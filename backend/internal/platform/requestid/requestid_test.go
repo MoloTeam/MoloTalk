@@ -5,9 +5,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/oklog/ulid/v2"
+
 	"github.com/MoloTeam/MoloTalk/backend/internal/platform/idgen"
 	"github.com/MoloTeam/MoloTalk/backend/internal/platform/requestid"
-	"github.com/MoloTeam/MoloTalk/backend/internal/platform/ulid"
 )
 
 func TestValidValues(t *testing.T) {
@@ -41,10 +42,7 @@ func TestValidValues(t *testing.T) {
 func TestCleanValueIsKept(t *testing.T) {
 	t.Parallel()
 
-	generated, err := ulid.New()
-	if err != nil {
-		t.Fatalf("new ulid: %v", err)
-	}
+	generated := ulid.MustParse("01ARZ3NDEKTSV4RRFFQ69G5FAV")
 
 	for _, value := range []string{"a", "0123456789abcdef", strings.Repeat("a", 64)} {
 		got, err := requestid.Resolve([]string{value}, idgen.NewSequence(generated))
@@ -60,10 +58,7 @@ func TestCleanValueIsKept(t *testing.T) {
 func TestAmbiguousValuesAreReplaced(t *testing.T) {
 	t.Parallel()
 
-	generated, err := ulid.New()
-	if err != nil {
-		t.Fatalf("new ulid: %v", err)
-	}
+	generated := ulid.MustParse("01ARZ3NDEKTSV4RRFFQ69G5FAV")
 
 	for name, values := range map[string][]string{
 		"absent":     nil,

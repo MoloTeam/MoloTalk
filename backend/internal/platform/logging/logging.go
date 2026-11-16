@@ -2,9 +2,8 @@
 package logging
 
 import (
-	"encoding/json"
 	"io"
-	"sync"
+	"log/slog"
 	"time"
 )
 
@@ -27,52 +26,42 @@ type Record struct {
 	MessageID string
 }
 
-type entry struct {
-	RequestID  string `json:"request_id"`
-	Service    string `json:"service"`
-	Operation  string `json:"operation"`
-	Result     string `json:"result"`
-	DurationMS int64  `json:"duration_ms"`
-	UserID     string `json:"user_id,omitempty"`
-	ChatID     string `json:"chat_id,omitempty"`
-	MessageID  string `json:"message_id,omitempty"`
-}
-
-// Logger пишет записи в формате JSON, по одной в строке.
+// Logger пишет записи через log/slog в формате JSON.
 type Logger struct {
-	mu      sync.Mutex
-	out     io.Writer
-	service string
+	log *slog.Logger
 }
 
 // New создаёт журнал процесса.
 func New(out io.Writer, service string) *Logger {
-	return &Logger{out: out, service: service}
+	handler := slog.NewJSONHandler(out, &slog.HandlerOptions{Level: slog.LevelInfo})
+	return &Logger{log: slog.New(handler).With(slog.String("service", service))}
 }
 
 // Write записывает результат операции.
 func (l *Logger) Write(record Record) {
-	if l == nil || l.out == nil {
+	if l == nil || l.log == nil {
 		return
 	}
-	service := record.Service
-	if service == "" {
-		service = l.service
+
+	attributes := []slog.Attr{
+		slog.String("request_id", record.RequestID),
+		slog.String("operation", record.Operation),
+		slog.String("result", record.Result),
+		slog.Int64("duration_ms", record.Duration.Milliseconds()),
 	}
-	line, err := json.Marshal(entry{
-		RequestID:  record.RequestID,
-		Service:    service,
-		Operation:  record.Operation,
-		Result:     record.Result,
-		DurationMS: record.Duration.Milliseconds(),
-		UserID:     record.UserID,
-		ChatID:     record.ChatID,
-		MessageID:  record.MessageID,
-	})
-	if err != nil {
-		return
+	if record.UserID != "" {
+		attributes = append(attributes, slog.String("user_id", record.UserID))
 	}
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	_, _ = l.out.Write(append(line, '\n'))
+	if record.ChatID != "" {
+		attributes = append(attributes, slog.String("chat_id", record.ChatID))
+	}
+	if record.MessageID != "" {
+		attributes = append(attributes, slog.String("message_id", record.MessageID))
+	}
+
+	level := slog.LevelInfo
+	if record.Result != ResultOK {
+		level = slog.LevelWarn
+	}
+	l.log.LogAttrs(nil, level, "operation", attributes...)
 }

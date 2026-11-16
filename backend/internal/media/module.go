@@ -1,5 +1,5 @@
-// Package media объявляет порты сообщений, вложений, подтверждений и обмена
-// событиями и собирает модуль Media.
+// Package media объявляет порты вложений и обмена событиями и собирает модуль
+// Media.
 package media
 
 import (
@@ -12,15 +12,6 @@ import (
 	"github.com/MoloTeam/MoloTalk/backend/internal/platform/idgen"
 )
 
-// Message — сообщение чата.
-type Message struct {
-	ID      string
-	ChatID  string
-	Author  string
-	Body    string
-	Version int
-}
-
 // Attachment — вложение сообщения.
 type Attachment struct {
 	ID        string
@@ -29,37 +20,10 @@ type Attachment struct {
 	Ready     bool
 }
 
-// Receipt — подтверждение прочтения.
-type Receipt struct {
-	MessageID string
-	AccountID string
-	ReadAt    time.Time
-}
-
-// ReceiptSummary — сводка подтверждений сообщения.
-type ReceiptSummary struct {
-	Read  int
-	Total int
-}
-
-// ReadState — состояние прочтения участника.
-type ReadState struct {
-	AccountID string
-	MessageID string
-}
-
 // ObjectInfo описывает объект файлового хранилища.
 type ObjectInfo struct {
 	Key  string
 	Size int64
-}
-
-// MessageRepository хранит сообщения.
-type MessageRepository interface {
-	CreateOrGet(ctx context.Context, message Message) (Message, error)
-	UpdateVersion(ctx context.Context, message Message) error
-	SoftDelete(ctx context.Context, messageID string) error
-	ListRange(ctx context.Context, chatID string, from, to int64) ([]Message, error)
 }
 
 // AttachmentRepository хранит вложения.
@@ -68,13 +32,6 @@ type AttachmentRepository interface {
 	MarkReady(ctx context.Context, attachmentID string) error
 	Link(ctx context.Context, attachmentID, messageID string) error
 	CheckReferences(ctx context.Context, attachmentID string) error
-}
-
-// ReceiptRepository хранит подтверждения прочтения.
-type ReceiptRepository interface {
-	UpsertMonotonic(ctx context.Context, receipt Receipt) error
-	GetSummary(ctx context.Context, messageID string) (ReceiptSummary, error)
-	GetReadStates(ctx context.Context, chatID string) ([]ReadState, error)
 }
 
 // ObjectStorage хранит вложения в файловом хранилище.
@@ -99,9 +56,7 @@ type EventSubscriber interface {
 
 // Deps задаёт зависимости модуля Media.
 type Deps struct {
-	Messages    MessageRepository
 	Attachments AttachmentRepository
-	Receipts    ReceiptRepository
 	Objects     ObjectStorage
 	Publisher   EventPublisher
 	Subscriber  EventSubscriber

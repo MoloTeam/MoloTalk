@@ -21,11 +21,13 @@ Backend SHALL предоставлять следующие порты из та
 - **WHEN** компиляционная проверка обращается к перечисленным методам через эти интерфейсы
 - **THEN** контракт доступен потребителю без импорта реализаций хранения, хеширования или токенов
 
-### Requirement: Порты состава чата и транзакций
+### Requirement: Порты состава чата, сообщений и транзакций
 
 Backend SHALL предоставлять следующие порты из таблицы 11 HLD.
 
 - `ChatRepository` — `GetMembers`, `LockGroup`, `AddMember`, `ChangeOwner`.
+- `MessageRepository` — `CreateOrGet`, `UpdateVersion`, `SoftDelete`, `ListRange`.
+- `ReceiptRepository` — `UpsertMonotonic`, `GetSummary`, `GetReadStates`.
 - `GroupUnitOfWork` — `WithinTransaction`.
 
 #### Scenario: Chat получает состав и транзакцию через разные порты
@@ -34,13 +36,17 @@ Backend SHALL предоставлять следующие порты из та
 - **WHEN** тестовый потребитель обращается к методам состава и вызывает `WithinTransaction` через интерфейсы
 - **THEN** код компилируется с обоими портами без подключения к PostgreSQL
 
-### Requirement: Порты сообщений, вложений и подтверждений
+#### Scenario: Сообщения и подтверждения доступны модулю Chat
+
+- **GIVEN** тестовые реализации `MessageRepository` и `ReceiptRepository`
+- **WHEN** тестовый потребитель вызывает `SoftDelete` и `GetSummary` через интерфейсы
+- **THEN** код компилируется без подключения к PostgreSQL, а модуль Media этих портов не требует
+
+### Requirement: Порты вложений
 
 Backend SHALL предоставлять следующие порты из таблицы 11 HLD.
 
-- `MessageRepository` — `CreateOrGet`, `UpdateVersion`, `SoftDelete`, `ListRange`.
 - `AttachmentRepository` — `Get`, `MarkReady`, `Link`, `CheckReferences`.
-- `ReceiptRepository` — `UpsertMonotonic`, `GetSummary`, `GetReadStates`.
 
 #### Scenario: Ошибка привязки воспроизводится в изоляции
 
@@ -68,13 +74,19 @@ Backend SHALL предоставлять следующие порты из та
 
 - `AuthClient` — `CheckSession`.
 - `ChatAccessClient` — `CheckAccess`, `GetAudience`.
-- `PresenceStateStore` — `Renew`, `Remove`, `ListLive`.
+- `PresenceStateStore` — `Renew`, `Remove`, `ListLive`. TTL ведётся для каждого подключения: `Presence` содержит `ConnectionID`, а `Remove` закрывает конкретное подключение, а не все подключения пользователя.
 
 #### Scenario: Контракты доступны без межсервисной сети
 
 - **GIVEN** тестовые реализации `AuthClient`, `ChatAccessClient` и `PresenceStateStore`
 - **WHEN** компиляционная проверка обращается к перечисленным методам через соответствующие интерфейсы
 - **THEN** код проверки компилируется без реализации HTTP-клиентов или Redis
+
+#### Scenario: Закрытие одного подключения не затрагивает другое
+
+- **GIVEN** у пользователя два активных подключения в одном чате
+- **WHEN** закрывают первое подключение через `Remove` с его `ConnectionID`
+- **THEN** `ListLive` возвращает второе подключение без изменений
 
 ### Requirement: Сборка модулей в точке входа
 

@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/MoloTeam/MoloTalk/backend/internal/platform/clock"
 	"github.com/MoloTeam/MoloTalk/backend/internal/platform/config"
 	"github.com/MoloTeam/MoloTalk/backend/internal/platform/httpserver"
 	"github.com/MoloTeam/MoloTalk/backend/internal/platform/idgen"
@@ -46,7 +47,7 @@ func Run(ctx context.Context, options Options) error {
 	}
 	ids := options.IDs
 	if ids == nil {
-		ids = idgen.System{}
+		ids = idgen.NewSystem(clock.System{})
 	}
 	out := options.Out
 	if out == nil {

@@ -12,20 +12,6 @@ import (
 	"github.com/MoloTeam/MoloTalk/backend/internal/platform/idgen"
 )
 
-type messages struct{ err error }
-
-func (f messages) CreateOrGet(context.Context, media.Message) (media.Message, error) {
-	return media.Message{}, f.err
-}
-
-func (f messages) UpdateVersion(context.Context, media.Message) error { return f.err }
-
-func (f messages) SoftDelete(context.Context, string) error { return f.err }
-
-func (f messages) ListRange(context.Context, string, int64, int64) ([]media.Message, error) {
-	return nil, f.err
-}
-
 type attachments struct{ err error }
 
 func (f attachments) Get(context.Context, string) (media.Attachment, error) {
@@ -37,18 +23,6 @@ func (f attachments) MarkReady(context.Context, string) error { return f.err }
 func (f attachments) Link(context.Context, string, string) error { return f.err }
 
 func (f attachments) CheckReferences(context.Context, string) error { return f.err }
-
-type receipts struct{ err error }
-
-func (f receipts) UpsertMonotonic(context.Context, media.Receipt) error { return f.err }
-
-func (f receipts) GetSummary(context.Context, string) (media.ReceiptSummary, error) {
-	return media.ReceiptSummary{}, f.err
-}
-
-func (f receipts) GetReadStates(context.Context, string) ([]media.ReadState, error) {
-	return nil, f.err
-}
 
 type objects struct{ err error }
 
@@ -81,9 +55,7 @@ func (f subscriber) Subscribe(context.Context, string, func(context.Context, []b
 }
 
 var (
-	_ media.MessageRepository    = messages{}
 	_ media.AttachmentRepository = attachments{}
-	_ media.ReceiptRepository    = receipts{}
 	_ media.ObjectStorage        = objects{}
 	_ media.EventPublisher       = publisher{}
 	_ media.EventSubscriber      = subscriber{}
@@ -94,9 +66,7 @@ func TestMediaPortsReproduceFailuresInIsolation(t *testing.T) {
 
 	sentinel := errors.New("storage unavailable")
 	module := media.New(media.Deps{
-		Messages:    messages{err: sentinel},
 		Attachments: attachments{err: sentinel},
-		Receipts:    receipts{err: sentinel},
 		Objects:     objects{err: sentinel},
 		Publisher:   publisher{err: sentinel},
 		Subscriber:  subscriber{err: sentinel},
@@ -123,5 +93,16 @@ func TestMediaPortsReproduceFailuresInIsolation(t *testing.T) {
 	var publisherPort media.EventPublisher = publisher{err: sentinel}
 	if err := publisherPort.Publish(ctx, "topic", nil); !errors.Is(err, sentinel) {
 		t.Errorf("Publish error = %v, want the port failure", err)
+	}
+}
+
+func TestMediaDoesNotOwnMessagePorts(t *testing.T) {
+	t.Parallel()
+
+	// Сообщения и подтверждения принадлежат Chat по таблице 11 HLD: модуль
+	// Media не должен требовать их в своих зависимостях.
+	module := media.New(media.Deps{})
+	if module == nil {
+		t.Fatal("module was not constructed without message ports")
 	}
 }

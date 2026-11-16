@@ -12,10 +12,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/oklog/ulid/v2"
+
 	"github.com/MoloTeam/MoloTalk/backend/internal/platform/httpserver"
 	"github.com/MoloTeam/MoloTalk/backend/internal/platform/idgen"
 	"github.com/MoloTeam/MoloTalk/backend/internal/platform/logging"
-	"github.com/MoloTeam/MoloTalk/backend/internal/platform/ulid"
 )
 
 type stubCheck struct {
@@ -43,7 +44,7 @@ func newServer(t *testing.T, timeout time.Duration, checks []httpserver.Readines
 		Service: "auth",
 		Checks:  checks,
 		Timeout: timeout,
-		IDs:     idgen.System{},
+		IDs:     idgen.NewSystem(nil),
 		Logger:  logging.New(records, "auth"),
 	})
 	return server, records
@@ -166,7 +167,7 @@ func TestRequestIDSelection(t *testing.T) {
 			}
 			continue
 		}
-		if !ulid.IsValid(got) {
+		if !isULID(got) {
 			t.Errorf("%s: X-Request-Id = %q, want a generated ULID", tc.name, got)
 		}
 	}
@@ -180,12 +181,17 @@ func TestGeneratedRequestIDIsUnique(t *testing.T) {
 	first := do(t, server, http.MethodGet, "/healthz", nil).Header().Get("X-Request-Id")
 	second := do(t, server, http.MethodGet, "/healthz", nil).Header().Get("X-Request-Id")
 
-	if !ulid.IsValid(first) || !ulid.IsValid(second) {
+	if !isULID(first) || !isULID(second) {
 		t.Fatalf("generated identifiers are not ULIDs: %q, %q", first, second)
 	}
 	if first == second {
 		t.Fatalf("generated identifiers repeat: %q", first)
 	}
+}
+
+func isULID(value string) bool {
+	_, err := ulid.ParseStrict(value)
+	return err == nil
 }
 
 func TestFailureKeepsCorrelation(t *testing.T) {

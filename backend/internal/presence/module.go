@@ -11,17 +11,18 @@ import (
 	"github.com/MoloTeam/MoloTalk/backend/internal/platform/idgen"
 )
 
-// Presence — состояние присутствия участника.
+// Presence — состояние присутствия одного подключения участника.
 type Presence struct {
-	AccountID string
-	ChatID    string
-	Until     time.Time
+	ConnectionID string
+	AccountID    string
+	ChatID       string
+	Until        time.Time
 }
 
-// PresenceStateStore хранит состояние присутствия.
+// PresenceStateStore хранит состояние присутствия по подключениям.
 type PresenceStateStore interface {
 	Renew(ctx context.Context, presence Presence) error
-	Remove(ctx context.Context, accountID string) error
+	Remove(ctx context.Context, connectionID string) error
 	ListLive(ctx context.Context, chatID string) ([]Presence, error)
 }
 
