@@ -114,6 +114,28 @@ docker compose --project-directory . --env-file .env.example -f deploy/docker-co
 
 Если `minio-init` завершился с ненулевым кодом, backend не запускается: проверьте `MINIO_ROOT_USER`, `MINIO_ROOT_PASSWORD` и `MINIO_BUCKET`. Если инфраструктурный контейнер остаётся `unhealthy`, команда `up --wait` завершается отказом, а причина видна в `ps` и `logs` этого контейнера.
 
+### Проверка маршрутизации и отказов
+
+Маршруты проверяются в изолированном контуре: вместо backend работают тестовые upstream из `deploy/tests/mock`, которые возвращают полученные путь, тело и `X-Request-Id`.
+
+```bash
+docker compose -p molotalk-routing -f deploy/tests/docker-compose.yml up --build --abort-on-container-exit --exit-code-from verify
+```
+
+Контур проверяет все разрешённые RPC, запрещённые и соседние пути, а также обмен контрольным кадром по `/ws`. Он поднимает собственный Caddy со своим CA и не требует запущенного основного окружения.
+
+Отказы порядка запуска воспроизводятся отдельными override-файлами:
+
+```bash
+# инфраструктура не проходит проверку готовности
+docker compose -p molotalk-neg --project-directory . --env-file .env.example -f deploy/docker-compose.yml -f deploy/tests/failing-postgres.override.yml up -d --wait
+
+# подготовка bucket получает неверные credentials
+docker compose -p molotalk-neg --project-directory . --env-file .env.example -f deploy/docker-compose.yml -f deploy/tests/failing-init.override.yml up -d --wait
+```
+
+Обе команды завершаются ненулевым кодом, а backend-процессы не запускаются.
+
 ### Остановка, повторный запуск и очистка
 
 ```bash

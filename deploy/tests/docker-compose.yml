@@ -1,0 +1,105 @@
+# Изолированный проверочный контур маршрутизации.
+#
+#   docker compose -p molotalk-routing -f deploy/tests/docker-compose.yml \
+#     up --build --abort-on-container-exit --exit-code-from verify
+#
+# Контур не использует реальные backend-процессы: вместо них работают
+# тестовые upstream, записывающие путь, тело и X-Request-Id.
+
+name: molotalk-routing
+
+services:
+  auth:
+    build:
+      context: ./mock
+    environment:
+      SERVICE: auth
+      PORT: "8081"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8081/healthz"]
+      interval: 2s
+      timeout: 2s
+      retries: 15
+
+  chat:
+    build:
+      context: ./mock
+    environment:
+      SERVICE: chat
+      PORT: "8082"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8082/healthz"]
+      interval: 2s
+      timeout: 2s
+      retries: 15
+
+  media:
+    build:
+      context: ./mock
+    environment:
+      SERVICE: media
+      PORT: "8083"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8083/healthz"]
+      interval: 2s
+      timeout: 2s
+      retries: 15
+
+  presence:
+    build:
+      context: ./mock
+    environment:
+      SERVICE: presence
+      PORT: "8084"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8084/healthz"]
+      interval: 2s
+      timeout: 2s
+      retries: 15
+
+  gateway:
+    build:
+      context: ./mock
+    environment:
+      SERVICE: gateway
+      PORT: "8085"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8085/healthz"]
+      interval: 2s
+      timeout: 2s
+      retries: 15
+
+  caddy:
+    image: caddy:2.10-alpine
+    depends_on:
+      auth:
+        condition: service_healthy
+      chat:
+        condition: service_healthy
+      media:
+        condition: service_healthy
+      presence:
+        condition: service_healthy
+      gateway:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:18443:443"
+    volumes:
+      - ../Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+
+  verify:
+    build:
+      context: ./mock
+    command: ["-verify"]
+    environment:
+      CA_PATH: /caddy-data/pki/authorities/local/root.crt
+      CADDY_ADDR: caddy:443
+    volumes:
+      - caddy-data:/caddy-data:ro
+    depends_on:
+      caddy:
+        condition: service_started
+
+volumes:
+  caddy-data:
