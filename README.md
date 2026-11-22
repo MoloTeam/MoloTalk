@@ -104,10 +104,12 @@ certutil -addstore -User Root "$env:USERPROFILE\caddy-root.crt"
 Проверка TLS с явным CA и без отключения проверки сертификата:
 
 ```bash
-curl --cacert "$env:USERPROFILE\caddy-root.crt" https://localhost/caddy-healthz
+curl.exe --ssl-no-revoke --cacert "$env:USERPROFILE\caddy-root.crt" https://localhost/caddy-healthz
 ```
 
 Если `HTTPS_PORT` отличается от `443`, укажите порт в адресе: `https://localhost:8443/caddy-healthz`.
+
+`--ssl-no-revoke` нужен для `curl.exe` в Windows: он использует Schannel, который требует проверить отзыв сертификата, а локальный CA Caddy не публикует CRL или OCSP, поэтому проверка отзыва невозможна (`CRYPT_E_NO_REVOCATION_CHECK`). Цепочка и имя хоста при этом по-прежнему проверяются. После установки CA в хранилище пользователя флаг `--cacert` можно не указывать.
 
 ### Диагностика
 
