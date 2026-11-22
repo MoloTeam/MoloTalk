@@ -1,0 +1,6 @@
+# Проверочный override: подготовка bucket получает неверный пароль и обязана
+# заблокировать запуск backend.
+services:
+  minio-init:
+    environment:
+      MINIO_ROOT_PASSWORD: definitely-wrong-password

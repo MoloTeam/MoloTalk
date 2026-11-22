@@ -1,0 +1,10 @@
+# Проверочный override: PostgreSQL не проходит проверку готовности, поэтому
+# зависящие сервисы не должны начать работу и команда запуска должна отказать.
+services:
+  postgres:
+    healthcheck:
+      test: ["CMD", "false"]
+      interval: 2s
+      timeout: 1s
+      retries: 2
+      start_period: 1s

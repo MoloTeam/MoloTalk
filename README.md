@@ -64,6 +64,79 @@ docker build --target auth -t molotalk/auth:dev -f backend/Dockerfile .
 
 Доступные цели: `auth`, `chat`, `media`, `presence`, `gateway`. Ошибка компиляции завершает сборку ненулевым кодом, и вызывающая команда видит сообщение компилятора; окружение при этом не запускается.
 
+### Запуск окружения
+
+Каноническая команда выполняется из корня репозитория:
+
+```bash
+docker compose --project-directory . --env-file .env.example -f deploy/docker-compose.yml up --build --wait --wait-timeout 180
+```
+
+Для личных значений используйте отдельный файл: `--env-file .env`. Переменные окружения оболочки имеют приоритет над файлом, поэтому значение из shell переопределяет значение из `.env`.
+
+| Что | Адрес |
+|---|---|
+| Вход приложения (Caddy, HTTPS) | `https://localhost`, порт из `HTTPS_PORT` (по умолчанию `443`) |
+| Прямой S3-доступ к MinIO | `http://127.0.0.1:{MINIO_S3_PORT}` (по умолчанию `9000`) |
+| backend, PostgreSQL, Redis, NATS | только внутри сети Compose, на хост не публикуются |
+
+Оба внешних адреса привязаны к loopback. Если порт `443` занят, например системным `wslrelay`, задайте другой: `HTTPS_PORT=8443`.
+
+### Доверие локальному удостоверяющему центру
+
+Caddy обслуживает `localhost` сертификатом своего локального CA; закрытый ключ остаётся в volume `caddy-data`. Публичный сертификат CA извлекается из запущенного контейнера:
+
+```bash
+docker cp "$(docker compose --project-directory . --env-file .env.example -f deploy/docker-compose.yml ps -q caddy)":/data/pki/authorities/local/root.crt caddy-root.crt
+```
+
+Установка доверия на Windows (текущему пользователю, без прав администратора):
+
+```powershell
+certutil -addstore -User Root caddy-root.crt
+```
+
+На других платформах сертификат добавляется в системное или браузерное хранилище доверенных корней. Доверие нужно установить один раз; сборка и запуск контейнеров от него не зависят.
+
+Проверка TLS с явным CA и без отключения проверки сертификата:
+
+```bash
+curl --cacert caddy-root.crt https://localhost/caddy-healthz
+```
+
+### Диагностика
+
+```bash
+docker compose --project-directory . --env-file .env.example -f deploy/docker-compose.yml ps
+docker compose --project-directory . --env-file .env.example -f deploy/docker-compose.yml logs --tail 50 minio-init
+docker compose --project-directory . --env-file .env.example -f deploy/docker-compose.yml logs --tail 50 auth
+```
+
+Если `minio-init` завершился с ненулевым кодом, backend не запускается: проверьте `MINIO_ROOT_USER`, `MINIO_ROOT_PASSWORD` и `MINIO_BUCKET`. Если инфраструктурный контейнер остаётся `unhealthy`, команда `up --wait` завершается отказом, а причина видна в `ps` и `logs` этого контейнера.
+
+### Остановка, повторный запуск и очистка
+
+```bash
+# остановка с сохранением данных (volumes остаются)
+docker compose --project-directory . --env-file .env.example -f deploy/docker-compose.yml down
+
+# повторный запуск без пересборки
+docker compose --project-directory . --env-file .env.example -f deploy/docker-compose.yml up -d --wait --wait-timeout 180
+
+# явная очистка данных выбранного окружения
+docker compose --project-directory . --env-file .env.example -f deploy/docker-compose.yml down -v
+```
+
+`down -v` удаляет volumes PostgreSQL, MinIO и данных Caddy, включая выпущенный CA. Выполняйте его только когда данные действительно нужно удалить.
+
+### Текущие ограничения этапа
+
+- `GET /` возвращает `503`: веб-клиент появится в issue #7.
+- Разрешённые RPC доходят до backend, но обработчиков ещё нет, поэтому возвращается `404`.
+- `/ws` проксируется, но обработчик WebSocket появится в карточке Gateway.
+- `/readyz` отвечает `503`: набор проверок пуст до T-32, `/healthz` уже возвращает `200`.
+- Миграции и fixture не входят в это окружение и добавляются в issue #5. PostgreSQL запускается без прикладной схемы.
+
 ## Definition of Done
 
 Карточка переводится в «Done», когда выполнены **все** пункты:

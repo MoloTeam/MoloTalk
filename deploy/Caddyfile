@@ -57,4 +57,9 @@ https://localhost {
 	handle / {
 		respond 503
 	}
+
+	# Всё остальное закрыто: неизвестные и внутренние RPC не достигают backend.
+	handle {
+		respond 404
+	}
 }
