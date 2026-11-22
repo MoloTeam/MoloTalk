@@ -1,0 +1,17 @@
+# Контекст сборки — корень репозитория. Внутрь нужны только исходники
+# backend и манифесты модуля.
+.git
+.github
+.agents
+.vscode
+.idea
+.tmp
+**/.tmp
+openspec
+deploy
+coverage
+coverage.out
+*.md
+*.log
+*.db
+*.sqlite
