@@ -86,14 +86,17 @@ docker compose --project-directory . --env-file .env.example -f deploy/docker-co
 
 Caddy обслуживает `localhost` сертификатом своего локального CA; закрытый ключ остаётся в volume `caddy-data`. Публичный сертификат CA извлекается из запущенного контейнера:
 
-```bash
-docker cp "$(docker compose --project-directory . --env-file .env.example -f deploy/docker-compose.yml ps -q caddy)":/data/pki/authorities/local/root.crt caddy-root.crt
+```powershell
+$caddy = (docker compose --project-directory . --env-file .env.example -f deploy/docker-compose.yml ps -q caddy).Trim()
+docker cp "${caddy}:/data/pki/authorities/local/root.crt" "$env:USERPROFILE\caddy-root.crt"
 ```
+
+Команда разбита на два шага намеренно: PowerShell 5.1 неверно передаёт `docker cp` строку вида `"$(...)":/path`, и Docker сообщает `'docker cp' requires 2 arguments`. Сертификат сохраняется вне репозитория, чтобы не попасть в коммит.
 
 Установка доверия на Windows (текущему пользователю, без прав администратора):
 
 ```powershell
-certutil -addstore -User Root caddy-root.crt
+certutil -addstore -User Root "$env:USERPROFILE\caddy-root.crt"
 ```
 
 На других платформах сертификат добавляется в системное или браузерное хранилище доверенных корней. Доверие нужно установить один раз; сборка и запуск контейнеров от него не зависят.
@@ -101,8 +104,10 @@ certutil -addstore -User Root caddy-root.crt
 Проверка TLS с явным CA и без отключения проверки сертификата:
 
 ```bash
-curl --cacert caddy-root.crt https://localhost/caddy-healthz
+curl --cacert "$env:USERPROFILE\caddy-root.crt" https://localhost/caddy-healthz
 ```
+
+Если `HTTPS_PORT` отличается от `443`, укажите порт в адресе: `https://localhost:8443/caddy-healthz`.
 
 ### Диагностика
 
