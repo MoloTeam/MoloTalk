@@ -1,0 +1,244 @@
+# Локальное окружение MoloTalk.
+#
+# Каноническая команда запуска из корня репозитория:
+#   docker compose --project-directory . --env-file .env.example \
+#     -f deploy/docker-compose.yml up --build --wait --wait-timeout 180
+
+name: molotalk
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+
+  redis:
+    image: redis:8-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
+  nats:
+    image: nats:2.11-alpine
+    command: ["-m", "8222"]
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8222/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
+  minio:
+    # Зеркало официального бинарника MinIO: репозиторий minio/minio на Docker Hub
+    # больше не публикуется.
+    image: pgsty/minio:latest
+    command: ["server", "/data"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?MINIO_ROOT_USER is required}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?MINIO_ROOT_PASSWORD is required}
+    volumes:
+      - minio-data:/data
+    ports:
+      - "127.0.0.1:${MINIO_S3_PORT:-9000}:9000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:9000/minio/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+
+  minio-init:
+    image: bitnamilegacy/minio-client:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?MINIO_ROOT_USER is required}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?MINIO_ROOT_PASSWORD is required}
+      MINIO_BUCKET: ${MINIO_BUCKET:?MINIO_BUCKET is required}
+    volumes:
+      - ./deploy/scripts/init-bucket.sh:/scripts/init-bucket.sh:ro
+    entrypoint: ["/bin/sh", "/scripts/init-bucket.sh"]
+    restart: "no"
+
+  auth:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: auth
+    environment:
+      HTTP_HOST: 0.0.0.0
+      AUTH_HTTP_PORT: ${AUTH_HTTP_PORT:-8081}
+      READINESS_TIMEOUT: ${READINESS_TIMEOUT:-1s}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:${AUTH_HTTP_PORT:-8081}/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
+  chat:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: chat
+    environment:
+      HTTP_HOST: 0.0.0.0
+      CHAT_HTTP_PORT: ${CHAT_HTTP_PORT:-8082}
+      READINESS_TIMEOUT: ${READINESS_TIMEOUT:-1s}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:${CHAT_HTTP_PORT:-8082}/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
+  media:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: media
+    environment:
+      HTTP_HOST: 0.0.0.0
+      MEDIA_HTTP_PORT: ${MEDIA_HTTP_PORT:-8083}
+      READINESS_TIMEOUT: ${READINESS_TIMEOUT:-1s}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:${MEDIA_HTTP_PORT:-8083}/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
+  presence:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: presence
+    environment:
+      HTTP_HOST: 0.0.0.0
+      PRESENCE_HTTP_PORT: ${PRESENCE_HTTP_PORT:-8084}
+      READINESS_TIMEOUT: ${READINESS_TIMEOUT:-1s}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:${PRESENCE_HTTP_PORT:-8084}/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
+  gateway:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: gateway
+    environment:
+      HTTP_HOST: 0.0.0.0
+      GATEWAY_HTTP_PORT: ${GATEWAY_HTTP_PORT:-8085}
+      READINESS_TIMEOUT: ${READINESS_TIMEOUT:-1s}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:${GATEWAY_HTTP_PORT:-8085}/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
+  caddy:
+    image: caddy:2.10-alpine
+    depends_on:
+      auth:
+        condition: service_healthy
+      chat:
+        condition: service_healthy
+      media:
+        condition: service_healthy
+      presence:
+        condition: service_healthy
+      gateway:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${HTTPS_PORT:-443}:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:2019/config/"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
+volumes:
+  postgres-data:
+  minio-data:
+  caddy-data:
+  caddy-config:

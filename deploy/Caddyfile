@@ -1,0 +1,60 @@
+{
+	admin localhost:2019
+	storage file_system /data
+}
+
+https://localhost {
+	tls internal
+
+	# Служебная проверка самого прокси: не зависит от backend и веб-клиента.
+	handle /caddy-healthz {
+		respond "ok" 200
+	}
+
+	# Разрешённые внешние RPC. Пути перечислены явно, чтобы внутренние методы
+	# не становились доступны извне.
+	@auth_rpc {
+		method POST
+		path /molotalk.v1.AuthService/Register /molotalk.v1.AuthService/Login /molotalk.v1.AuthService/RefreshToken /molotalk.v1.AuthService/Logout /molotalk.v1.AuthService/GetMe /molotalk.v1.AuthService/UpdateProfile /molotalk.v1.AuthService/ChangePassword /molotalk.v1.AuthService/SearchUsers
+	}
+	handle @auth_rpc {
+		reverse_proxy auth:8081
+	}
+
+	@chat_rpc {
+		method POST
+		path /molotalk.v1.ChatService/ListChats /molotalk.v1.ChatService/GetChat /molotalk.v1.ChatService/CreateDirectChat /molotalk.v1.ChatService/CreateGroupChat /molotalk.v1.ChatService/AddGroupMember /molotalk.v1.ChatService/RemoveGroupMember /molotalk.v1.ChatService/LeaveGroup /molotalk.v1.ChatService/SetGroupMemberRole /molotalk.v1.ChatService/SendMessage /molotalk.v1.ChatService/EditMessage /molotalk.v1.ChatService/DeleteMessage /molotalk.v1.ChatService/GetMessages /molotalk.v1.ChatService/ConfirmDelivery /molotalk.v1.ChatService/MarkRead /molotalk.v1.ChatService/GetMessageReceipts /molotalk.v1.ChatService/GetReadStates
+	}
+	handle @chat_rpc {
+		reverse_proxy chat:8082
+	}
+
+	@media_rpc {
+		method POST
+		path /molotalk.v1.MediaService/PrepareUpload /molotalk.v1.MediaService/CompleteUpload /molotalk.v1.MediaService/GetAttachment /molotalk.v1.MediaService/GetDownloadURL
+	}
+	handle @media_rpc {
+		reverse_proxy media:8083
+	}
+
+	@presence_rpc {
+		method POST
+		path /molotalk.v1.PresenceService/GetPresence
+	}
+	handle @presence_rpc {
+		reverse_proxy presence:8084
+	}
+
+	# WebSocket: только точный путь, префиксные совпадения отклоняются.
+	@ws {
+		path /ws
+	}
+	handle @ws {
+		reverse_proxy gateway:8085
+	}
+
+	# До появления веб-клиента (#7) корень отвечает 503.
+	handle / {
+		respond 503
+	}
+}

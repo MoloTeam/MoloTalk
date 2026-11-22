@@ -1,4 +1,4 @@
-# Tasks
+﻿# Tasks
 
 ## 1. Контейнерная сборка backend
 
@@ -7,7 +7,7 @@
 
 ## 2. Compose и конфигурация окружения
 
-- [ ] 2.1 Создать `deploy/docker-compose.yml` с пятью backend-процессами, PostgreSQL, Redis, NATS Core, MinIO и Caddy по [local-environment](specs/local-environment/spec.md). Согласовать используемые переменные с `.env.example`, закрепить доступные версии образов, задать `HTTP_HOST=0.0.0.0` внутри backend-контейнеров. Проверить разрешение конфигурации командой `docker compose --project-directory . --env-file .env.example -f deploy/docker-compose.yml config --quiet`, переопределение внешнего порта и отказ при пустой обязательной настройке.
+- [x] 2.1 Создать `deploy/docker-compose.yml` с пятью backend-процессами, PostgreSQL, Redis, NATS Core, MinIO и Caddy по [local-environment](specs/local-environment/spec.md). Согласовать используемые переменные с `.env.example`, закрепить доступные версии образов, задать `HTTP_HOST=0.0.0.0` внутри backend-контейнеров. Проверить разрешение конфигурации командой `docker compose --project-directory . --env-file .env.example -f deploy/docker-compose.yml config --quiet`, переопределение внешнего порта и отказ при пустой обязательной настройке.
 - [ ] 2.2 Настроить внутреннюю сеть, loopback-публикацию Caddy и S3, volumes PostgreSQL, MinIO и данных Caddy. Проверить по конфигурации и запущенным контейнерам, что backend, PostgreSQL, Redis и NATS доступны внутри сети и их порты не опубликованы на хост.
 - [ ] 2.3 Добавить штатные инфраструктурные healthcheck, ожидание их успеха и backend-healthcheck через `/healthz`. Проверить наличие используемых средств проверки в образах, задержку и постоянный отказ инфраструктуры через изолированный тестовый Compose override. Описать диагностику в README и подтвердить, что `/readyz` каркаса сохраняет `503`.
 
