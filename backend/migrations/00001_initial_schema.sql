@@ -1,5 +1,5 @@
 -- Начальная схема MoloTalk. Источник — docs/hld/schema.sql, SHA-256
--- CD4201662F63B9D76BA4CEBA4C418F8B4274C03D57DD9D7968DC031ABA71ADCE.
+-- C9B12E811E35202CBEBAA0C25D6A44B1F0766F4369CB3D6D2BA1E36D292A55D1.
 --
 -- Два принятых отличия от источника:
 --   * исключён U06 UNIQUE messages(channel_id,id);
