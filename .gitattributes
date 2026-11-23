@@ -15,6 +15,10 @@
 *.bat text eol=crlf
 *.cmd text eol=crlf
 
+# Нормативный источник схемы сверяется по SHA-256 точных байтов, поэтому
+# окончания строк в нём не преобразуются.
+docs/hld/schema.sql -text
+
 # Двоичные файлы не преобразуются.
 *.png binary
 *.jpg binary
