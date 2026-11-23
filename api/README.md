@@ -1,53 +1,54 @@
-# РљРѕРЅС‚СЂР°РєС‚С‹ API
+# Контракты API
 
-Proto вЂ” РµРґРёРЅСЃС‚РІРµРЅРЅС‹Р№ РёСЃС‚РѕС‡РЅРёРє С‚РёРїРѕРІ Рё РїСЂР°РІРёР». Go, TypeScript Рё OpenAPI вЂ”
-РїСЂРѕРёР·РІРѕРґРЅС‹Рµ С„Р°Р№Р»С‹, РѕРЅРё РєРѕРјРјРёС‚СЏС‚СЃСЏ РєР°Рє golden Рё РїСЂРѕРІРµСЂСЏСЋС‚СЃСЏ РїРѕРІС‚РѕСЂРЅРѕР№
-РіРµРЅРµСЂР°С†РёРµР№.
+Proto — единственный источник типов и правил. Go, TypeScript и OpenAPI —
+производные файлы, они коммитятся как golden и проверяются повторной
+генерацией.
 
-## РЎС‚СЂСѓРєС‚СѓСЂР°
+## Структура
 
 ```text
 api/
-  proto/molotalk/v1/            РїСѓР±Р»РёС‡РЅС‹Рµ RPC Рё Gateway
-  proto/molotalk/internal/v1/   РІРЅСѓС‚СЂРµРЅРЅРёРµ RPC
-  third_party/proto/            Р·Р°РєРѕРјРјРёС‡РµРЅРЅС‹Рµ РІРЅРµС€РЅРёРµ proto (buf.validate, google.api)
-  openapi/base.public.yaml      security Рё РёСЃРєР»СЋС‡РµРЅРёСЏ Р±РµР· access token
-  openapi/base.internal.yaml    СЃР»СѓР¶РµР±РЅС‹Р№ Bearer
-  gen/openapi/public.json       golden РїСѓР±Р»РёС‡РЅРѕРіРѕ OpenAPI
-  gen/openapi/internal.json     golden РІРЅСѓС‚СЂРµРЅРЅРµРіРѕ OpenAPI
-  src/gen/                      TypeScript С‚РѕР»СЊРєРѕ РїСѓР±Р»РёС‡РЅРѕРіРѕ РїР°РєРµС‚Р°
+  proto/molotalk/v1/            публичные RPC и Gateway
+  proto/molotalk/internal/v1/   внутренние RPC
+  third_party/proto/            закоммиченные внешние proto (buf.validate, google.api)
+  openapi/base.public.yaml      security и исключения без access token
+  openapi/base.internal.yaml    служебный Bearer
+  openapi/comparison.md         однократная сверка с материалом HLD
+  gen/openapi/public.json       golden публичного OpenAPI
+  gen/openapi/internal.json     golden внутреннего OpenAPI
+  src/gen/                      TypeScript публичного пакета и зависимостей
 ```
 
-`proto/materials/` СЃРѕРґРµСЂР¶РёС‚ СЃРЅРёРјРєРё РёСЃС…РѕРґРЅС‹С… РјР°С‚РµСЂРёР°Р»РѕРІ HLD, РїРѕ РєРѕС‚РѕСЂС‹Рј
-РїРѕСЃС‚СЂРѕРµРЅ РєРѕРЅС‚СЂР°РєС‚: `openapi.json` (`17eedbb8вЂ¦`) Рё `gateway.proto` (`f90e96aeвЂ¦`).
+`api/materials/` содержит снимки исходных материалов HLD: `openapi.json`
+(`17eedbb8…`) и `gateway.proto` (`f90e96ae…`).
 
-## Р’РЅРµС€РЅРёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё
+## Внешние зависимости
 
-Р РµРµСЃС‚СЂ Buf РІ РѕРєСЂСѓР¶РµРЅРёРё РЅРµРґРѕСЃС‚СѓРїРµРЅ, РїРѕСЌС‚РѕРјСѓ РІРЅРµС€РЅРёРµ proto Р·Р°РєРѕРјРјРёС‡РµРЅС‹ РІ
-[`third_party/`](third_party/README.md) СЃ Р·Р°РєСЂРµРїР»С‘РЅРЅС‹Рј РїСЂРѕРёСЃС…РѕР¶РґРµРЅРёРµРј, Р»РёС†РµРЅР·РёСЏРјРё
-Рё SHA-256. `buf.lock` РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ: СѓРґР°Р»С‘РЅРЅС‹С… Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РЅРµС‚.
+Реестр Buf в окружении недоступен, поэтому внешние proto закоммичены в
+[`third_party/`](third_party/README.md) с закреплённым происхождением, лицензиями
+и SHA-256. `buf.lock` не используется: удалённых зависимостей нет.
 
-## РРЅСЃС‚СЂСѓРјРµРЅС‚С‹
+## Инструменты
 
-| РРЅСЃС‚СЂСѓРјРµРЅС‚ | Р’РµСЂСЃРёСЏ | Р›РёС†РµРЅР·РёСЏ |
+| Инструмент | Версия | Лицензия |
 |---|---|---|
 | `github.com/bufbuild/buf/cmd/buf` | v1.75.0 | Apache-2.0 |
 | `google.golang.org/protobuf/cmd/protoc-gen-go` | v1.36.13-0.20261016172727-e9ee2a76ab8e | BSD-3-Clause |
 | `connectrpc.com/connect/v2/cmd/protoc-gen-connect-go` | v2.0.2 | Apache-2.0 |
 | `connectrpc.com/protoc-gen-connect-openapi` | v0.30.0 | MIT |
 | `buf.build/go/protovalidate` | v1.4.1 | Apache-2.0 |
-| `connectrpc.com/validate` | v0.9.0 | Apache-2.0 |
+| `connectrpc.com/connect/v2` | v2.0.2 | Apache-2.0 |
 | `@bufbuild/protoc-gen-es`, `@bufbuild/protobuf` | 2.17.0 | Apache-2.0 |
 | `@bufbuild/protovalidate` | 1.3.0 | Apache-2.0 |
 | `@connectrpc/connect`, `@connectrpc/connect-web` | 2.3.0 | Apache-2.0 |
 
-Go-РёРЅСЃС‚СЂСѓРјРµРЅС‚С‹ Р·Р°РєСЂРµРїР»РµРЅС‹ РґРёСЂРµРєС‚РёРІР°РјРё `tool` РІ `backend/go.mod`, JS вЂ” С‚РѕС‡РЅС‹РјРё
-РІРµСЂСЃРёСЏРјРё Рё `package-lock.json`. Р“Р»РѕР±Р°Р»СЊРЅР°СЏ СѓСЃС‚Р°РЅРѕРІРєР° РїР»Р°РіРёРЅРѕРІ, `protoc` Рё Docker
-РЅРµ С‚СЂРµР±СѓСЋС‚СЃСЏ.
+Go-инструменты закреплены директивами `tool` в `backend/go.mod`, JS — точными
+версиями и `package-lock.json`. Глобальная установка плагинов, `protoc` и Docker
+не требуются.
 
-## РљРѕРјР°РЅРґС‹
+## Команды
 
-РР· РєРѕСЂРЅСЏ СЂРµРїРѕР·РёС‚РѕСЂРёСЏ:
+Из корня репозитория:
 
 ```bash
 npm --prefix api ci
@@ -55,9 +56,70 @@ npm --prefix api run generate
 npm --prefix api run check
 ```
 
-Р“РµРЅРµСЂР°С†РёСЏ РѕРіСЂР°РЅРёС‡РµРЅР° РєР°С‚Р°Р»РѕРіР°РјРё РєРѕРЅС‚СЂР°РєС‚РѕРІ: Go РїРѕР»СѓС‡Р°РµС‚ РѕР±Р° РїР°РєРµС‚Р°, TypeScript вЂ”
-С‚РѕР»СЊРєРѕ `proto/molotalk/v1`, OpenAPI СЃРѕР±РёСЂР°РµС‚СЃСЏ РѕС‚РґРµР»СЊРЅРѕ РґР»СЏ РїСѓР±Р»РёС‡РЅРѕРіРѕ Рё
-РІРЅСѓС‚СЂРµРЅРЅРµРіРѕ РїР°РєРµС‚РѕРІ.
+Генерация ограничена каталогами контрактов: Go получает оба пакета, TypeScript —
+только `proto/molotalk/v1` (и импортируемые им внешние схемы), OpenAPI собирается
+отдельно для публичного и внутреннего пакетов.
 
-РћР±РЅРѕРІР»РµРЅРёРµ golden РІС…РѕРґРёС‚ РІ СЂРµРІСЊСЋ РёР·РјРµРЅРµРЅРёСЏ proto РёР»Рё base-С„Р°Р№Р»Р° Рё РЅРµ РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ
-РєРѕРјР°РЅРґРѕР№ `check` Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё.
+`check` собирает `buf` и плагины во временный каталог, проверяет
+`buf format/lint/build`, генерирует артефакты в отдельный каталог и сравнивает их
+с отслеживаемыми файлами, затем выполняет `go build/vet/test` и typecheck.
+Отслеживаемые файлы не изменяются: устаревший артефакт даёт ненулевой код.
+До первого слияния контрактов в `main` проверка `buf breaking` явно сообщает об
+отсутствии baseline.
+
+## Примеры использования
+
+Go-клиент:
+
+```go
+client := connect.NewClient(connecthttp.NewTransport(http.DefaultClient, "https://localhost"))
+auth := molotalkv1connect.NewAuthServiceClient(client)
+tokens, err := auth.Login(ctx, &molotalkv1.LoginRequest{Identifier: "alice@example.com", Password: "secret1"})
+```
+
+Сервер с общей валидацией:
+
+```go
+server := rpc.NewServer()
+molotalkv1connect.RegisterAuthServiceHandler(server, handler)
+connecthttp.Mount(mux, server)
+```
+
+TypeScript-клиент (только публичный пакет):
+
+```ts
+import { createClient } from "@connectrpc/connect";
+import { createConnectTransport } from "@connectrpc/connect-web";
+import { AuthService } from "./gen/molotalk/v1/auth_pb.js";
+
+const transport = createConnectTransport({ baseUrl: "https://localhost" });
+const auth = createClient(AuthService, transport);
+const tokens = await auth.login({ identifier: "alice@example.com", password: "secret1" });
+```
+
+## Wire-формат Gateway (срез C)
+
+Один protobuf-кадр `GatewayEnvelope` на кадр WebSocket, без JSON-обёртки и поля
+`sequence`.
+
+- Heartbeat отправляется клиентом каждые 25 секунд, сервер отвечает
+  `HeartbeatAck`; при отсутствии кадров 60 секунд соединение закрывается.
+- Повторный `Identify` на том же соединении заменяет подписку и возвращает новый
+  `Ready`.
+- После `Ready` клиент перечитывает историю и состояния прочтения: replay не
+  гарантируется.
+- Коды закрытия: `4001` — неавторизован, `4003` — нет доступа, `4008` —
+  превышено время ожидания кадров.
+- `ServerEvent` содержит `event_id`, `occurred_at` и ровно одно событие;
+  `ReceiptUpdated` содержит сводку для автора либо собственное подтверждение
+  читателя.
+
+Контрольные кадры с фиксированным временем описаны в тестах
+`backend/internal/platform/rpc/gateway_contract_test.go`.
+
+## Сверка и golden
+
+Однократная сверка с материалом HLD зафиксирована в
+[`openapi/comparison.md`](openapi/comparison.md). Дальше действует golden:
+изменение proto или base-файла требует обновить generated-файлы в том же PR,
+иначе `check` завершается ошибкой.
