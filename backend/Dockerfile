@@ -43,3 +43,11 @@ FROM runtime AS gateway
 COPY --from=builder /out/gateway /app/bin/gateway
 EXPOSE 8085
 ENTRYPOINT ["/app/bin/gateway"]
+
+FROM runtime AS migrate
+COPY --from=builder /out/migrate /app/bin/migrate
+ENTRYPOINT ["/app/bin/migrate"]
+
+FROM runtime AS fixtures
+COPY --from=builder /out/fixtures /app/bin/fixtures
+ENTRYPOINT ["/app/bin/fixtures"]

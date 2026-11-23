@@ -82,6 +82,54 @@ docker compose --project-directory . --env-file .env.example -f deploy/docker-co
 
 Оба внешних адреса привязаны к loopback. Если порт `443` занят, например системным `wslrelay`, задайте другой: `HTTPS_PORT=8443`.
 
+### Миграции схемы
+
+Схема применяется автоматически: одноразовая служба `migrate` ждёт готовности PostgreSQL, выполняет версии из `backend/migrations/` и завершается, после чего стартуют пять backend-процессов. Фикстура автоматически не загружается.
+
+```bash
+# состояние службы миграций
+docker compose --project-directory . --env-file .env.example -f deploy/docker-compose.yml ps --all migrate
+
+# повторное применение вручную (например, после изменения встроенных миграций)
+docker compose --project-directory . --env-file .env.example -f deploy/docker-compose.yml run --rm migrate
+```
+
+Версии хранятся в `goose_db_version`; повторный запуск пропускает выполненные миграции и не трогает данные. Ошибка миграции возвращает ненулевой код и блокирует запуск backend. Диагностика содержит этап и категорию ошибки без строки подключения и пароля.
+
+### Демонстрационные данные (fixture)
+
+Fixture загружается только явно и в отдельную демонстрационную БД с собственным volume. Обычный `deploy/docker-compose.yml` службу `fixtures` не содержит.
+
+```bash
+# отдельный проект: PostgreSQL и применённые миграции
+docker compose -p molotalk-demo --env-file .env.example -f deploy/fixtures.compose.yml up -d postgres
+docker compose -p molotalk-demo --env-file .env.example -f deploy/fixtures.compose.yml run --rm migrate
+
+# явная загрузка набора basic
+docker compose -p molotalk-demo --env-file .env.example -f deploy/fixtures.compose.yml run --rm fixtures
+```
+
+Набор `basic` создаёт только `users`, `channels` и `channel_members`: Alice, Bob, Carol, личный диалог и группу. Записи `user_auth`, сеансов и остальных таблиц не создаются. Повторный запуск возвращает ошибку `application tables are not empty` и не меняет данные; сброс выполняется удалением отдельного volume.
+
+Состав и фиксированные значения набора описаны в [backend/cmd/fixtures/README.md](backend/cmd/fixtures/README.md).
+
+### Интеграционные проверки
+
+```bash
+cd backend
+go test -tags=integration -count=1 ./...
+```
+
+Для интеграционного прогона нужен работающий Docker: тесты поднимают PostgreSQL 17 в Testcontainers, применяют реальные миграции и выделяют отдельную БД каждому сценарию. При недоступном Docker прогон завершается явной ошибкой.
+
+Обычный `go test ./...` контейнеры не поднимает: интеграционные файлы помечены тегом `integration`.
+
+На Windows с Docker Desktop может потребоваться явный адрес демона, если он не совпадает с значением по умолчанию:
+
+```powershell
+$env:DOCKER_HOST = "npipe:////./pipe/dockerDesktopLinuxEngine"
+```
+
 ### Доверие локальному удостоверяющему центру
 
 Caddy обслуживает `localhost` сертификатом своего локального CA; закрытый ключ остаётся в volume `caddy-data`. Публичный сертификат CA извлекается из запущенного контейнера:
@@ -164,7 +212,7 @@ docker compose --project-directory . --env-file .env.example -f deploy/docker-co
 - Разрешённые RPC доходят до backend, но обработчиков ещё нет, поэтому возвращается `404`.
 - `/ws` проксируется, но обработчик WebSocket появится в карточке Gateway.
 - `/readyz` отвечает `503`: набор проверок пуст до T-32, `/healthz` уже возвращает `200`.
-- Миграции и fixture не входят в это окружение и добавляются в issue #5. PostgreSQL запускается без прикладной схемы.
+- Схема применяется миграциями при запуске; демонстрационная fixture загружается только явно.
 
 ## Definition of Done
 

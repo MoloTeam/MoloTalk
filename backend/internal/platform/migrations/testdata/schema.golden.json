@@ -1,0 +1,810 @@
+{
+  "domain": {
+    "name": "ulid",
+    "base_type": "character(26)",
+    "check": "CHECK ((VALUE ~ '^[0-7][0-9A-HJKMNP-TV-Z]{25}$'::text))"
+  },
+  "tables": [
+    {
+      "name": "attachments",
+      "columns": [
+        {
+          "name": "id",
+          "type": "ulid",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "uploader_id",
+          "type": "ulid",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "purpose",
+          "type": "text",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "object_key",
+          "type": "text",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "temp_object_key",
+          "type": "text",
+          "not_null": false,
+          "default": ""
+        },
+        {
+          "name": "thumbnail_key",
+          "type": "text",
+          "not_null": false,
+          "default": ""
+        },
+        {
+          "name": "filename",
+          "type": "text",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "content_type",
+          "type": "text",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "size_bytes",
+          "type": "bigint",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "channel_id",
+          "type": "ulid",
+          "not_null": false,
+          "default": ""
+        },
+        {
+          "name": "linked_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "upload_expires_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "completed_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "channel_members",
+      "columns": [
+        {
+          "name": "channel_id",
+          "type": "ulid",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "user_id",
+          "type": "ulid",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "role",
+          "type": "text",
+          "not_null": true,
+          "default": "'MEMBER'::text"
+        },
+        {
+          "name": "joined_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "channels",
+      "columns": [
+        {
+          "name": "id",
+          "type": "ulid",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "created_by_id",
+          "type": "ulid",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "client_request_id",
+          "type": "ulid",
+          "not_null": false,
+          "default": ""
+        },
+        {
+          "name": "create_request_hash",
+          "type": "text",
+          "not_null": false,
+          "default": ""
+        },
+        {
+          "name": "kind",
+          "type": "text",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "not_null": false,
+          "default": ""
+        },
+        {
+          "name": "owner_id",
+          "type": "ulid",
+          "not_null": false,
+          "default": ""
+        },
+        {
+          "name": "direct_pair_key",
+          "type": "text",
+          "not_null": false,
+          "default": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "closed_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "login_attempt_windows",
+      "columns": [
+        {
+          "name": "identifier_hash",
+          "type": "character(64)",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "failed_count",
+          "type": "smallint",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "window_started_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "message_receipts",
+      "columns": [
+        {
+          "name": "message_id",
+          "type": "ulid",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "user_id",
+          "type": "ulid",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "delivered_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": ""
+        },
+        {
+          "name": "read_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "messages",
+      "columns": [
+        {
+          "name": "id",
+          "type": "ulid",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "channel_id",
+          "type": "ulid",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "author_id",
+          "type": "ulid",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "client_message_id",
+          "type": "ulid",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "text",
+          "type": "text",
+          "not_null": true,
+          "default": "''::text"
+        },
+        {
+          "name": "attachment_ids",
+          "type": "character varying(26)[]",
+          "not_null": true,
+          "default": "'{}'::character varying[]"
+        },
+        {
+          "name": "revision",
+          "type": "integer",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "edited_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": ""
+        },
+        {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": ""
+        },
+        {
+          "name": "request_hash",
+          "type": "text",
+          "not_null": true,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "refresh_tokens",
+      "columns": [
+        {
+          "name": "token_hash",
+          "type": "text",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "session_id",
+          "type": "ulid",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "consumed_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "sessions",
+      "columns": [
+        {
+          "name": "id",
+          "type": "ulid",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "user_id",
+          "type": "ulid",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "revoked_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "user_auth",
+      "columns": [
+        {
+          "name": "user_id",
+          "type": "ulid",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "password_hash",
+          "type": "text",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "password_changed_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "users",
+      "columns": [
+        {
+          "name": "id",
+          "type": "ulid",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "identifier",
+          "type": "text",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "display_name",
+          "type": "text",
+          "not_null": true,
+          "default": ""
+        },
+        {
+          "name": "avatar_attachment_id",
+          "type": "ulid",
+          "not_null": false,
+          "default": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
+          "default": ""
+        }
+      ]
+    }
+  ],
+  "constraints": [
+    {
+      "table": "attachments",
+      "name": "attachments_channel_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (channel_id) REFERENCES channels(id)"
+    },
+    {
+      "table": "attachments",
+      "name": "attachments_check",
+      "type": "c",
+      "definition": "CHECK (((purpose \u003c\u003e 'AVATAR'::text) OR (size_bytes \u003c= 5242880)))"
+    },
+    {
+      "table": "attachments",
+      "name": "attachments_check1",
+      "type": "c",
+      "definition": "CHECK (((purpose \u003c\u003e 'MESSAGE_ATTACHMENT'::text) OR (size_bytes \u003c= 20971520)))"
+    },
+    {
+      "table": "attachments",
+      "name": "attachments_check2",
+      "type": "c",
+      "definition": "CHECK (((channel_id IS NULL) = (linked_at IS NULL)))"
+    },
+    {
+      "table": "attachments",
+      "name": "attachments_object_key_key",
+      "type": "u",
+      "definition": "UNIQUE (object_key)"
+    },
+    {
+      "table": "attachments",
+      "name": "attachments_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "attachments",
+      "name": "attachments_purpose_check",
+      "type": "c",
+      "definition": "CHECK ((purpose = ANY (ARRAY['AVATAR'::text, 'MESSAGE_ATTACHMENT'::text])))"
+    },
+    {
+      "table": "attachments",
+      "name": "attachments_size_bytes_check",
+      "type": "c",
+      "definition": "CHECK ((size_bytes \u003e= 0))"
+    },
+    {
+      "table": "attachments",
+      "name": "attachments_status_check",
+      "type": "c",
+      "definition": "CHECK ((status = ANY (ARRAY['UPLOADING'::text, 'VALIDATING'::text, 'READY'::text, 'REJECTED'::text, 'DELETING'::text])))"
+    },
+    {
+      "table": "attachments",
+      "name": "attachments_temp_object_key_key",
+      "type": "u",
+      "definition": "UNIQUE (temp_object_key)"
+    },
+    {
+      "table": "attachments",
+      "name": "attachments_uploader_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (uploader_id) REFERENCES users(id)"
+    },
+    {
+      "table": "channel_members",
+      "name": "channel_members_channel_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (channel_id) REFERENCES channels(id)"
+    },
+    {
+      "table": "channel_members",
+      "name": "channel_members_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (channel_id, user_id)"
+    },
+    {
+      "table": "channel_members",
+      "name": "channel_members_role_check",
+      "type": "c",
+      "definition": "CHECK ((role = ANY (ARRAY['ADMIN'::text, 'MEMBER'::text])))"
+    },
+    {
+      "table": "channel_members",
+      "name": "channel_members_user_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (user_id) REFERENCES users(id)"
+    },
+    {
+      "table": "channels",
+      "name": "channels_check",
+      "type": "c",
+      "definition": "CHECK ((((kind = 'DIRECT'::text) AND (client_request_id IS NULL) AND (create_request_hash IS NULL)) OR ((kind = 'GROUP'::text) AND (client_request_id IS NOT NULL) AND (create_request_hash IS NOT NULL))))"
+    },
+    {
+      "table": "channels",
+      "name": "channels_check1",
+      "type": "c",
+      "definition": "CHECK ((((kind = 'DIRECT'::text) AND (owner_id IS NULL) AND (direct_pair_key IS NOT NULL)) OR ((kind = 'GROUP'::text) AND (direct_pair_key IS NULL) AND ((closed_at IS NOT NULL) OR ((owner_id IS NOT NULL) AND (name IS NOT NULL) AND (name ~ '[^[:space:]]'::text))))))"
+    },
+    {
+      "table": "channels",
+      "name": "channels_created_by_id_client_request_id_key",
+      "type": "u",
+      "definition": "UNIQUE (created_by_id, client_request_id)"
+    },
+    {
+      "table": "channels",
+      "name": "channels_created_by_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (created_by_id) REFERENCES users(id)"
+    },
+    {
+      "table": "channels",
+      "name": "channels_direct_pair_key_key",
+      "type": "u",
+      "definition": "UNIQUE (direct_pair_key)"
+    },
+    {
+      "table": "channels",
+      "name": "channels_kind_check",
+      "type": "c",
+      "definition": "CHECK ((kind = ANY (ARRAY['DIRECT'::text, 'GROUP'::text])))"
+    },
+    {
+      "table": "channels",
+      "name": "channels_name_check",
+      "type": "c",
+      "definition": "CHECK (((length(name) \u003e= 1) AND (length(name) \u003c= 100)))"
+    },
+    {
+      "table": "channels",
+      "name": "channels_owner_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (owner_id) REFERENCES users(id)"
+    },
+    {
+      "table": "channels",
+      "name": "channels_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "channels",
+      "name": "group_owner_is_member",
+      "type": "f",
+      "definition": "FOREIGN KEY (id, owner_id) REFERENCES channel_members(channel_id, user_id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "login_attempt_windows",
+      "name": "login_attempt_windows_failed_count_check",
+      "type": "c",
+      "definition": "CHECK (((failed_count \u003e= 1) AND (failed_count \u003c= 5)))"
+    },
+    {
+      "table": "login_attempt_windows",
+      "name": "login_attempt_windows_identifier_hash_check",
+      "type": "c",
+      "definition": "CHECK ((identifier_hash ~ '^[0-9a-f]{64}$'::text))"
+    },
+    {
+      "table": "login_attempt_windows",
+      "name": "login_attempt_windows_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (identifier_hash)"
+    },
+    {
+      "table": "message_receipts",
+      "name": "message_receipts_check",
+      "type": "c",
+      "definition": "CHECK (((read_at IS NULL) OR ((delivered_at IS NOT NULL) AND (read_at \u003e= delivered_at))))"
+    },
+    {
+      "table": "message_receipts",
+      "name": "message_receipts_message_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (message_id) REFERENCES messages(id)"
+    },
+    {
+      "table": "message_receipts",
+      "name": "message_receipts_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (message_id, user_id)"
+    },
+    {
+      "table": "message_receipts",
+      "name": "message_receipts_user_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (user_id) REFERENCES users(id)"
+    },
+    {
+      "table": "messages",
+      "name": "messages_attachment_ids_check",
+      "type": "c",
+      "definition": "CHECK ((cardinality(attachment_ids) \u003c= 5))"
+    },
+    {
+      "table": "messages",
+      "name": "messages_author_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (author_id) REFERENCES users(id)"
+    },
+    {
+      "table": "messages",
+      "name": "messages_channel_id_author_id_client_message_id_key",
+      "type": "u",
+      "definition": "UNIQUE (channel_id, author_id, client_message_id)"
+    },
+    {
+      "table": "messages",
+      "name": "messages_channel_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (channel_id) REFERENCES channels(id)"
+    },
+    {
+      "table": "messages",
+      "name": "messages_check",
+      "type": "c",
+      "definition": "CHECK (((deleted_at IS NOT NULL) OR (text ~ '[^[:space:]]'::text) OR (cardinality(attachment_ids) \u003e 0)))"
+    },
+    {
+      "table": "messages",
+      "name": "messages_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "messages",
+      "name": "messages_revision_check",
+      "type": "c",
+      "definition": "CHECK ((revision \u003e= 1))"
+    },
+    {
+      "table": "messages",
+      "name": "messages_text_check",
+      "type": "c",
+      "definition": "CHECK ((char_length(text) \u003c= 4096))"
+    },
+    {
+      "table": "refresh_tokens",
+      "name": "refresh_tokens_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (token_hash)"
+    },
+    {
+      "table": "refresh_tokens",
+      "name": "refresh_tokens_session_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (session_id) REFERENCES sessions(id)"
+    },
+    {
+      "table": "sessions",
+      "name": "sessions_check",
+      "type": "c",
+      "definition": "CHECK ((expires_at \u003e created_at))"
+    },
+    {
+      "table": "sessions",
+      "name": "sessions_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "sessions",
+      "name": "sessions_user_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (user_id) REFERENCES users(id)"
+    },
+    {
+      "table": "user_auth",
+      "name": "user_auth_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (user_id)"
+    },
+    {
+      "table": "user_auth",
+      "name": "user_auth_user_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (user_id) REFERENCES users(id)"
+    },
+    {
+      "table": "users",
+      "name": "user_avatar_fk",
+      "type": "f",
+      "definition": "FOREIGN KEY (avatar_attachment_id) REFERENCES attachments(id)"
+    },
+    {
+      "table": "users",
+      "name": "users_avatar_attachment_id_key",
+      "type": "u",
+      "definition": "UNIQUE (avatar_attachment_id)"
+    },
+    {
+      "table": "users",
+      "name": "users_display_name_check",
+      "type": "c",
+      "definition": "CHECK ((((length(display_name) \u003e= 1) AND (length(display_name) \u003c= 64)) AND (display_name ~ '[^[:space:]]'::text)))"
+    },
+    {
+      "table": "users",
+      "name": "users_identifier_check",
+      "type": "c",
+      "definition": "CHECK ((((length(identifier) \u003e= 1) AND (length(identifier) \u003c= 254)) AND (identifier = lower(identifier))))"
+    },
+    {
+      "table": "users",
+      "name": "users_identifier_key",
+      "type": "u",
+      "definition": "UNIQUE (identifier)"
+    },
+    {
+      "table": "users",
+      "name": "users_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    }
+  ],
+  "indexes": [
+    {
+      "table": "attachments",
+      "name": "attachment_cleanup_idx",
+      "definition": "CREATE INDEX attachment_cleanup_idx ON public.attachments USING btree (status, created_at) WHERE (linked_at IS NULL)"
+    },
+    {
+      "table": "channel_members",
+      "name": "member_user_idx",
+      "definition": "CREATE INDEX member_user_idx ON public.channel_members USING btree (user_id, channel_id)"
+    },
+    {
+      "table": "login_attempt_windows",
+      "name": "login_window_cleanup_idx",
+      "definition": "CREATE INDEX login_window_cleanup_idx ON public.login_attempt_windows USING btree (window_started_at)"
+    },
+    {
+      "table": "message_receipts",
+      "name": "receipt_unread_idx",
+      "definition": "CREATE INDEX receipt_unread_idx ON public.message_receipts USING btree (user_id, message_id) WHERE (read_at IS NULL)"
+    },
+    {
+      "table": "message_receipts",
+      "name": "receipt_user_idx",
+      "definition": "CREATE INDEX receipt_user_idx ON public.message_receipts USING btree (user_id, message_id)"
+    },
+    {
+      "table": "messages",
+      "name": "attachment_reference_idx",
+      "definition": "CREATE INDEX attachment_reference_idx ON public.messages USING gin (attachment_ids)"
+    },
+    {
+      "table": "messages",
+      "name": "history_idx",
+      "definition": "CREATE INDEX history_idx ON public.messages USING btree (channel_id, id DESC)"
+    },
+    {
+      "table": "refresh_tokens",
+      "name": "refresh_session_idx",
+      "definition": "CREATE INDEX refresh_session_idx ON public.refresh_tokens USING btree (session_id)"
+    },
+    {
+      "table": "sessions",
+      "name": "sessions_user_idx",
+      "definition": "CREATE INDEX sessions_user_idx ON public.sessions USING btree (user_id)"
+    }
+  ]
+}

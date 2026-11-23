@@ -1,0 +1,6 @@
+# Проверочный override: миграции получают неверные credentials и обязаны
+# заблокировать первый запуск backend.
+services:
+  migrate:
+    environment:
+      DATABASE_URL: postgres://molotalk:wrong-password@postgres:5432/molotalk?sslmode=disable

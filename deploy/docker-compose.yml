@@ -76,6 +76,19 @@ services:
     entrypoint: ["/bin/sh", "/scripts/init-bucket.sh"]
     restart: "no"
 
+  migrate:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: migrate
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
+      MIGRATE_TIMEOUT: 60s
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
   auth:
     build:
       context: .
@@ -95,6 +108,8 @@ services:
       minio:
         condition: service_healthy
       minio-init:
+        condition: service_completed_successfully
+      migrate:
         condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:${AUTH_HTTP_PORT:-8081}/healthz"]
@@ -123,6 +138,8 @@ services:
         condition: service_healthy
       minio-init:
         condition: service_completed_successfully
+      migrate:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:${CHAT_HTTP_PORT:-8082}/healthz"]
       interval: 5s
@@ -149,6 +166,8 @@ services:
       minio:
         condition: service_healthy
       minio-init:
+        condition: service_completed_successfully
+      migrate:
         condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:${MEDIA_HTTP_PORT:-8083}/healthz"]
@@ -177,6 +196,8 @@ services:
         condition: service_healthy
       minio-init:
         condition: service_completed_successfully
+      migrate:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:${PRESENCE_HTTP_PORT:-8084}/healthz"]
       interval: 5s
@@ -203,6 +224,8 @@ services:
       minio:
         condition: service_healthy
       minio-init:
+        condition: service_completed_successfully
+      migrate:
         condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:${GATEWAY_HTTP_PORT:-8085}/healthz"]
