@@ -5,7 +5,7 @@
   "scripts": {
     "buf": "buf",
     "generate:go": "buf generate --template buf.gen.go.yaml",
-    "generate:ts": "buf generate --template buf.gen.ts.yaml --path proto/molotalk/v1",
+    "generate:ts": "buf generate --template buf.gen.ts.yaml --path proto/molotalk/v1 --path third_party/proto/buf/validate --path third_party/proto/google/api",
     "generate:openapi": "buf generate --template buf.gen.openapi.yaml",
     "generate": "npm run generate:go && npm run generate:ts && npm run generate:openapi",
     "typecheck": "tsc --noEmit",
@@ -20,6 +20,7 @@
   "devDependencies": {
     "@bufbuild/protoc-gen-es": "2.17.0",
     "@bufbuild/protovalidate": "1.3.0",
+    "@types/node": "^24.10.1",
     "typescript": "5.9.3"
   }
 }
