@@ -1,0 +1,5090 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "MoloTalk API",
+    "version": "1.1.0",
+    "description": "Целевой unary Connect RPC MoloTalk. ReadState вычисляется по message_receipts. Описание предназначено для реализации, не подтверждает текущий код."
+  },
+  "servers": [
+    {
+      "url": "https://molotalk.example.test"
+    }
+  ],
+  "paths": {
+    "/molotalk.v1.AuthService/Register": {
+      "post": {
+        "operationId": "AuthService_Register",
+        "tags": [
+          "AuthService"
+        ],
+        "summary": "Register",
+        "description": "Публичный. identifier — email до 254 символов, сравнивается без учёта регистра; displayName — 1–64 символа, не из одних пробелов. Создаёт уникальную учётную запись. Пароль проверяется по F_Pwd_1–3. Занятый identifier — already_exists.",
+        "x-functional-requirements": "F_Auth_1–4; F_Pwd_1–3",
+        "x-access": "public",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthServiceRegisterRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthServiceRegisterResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ошибка Connect RPC; invalid_argument",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Ошибка Connect RPC; already_exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/molotalk.v1.AuthService/Login": {
+      "post": {
+        "operationId": "AuthService_Login",
+        "tags": [
+          "AuthService"
+        ],
+        "summary": "Login",
+        "description": "Публичный. Создаёт независимый сеанс для верных учётных данных. Неверная пара — unauthenticated без уточнения поля. После 5 неудачных попыток одного нормализованного identifier за 15 минут — resource_exhausted до конца окна; окно хранится в PostgreSQL.",
+        "x-functional-requirements": "F_Auth_5–7",
+        "x-access": "public",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthServiceLoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthServiceLoginResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ошибка Connect RPC; invalid_argument",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Ошибка Connect RPC; resource_exhausted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/molotalk.v1.AuthService/RefreshToken": {
+      "post": {
+        "operationId": "AuthService_RefreshToken",
+        "tags": [
+          "AuthService"
+        ],
+        "summary": "RefreshToken",
+        "description": "Публичный. Погашает одноразовый refresh token и возвращает новую пару. Повторное предъявление погашенного токена отзывает весь соответствующий сеанс и возвращает unauthenticated. Просроченный или неизвестный токен — unauthenticated.",
+        "x-functional-requirements": "F_Auth_5; сеансы",
+        "x-access": "public",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthServiceRefreshTokenRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthServiceRefreshTokenResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/molotalk.v1.AuthService/Logout": {
+      "post": {
+        "operationId": "AuthService_Logout",
+        "tags": [
+          "AuthService"
+        ],
+        "summary": "Logout",
+        "description": "Пользователь. Отзывает текущий sessionId, при allSessions = true — все сеансы. Gateway закрывает их WebSocket при уведомлении или проверке сеанса. Повтор не создаёт нового эффекта.",
+        "x-functional-requirements": "F_Auth_8",
+        "x-access": "user",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthServiceLogoutRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthServiceLogoutResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Ошибка Connect RPC; permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка Connect RPC; not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.AuthService/GetMe": {
+      "post": {
+        "operationId": "AuthService_GetMe",
+        "tags": [
+          "AuthService"
+        ],
+        "summary": "GetMe",
+        "description": "Пользователь. Возвращает текущий профиль, включая identifier.",
+        "x-functional-requirements": "F_Profile_1–3",
+        "x-access": "user",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthServiceGetMeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthServiceGetMeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Ошибка Connect RPC; permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка Connect RPC; not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.AuthService/UpdateProfile": {
+      "post": {
+        "operationId": "AuthService_UpdateProfile",
+        "tags": [
+          "AuthService"
+        ],
+        "summary": "UpdateProfile",
+        "description": "Пользователь. Применяет переданные поля; имя — 1–64 символа, не из одних пробелов. Аватар должен быть READY, иметь purpose = AVATAR и принадлежать пользователю, иначе failed_precondition. clearAvatar = true удаляет аватар; одновременно с avatarAttachmentId — invalid_argument.",
+        "x-functional-requirements": "F_Profile_1–3; F_Profile_8–9",
+        "x-access": "user",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthServiceUpdateProfileRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthServiceUpdateProfileResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ошибка Connect RPC; failed_precondition; invalid_argument",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Ошибка Connect RPC; permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка Connect RPC; not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.AuthService/ChangePassword": {
+      "post": {
+        "operationId": "AuthService_ChangePassword",
+        "tags": [
+          "AuthService"
+        ],
+        "summary": "ChangePassword",
+        "description": "Пользователь. Проверяет текущий пароль, совпадение новых полей и F_Pwd_1–3. Неверный текущий пароль — invalid_argument. После смены пароля остальные сеансы отзываются, текущий сохраняется.",
+        "x-functional-requirements": "F_Profile_4–7",
+        "x-access": "user",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthServiceChangePasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthServiceChangePasswordResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ошибка Connect RPC; invalid_argument",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Ошибка Connect RPC; permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка Connect RPC; not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.AuthService/SearchUsers": {
+      "post": {
+        "operationId": "AuthService_SearchUsers",
+        "tags": [
+          "AuthService"
+        ],
+        "summary": "SearchUsers",
+        "description": "Пользователь. query — 2–100 символов; по имени ищется начало слова, по identifier — только полное совпадение. limit — 20 по умолчанию, максимум 50. Текущий пользователь исключён; identifier других пользователей не возвращается.",
+        "x-functional-requirements": "Создание диалога; F_Group_3",
+        "x-access": "user",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthServiceSearchUsersRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthServiceSearchUsersResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ошибка Connect RPC; invalid_argument",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Ошибка Connect RPC; permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка Connect RPC; not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.AuthService/IntrospectSession": {
+      "post": {
+        "operationId": "AuthService_IntrospectSession",
+        "tags": [
+          "AuthService"
+        ],
+        "summary": "IntrospectSession",
+        "description": "Внутренний. Проверяет существование, срок и отсутствие отзыва сеанса, его принадлежность userId. sid и sub берутся из проверенного access token. Вызывается Gateway при IDENTIFY и перед выдачей событий.",
+        "x-functional-requirements": "Авторизация серверных модулей",
+        "x-access": "service",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthServiceIntrospectSessionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthServiceIntrospectSessionResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.ChatService/ListChats": {
+      "post": {
+        "operationId": "ChatService_ListChats",
+        "tags": [
+          "ChatService"
+        ],
+        "summary": "ListChats",
+        "description": "Пользователь. Возвращает доступные диалоги с участниками, ролями и счётчиками, по убыванию времени последнего неудалённого сообщения; для пустых — времени создания. Равенство разрешается id. Страница — 50, максимум 100. nextCursor задан при следующей странице.",
+        "x-functional-requirements": "F_Group_1–9; F_History_3",
+        "x-access": "user",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatServiceListChatsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatServiceListChatsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Ошибка Connect RPC; permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка Connect RPC; not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.ChatService/GetChat": {
+      "post": {
+        "operationId": "ChatService_GetChat",
+        "tags": [
+          "ChatService"
+        ],
+        "summary": "GetChat",
+        "description": "Пользователь. Возвращает актуальную карточку доступного диалога.",
+        "x-functional-requirements": "F_Group_1–9",
+        "x-access": "user",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatServiceGetChatRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatServiceGetChatResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Ошибка Connect RPC; permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка Connect RPC; not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.ChatService/CreateDirectChat": {
+      "post": {
+        "operationId": "ChatService_CreateDirectChat",
+        "tags": [
+          "ChatService"
+        ],
+        "summary": "CreateDirectChat",
+        "description": "Пользователь. Возвращает существующий диалог пары либо создаёт его; повтор не создаёт второй диалог. peerUserId не равен собственному id; неизвестный пользователь — not_found.",
+        "x-functional-requirements": "F_Msg_1",
+        "x-access": "user",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatServiceCreateDirectChatRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatServiceCreateDirectChatResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ошибка Connect RPC; invalid_argument",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Ошибка Connect RPC; permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка Connect RPC; not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.ChatService/CreateGroupChat": {
+      "post": {
+        "operationId": "ChatService_CreateGroupChat",
+        "tags": [
+          "ChatService"
+        ],
+        "summary": "CreateGroupChat",
+        "description": "Пользователь. Создаёт группу и состав локальной транзакцией; создатель — владелец и входит в лимит 100. name — 1–100 символов, не из одних пробелов. Повторы и id создателя в memberIds игнорируются. Более 99 других участников — failed_precondition, неизвестный пользователь — not_found. Тот же clientRequestId и состав возвращают прежнюю группу; иная команда с тем же ключом — already_exists.",
+        "x-functional-requirements": "F_Group_1–2; F_Group_5",
+        "x-access": "user",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatServiceCreateGroupChatRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatServiceCreateGroupChatResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ошибка Connect RPC; failed_precondition; invalid_argument",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Ошибка Connect RPC; permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка Connect RPC; not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Ошибка Connect RPC; already_exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.ChatService/AddGroupMember": {
+      "post": {
+        "operationId": "ChatService_AddGroupMember",
+        "tags": [
+          "ChatService"
+        ],
+        "summary": "AddGroupMember",
+        "description": "Пользователь. Доступен владельцу/администратору GROUP. Проверка лимита и добавление сериализуются по группе. При 100 участниках — failed_precondition. Добавление текущего участника возвращает актуальную карточку без изменения состава.",
+        "x-functional-requirements": "F_Group_3–5",
+        "x-access": "user",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatServiceAddGroupMemberRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatServiceAddGroupMemberResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Ошибка Connect RPC; permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка Connect RPC; not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Ошибка Connect RPC; resource_exhausted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.ChatService/RemoveGroupMember": {
+      "post": {
+        "operationId": "ChatService_RemoveGroupMember",
+        "tags": [
+          "ChatService"
+        ],
+        "summary": "RemoveGroupMember",
+        "description": "Пользователь. Владелец удаляет другого участника; администратор — только MEMBER, иначе permission_denied. Удаление себя — invalid_argument: используется LeaveGroup. Владелец не исключается этим методом.",
+        "x-functional-requirements": "F_Group_6",
+        "x-access": "user",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatServiceRemoveGroupMemberRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatServiceRemoveGroupMemberResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ошибка Connect RPC; failed_precondition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Ошибка Connect RPC; permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка Connect RPC; not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.ChatService/LeaveGroup": {
+      "post": {
+        "operationId": "ChatService_LeaveGroup",
+        "tags": [
+          "ChatService"
+        ],
+        "summary": "LeaveGroup",
+        "description": "Пользователь. Только GROUP, для DIRECT — failed_precondition. Удаляет текущего участника. Выход владельца передаёт владение администратору, а при их отсутствии — случайному участнику в той же транзакции; newOwnerId задан только при передаче. Пустая группа закрывается.",
+        "x-functional-requirements": "F_Group_7; F_Group_9",
+        "x-access": "user",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatServiceLeaveGroupRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatServiceLeaveGroupResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ошибка Connect RPC; failed_precondition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Ошибка Connect RPC; permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка Connect RPC; not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.ChatService/SetGroupMemberRole": {
+      "post": {
+        "operationId": "ChatService_SetGroupMemberRole",
+        "tags": [
+          "ChatService"
+        ],
+        "summary": "SetGroupMemberRole",
+        "description": "Пользователь. Только владелец назначает/снимает администратора; владение этим методом не передаётся. Изменение собственной роли — invalid_argument; userId вне состава — not_found.",
+        "x-functional-requirements": "F_Group_8",
+        "x-access": "user",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatServiceSetGroupMemberRoleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatServiceSetGroupMemberRoleResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ошибка Connect RPC; invalid_argument",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Ошибка Connect RPC; permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка Connect RPC; not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.ChatService/SendMessage": {
+      "post": {
+        "operationId": "ChatService_SendMessage",
+        "tags": [
+          "ChatService"
+        ],
+        "summary": "SendMessage",
+        "description": "Пользователь. Сохраняет непустой текст до 4000 символов либо 1–5 готовых файлов. Вместе с сообщением фиксирует строки получателей из текущего состава без автора. Тот же ключ и исходная команда дают тот же id; другая команда — already_exists. После записи отдельно привязывает файлы и публикует событие; сбой привязки отражает attachmentsLinked = false.",
+        "x-functional-requirements": "F_Msg_1–4; F_History_3; F_Media_1–2; F_Media_5",
+        "x-access": "user",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatServiceSendMessageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatServiceSendMessageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ошибка Connect RPC; failed_precondition; invalid_argument",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Ошибка Connect RPC; permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка Connect RPC; not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Ошибка Connect RPC; already_exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.ChatService/EditMessage": {
+      "post": {
+        "operationId": "ChatService_EditMessage",
+        "tags": [
+          "ChatService"
+        ],
+        "summary": "EditMessage",
+        "description": "Пользователь. Проверяет членство и авторство; меняет только текст. Отсутствующий text не меняет сообщение, пустой допустим при вложениях. Устаревшая expectedRevision — aborted, удалённое сообщение — failed_precondition. При изменении повышает revision и выставляет editedAt.",
+        "x-functional-requirements": "F_Msg_7–9",
+        "x-access": "user",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatServiceEditMessageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatServiceEditMessageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ошибка Connect RPC; failed_precondition; invalid_argument",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Ошибка Connect RPC; permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка Connect RPC; not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Ошибка Connect RPC; aborted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.ChatService/DeleteMessage": {
+      "post": {
+        "operationId": "ChatService_DeleteMessage",
+        "tags": [
+          "ChatService"
+        ],
+        "summary": "DeleteMessage",
+        "description": "Пользователь. Мягко удаляет собственное сообщение. Повтор идемпотентен. История возвращает маркер deletedAt без содержимого, UI скрывает запись. Новые URL вложений не выдаются, прежние действуют до истечения. Участникам направляется MessageDeleted.",
+        "x-functional-requirements": "F_Msg_10–12",
+        "x-access": "user",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatServiceDeleteMessageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatServiceDeleteMessageResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Ошибка Connect RPC; permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка Connect RPC; not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.ChatService/GetMessages": {
+      "post": {
+        "operationId": "ChatService_GetMessages",
+        "tags": [
+          "ChatService"
+        ],
+        "summary": "GetMessages",
+        "description": "Пользователь. LATEST — по умолчанию; BEFORE возвращает id < toMessageId, AFTER — id > fromMessageId, RANGE — обе включительные границы. limit — 50, максимум 100. Результат всегда по возрастанию id, включая маркеры deletedAt. При hasMore = true задан nextCursor. С cursor передаются только chatId и limit; режим и границы сохранены в курсоре. Окно заменяется после чтения всего диапазона.",
+        "x-functional-requirements": "F_History_1–3; F_Msg_9; F_Msg_12",
+        "x-access": "user",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatServiceGetMessagesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatServiceGetMessagesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ошибка Connect RPC; invalid_argument",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Ошибка Connect RPC; permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка Connect RPC; not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.ChatService/ConfirmDelivery": {
+      "post": {
+        "operationId": "ChatService_ConfirmDelivery",
+        "tags": [
+          "ChatService"
+        ],
+        "summary": "ConfirmDelivery",
+        "description": "Пользователь. Подтверждает 1–100 сообщений одного доступного чата. Обновляются только собственные строки message_receipts; остальные id пропускаются, при отсутствии подходящих — permission_denied. Первый deliveredAt сохраняется, повтор безопасен.",
+        "x-functional-requirements": "F_Msg_5",
+        "x-access": "user",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatServiceConfirmDeliveryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatServiceConfirmDeliveryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ошибка Connect RPC; invalid_argument",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Ошибка Connect RPC; permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка Connect RPC; not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.ChatService/MarkRead": {
+      "post": {
+        "operationId": "ChatService_MarkRead",
+        "tags": [
+          "ChatService"
+        ],
+        "summary": "MarkRead",
+        "description": "Пользователь. Подтверждает 1–100 показанных сообщений активного видимого чата по тем же правилам отбора. readAt заполняется однократно, одновременно обеспечивается deliveredAt. Возвращает вычисленный ReadState; максимум подтверждённых id не означает прочтения пропущенных сообщений.",
+        "x-functional-requirements": "F_Msg_6",
+        "x-access": "user",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatServiceMarkReadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatServiceMarkReadResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ошибка Connect RPC; invalid_argument",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Ошибка Connect RPC; permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка Connect RPC; not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.ChatService/GetMessageReceipts": {
+      "post": {
+        "operationId": "ChatService_GetMessageReceipts",
+        "tags": [
+          "ChatService"
+        ],
+        "summary": "GetMessageReceipts",
+        "description": "Пользователь. Детальный список исходных получателей и времён ACK выдаётся автору при текущем доступе к чату. До ACK времена отсутствуют. Другой участник — permission_denied; без доступа — not_found.",
+        "x-functional-requirements": "F_Msg_5–6",
+        "x-access": "user",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatServiceGetMessageReceiptsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatServiceGetMessageReceiptsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Ошибка Connect RPC; permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка Connect RPC; not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.ChatService/GetReadStates": {
+      "post": {
+        "operationId": "ChatService_GetReadStates",
+        "tags": [
+          "ChatService"
+        ],
+        "summary": "GetReadStates",
+        "description": "Пользователь. Возвращает вычисляемые ReadState доступных чатов: непрочитанные неудалённые сообщения и максимальный подтверждённый id. Отдельной таблицы состояния чтения нет.",
+        "x-functional-requirements": "F_History_3; F_Msg_6",
+        "x-access": "user",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatServiceGetReadStatesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatServiceGetReadStatesResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Ошибка Connect RPC; permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка Connect RPC; not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.ChatService/CheckChatAccess": {
+      "post": {
+        "operationId": "ChatService_CheckChatAccess",
+        "tags": [
+          "ChatService"
+        ],
+        "summary": "CheckChatAccess",
+        "description": "Внутренний. Проверяет текущее членство; при attachmentId — также ссылку из неудалённого сообщения и завершённую привязку файла к этому чату.",
+        "x-functional-requirements": "Авторизация Media/Gateway",
+        "x-access": "service",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatServiceCheckChatAccessRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatServiceCheckChatAccessResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.ChatService/GetUserChatIds": {
+      "post": {
+        "operationId": "ChatService_GetUserChatIds",
+        "tags": [
+          "ChatService"
+        ],
+        "summary": "GetUserChatIds",
+        "description": "Внутренний. Вызывается Gateway при подключении; chatIds определяют подписки и аудиторию присутствия, readStates вычисляются для READY.",
+        "x-functional-requirements": "Инициализация Gateway/Presence",
+        "x-access": "service",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatServiceGetUserChatIdsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatServiceGetUserChatIdsResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.MediaService/PrepareUpload": {
+      "post": {
+        "operationId": "MediaService_PrepareUpload",
+        "tags": [
+          "MediaService"
+        ],
+        "summary": "PrepareUpload",
+        "description": "Пользователь. Проверяет назначение, заявленные формат и размер; filename — 1–255 символов без /, обратной косой черты и управляющих символов. Выдаёт presigned PUT на 15 минут с подписанным Content-Type. Браузер передаёт разрешённые requiredHeaders и File напрямую в S3. Content-Length устанавливает браузер; фактический размер обязательно проверяется в CompleteUpload.",
+        "x-functional-requirements": "F_Profile_3; F_Profile_8–9; F_Media_1; F_Media_3–4",
+        "x-access": "user",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaServicePrepareUploadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaServicePrepareUploadResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ошибка Connect RPC; invalid_argument",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Ошибка Connect RPC; permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка Connect RPC; not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.MediaService/CompleteUpload": {
+      "post": {
+        "operationId": "MediaService_CompleteUpload",
+        "tags": [
+          "MediaService"
+        ],
+        "summary": "CompleteUpload",
+        "description": "Пользователь. Проверяет владельца, фактический размер и формат; создаёт миниатюру изображения, переносит проверенные байты на финальный ключ и возвращает READY. Отсутствие объекта — failed_precondition; неверный формат/размер — invalid_argument, REJECTED и удаление временного объекта. Повтор READY идемпотентен.",
+        "x-functional-requirements": "F_Profile_8–9; F_Media_3–4",
+        "x-access": "user",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaServiceCompleteUploadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaServiceCompleteUploadResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ошибка Connect RPC; failed_precondition; invalid_argument",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Ошибка Connect RPC; permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка Connect RPC; not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.MediaService/GetAttachment": {
+      "post": {
+        "operationId": "MediaService_GetAttachment",
+        "tags": [
+          "MediaService"
+        ],
+        "summary": "GetAttachment",
+        "description": "Пользователь. Выдаёт метаданные по тем же правилам видимости, что GetDownloadURL. Незакреплённая загрузка видна только владельцу; PENDING объединяет UPLOADING и VALIDATING. DELETING не выдаётся как доступный объект.",
+        "x-functional-requirements": "F_Media_1–2",
+        "x-access": "user",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaServiceGetAttachmentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaServiceGetAttachmentResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Ошибка Connect RPC; permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка Connect RPC; not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.MediaService/GetDownloadURL": {
+      "post": {
+        "operationId": "MediaService_GetDownloadURL",
+        "tags": [
+          "MediaService"
+        ],
+        "summary": "GetDownloadURL",
+        "description": "Пользователь. Выдаёт presigned GET на час. Аватар доступен по текущей ссылке профиля; вложение — текущему участнику при ссылке из неудалённого сообщения и привязке к чату. Владелец может просматривать собственный READY до привязки. Нет файла/права — not_found; доступный файл не READY, его привязка не завершена либо миниатюры нет — failed_precondition. Для изображений Content-Disposition: inline, для документов — attachment с исходным именем. Байты передаются из S3.",
+        "x-functional-requirements": "F_Profile_3; F_Media_2",
+        "x-access": "user",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaServiceGetDownloadURLRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaServiceGetDownloadURLResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ошибка Connect RPC; failed_precondition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Ошибка Connect RPC; permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка Connect RPC; not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.PresenceService/GetPresence": {
+      "post": {
+        "operationId": "PresenceService_GetPresence",
+        "tags": [
+          "PresenceService"
+        ],
+        "summary": "GetPresence",
+        "description": "Пользователь. userIds — 1–200. Возвращает статусы собеседников и общих участников; остальные id пропускаются без ошибки.",
+        "x-functional-requirements": "F_Presence_1",
+        "x-access": "user",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PresenceServiceGetPresenceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PresenceServiceGetPresenceResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ошибка Connect RPC; invalid_argument",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ошибка Connect RPC; unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Ошибка Connect RPC; permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка Connect RPC; not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.PresenceService/Heartbeat": {
+      "post": {
+        "operationId": "PresenceService_Heartbeat",
+        "tags": [
+          "PresenceService"
+        ],
+        "summary": "Heartbeat",
+        "description": "Внутренний. Вызывается Gateway на HEARTBEAT клиента. Продлевает TTL соединения Redis до 60 секунд; время задаёт сервер. Статус ONLINE, пока существует хотя бы одно живое соединение.",
+        "x-functional-requirements": "F_Presence_1",
+        "x-access": "service",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PresenceServiceHeartbeatRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PresenceServiceHeartbeatResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ]
+      }
+    },
+    "/molotalk.v1.PresenceService/Disconnect": {
+      "post": {
+        "operationId": "PresenceService_Disconnect",
+        "tags": [
+          "PresenceService"
+        ],
+        "summary": "Disconnect",
+        "description": "Внутренний. Вызывается Gateway при закрытии соединения. Удаляет одно соединение и пересчитывает присутствие; при потере вызова запись истекает по TTL.",
+        "x-functional-requirements": "F_Presence_1",
+        "x-access": "service",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Connect-Protocol-Version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PresenceServiceDisconnectRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный результат операции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PresenceServiceDisconnectResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка Connect RPC; internal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка Connect RPC; unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpcError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "serviceBearer": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "serviceBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "service JWT"
+      }
+    },
+    "schemas": {
+      "Id": {
+        "type": "string",
+        "description": "ULID в канонической записи",
+        "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$",
+        "minLength": 26,
+        "maxLength": 26
+      },
+      "Timestamp": {
+        "type": "string",
+        "description": "Время UTC в RFC 3339",
+        "format": "date-time"
+      },
+      "Empty": {
+        "type": "object",
+        "description": "",
+        "properties": {},
+        "required": []
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "identifier": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254,
+            "description": "Возвращается только самому пользователю."
+          },
+          "displayName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "avatarAttachmentId": {
+            "$ref": "#/components/schemas/Id"
+          }
+        },
+        "required": [
+          "id",
+          "displayName"
+        ]
+      },
+      "SessionTokens": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "sessionId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "accessToken": {
+            "type": "string"
+          },
+          "refreshToken": {
+            "type": "string"
+          },
+          "accessExpiresAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "refreshExpiresAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          }
+        },
+        "required": [
+          "user",
+          "sessionId",
+          "accessToken",
+          "refreshToken",
+          "accessExpiresAt",
+          "refreshExpiresAt"
+        ]
+      },
+      "Member": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "OWNER",
+              "ADMIN",
+              "MEMBER"
+            ]
+          },
+          "joinedAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          }
+        },
+        "required": [
+          "user",
+          "role",
+          "joinedAt"
+        ]
+      },
+      "Chat": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "DIRECT",
+              "GROUP"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Member"
+            }
+          },
+          "unreadCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "lastMessageId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "lastMessage": {
+            "$ref": "#/components/schemas/Message"
+          },
+          "closedAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "members",
+          "unreadCount"
+        ]
+      },
+      "Attachment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "AVATAR",
+              "MESSAGE_ATTACHMENT"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "READY",
+              "REJECTED"
+            ]
+          },
+          "filename": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "sizeBytes": {
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "description": "int64 по правилам Protobuf JSON"
+          },
+          "hasThumbnail": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "purpose",
+          "status",
+          "filename",
+          "contentType",
+          "sizeBytes",
+          "hasThumbnail"
+        ]
+      },
+      "ReceiptSummary": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "recipientCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "deliveredCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "readCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "state": {
+            "type": "string",
+            "description": "",
+            "enum": [
+              "ACCEPTED",
+              "DELIVERED",
+              "READ"
+            ]
+          }
+        },
+        "required": [
+          "recipientCount",
+          "deliveredCount",
+          "readCount",
+          "state"
+        ]
+      },
+      "Message": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "chatId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "authorId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "clientMessageId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Attachment"
+            },
+            "maxItems": 5
+          },
+          "attachmentsLinked": {
+            "type": "boolean"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "editedAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "deletedAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "receiptSummary": {
+            "$ref": "#/components/schemas/ReceiptSummary"
+          },
+          "author": {
+            "$ref": "#/components/schemas/User"
+          }
+        },
+        "required": [
+          "id",
+          "chatId",
+          "authorId",
+          "clientMessageId",
+          "attachments",
+          "attachmentsLinked",
+          "revision",
+          "createdAt",
+          "author"
+        ]
+      },
+      "Receipt": {
+        "type": "object",
+        "properties": {
+          "messageId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "userId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "deliveredAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "readAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          }
+        },
+        "required": [
+          "messageId",
+          "userId"
+        ],
+        "description": "Строка существует до первого ACK; времена отсутствуют до соответствующего подтверждения."
+      },
+      "ReadState": {
+        "type": "object",
+        "description": "Вычисляемый результат запроса, не отдельная таблица. unreadCount считается по неподтверждённым неудалённым сообщениям; lastReadMessageId — максимальный подтверждённый ID.",
+        "properties": {
+          "chatId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "lastReadMessageId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "unreadCount": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "chatId",
+          "unreadCount"
+        ]
+      },
+      "Presence": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "userId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "status": {
+            "type": "string",
+            "description": "",
+            "enum": [
+              "ONLINE",
+              "OFFLINE"
+            ]
+          }
+        },
+        "required": [
+          "userId",
+          "status"
+        ]
+      },
+      "RpcError": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string",
+                  "description": "base64 Protobuf без padding"
+                },
+                "debug": {}
+              },
+              "required": [
+                "type",
+                "value"
+              ],
+              "description": "Стандартная detail Connect"
+            }
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
+      "AuthServiceRegisterRequest": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254,
+            "description": "Нормализуется в нижний регистр."
+          },
+          "displayName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "\\S"
+          },
+          "password": {
+            "type": "string",
+            "description": "6–64 символа; точный набор F_Pwd_2 и четыре класса F_Pwd_3",
+            "minLength": 6,
+            "maxLength": 64,
+            "pattern": "^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[^A-Za-z0-9])[A-Za-z0-9!@#$%^&*()_+\\-=\\[\\]{};:'\"|,.<>/?]{6,64}$"
+          }
+        },
+        "required": [
+          "identifier",
+          "displayName",
+          "password"
+        ]
+      },
+      "AuthServiceRegisterResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "tokens": {
+            "$ref": "#/components/schemas/SessionTokens"
+          }
+        },
+        "required": [
+          "tokens"
+        ]
+      },
+      "AuthServiceLoginRequest": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254,
+            "description": "Нормализуется в нижний регистр."
+          },
+          "password": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "identifier",
+          "password"
+        ]
+      },
+      "AuthServiceLoginResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "tokens": {
+            "$ref": "#/components/schemas/SessionTokens"
+          }
+        },
+        "required": [
+          "tokens"
+        ]
+      },
+      "AuthServiceRefreshTokenRequest": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "description": ""
+          }
+        },
+        "required": [
+          "refreshToken"
+        ]
+      },
+      "AuthServiceRefreshTokenResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "tokens": {
+            "$ref": "#/components/schemas/SessionTokens"
+          }
+        },
+        "required": [
+          "tokens"
+        ]
+      },
+      "AuthServiceLogoutRequest": {
+        "type": "object",
+        "properties": {
+          "allSessions": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": []
+      },
+      "AuthServiceLogoutResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {},
+        "required": []
+      },
+      "AuthServiceGetMeRequest": {
+        "type": "object",
+        "description": "",
+        "properties": {},
+        "required": []
+      },
+      "AuthServiceGetMeResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        },
+        "required": [
+          "user"
+        ]
+      },
+      "AuthServiceUpdateProfileRequest": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "\\S"
+          },
+          "avatarAttachmentId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "clearAvatar": {
+            "type": "boolean"
+          }
+        },
+        "required": [],
+        "minProperties": 1,
+        "not": {
+          "required": [
+            "avatarAttachmentId",
+            "clearAvatar"
+          ],
+          "properties": {
+            "clearAvatar": {
+              "const": true
+            }
+          }
+        }
+      },
+      "AuthServiceUpdateProfileResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        },
+        "required": [
+          "user"
+        ]
+      },
+      "AuthServiceChangePasswordRequest": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "currentPassword": {
+            "type": "string",
+            "description": ""
+          },
+          "newPassword": {
+            "type": "string",
+            "description": "6–64 символа; точный набор F_Pwd_2 и четыре класса F_Pwd_3",
+            "minLength": 6,
+            "maxLength": 64,
+            "pattern": "^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[^A-Za-z0-9])[A-Za-z0-9!@#$%^&*()_+\\-=\\[\\]{};:'\"|,.<>/?]{6,64}$"
+          },
+          "newPasswordConfirmation": {
+            "type": "string",
+            "description": "6–64 символа; точный набор F_Pwd_2 и четыре класса F_Pwd_3",
+            "minLength": 6,
+            "maxLength": 64,
+            "pattern": "^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[^A-Za-z0-9])[A-Za-z0-9!@#$%^&*()_+\\-=\\[\\]{};:'\"|,.<>/?]{6,64}$"
+          }
+        },
+        "required": [
+          "currentPassword",
+          "newPassword",
+          "newPasswordConfirmation"
+        ]
+      },
+      "AuthServiceChangePasswordResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {},
+        "required": []
+      },
+      "AuthServiceSearchUsersRequest": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "default": 20
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "AuthServiceSearchUsersResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "users": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/User"
+            }
+          }
+        },
+        "required": [
+          "users"
+        ]
+      },
+      "AuthServiceIntrospectSessionRequest": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "sessionId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "userId": {
+            "$ref": "#/components/schemas/Id"
+          }
+        },
+        "required": [
+          "sessionId",
+          "userId"
+        ]
+      },
+      "AuthServiceIntrospectSessionResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "active": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "active"
+        ]
+      },
+      "ChatServiceListChatsRequest": {
+        "type": "object",
+        "properties": {
+          "cursor": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 50
+          }
+        },
+        "required": []
+      },
+      "ChatServiceListChatsResponse": {
+        "type": "object",
+        "properties": {
+          "chats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Chat"
+            }
+          },
+          "nextCursor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "chats"
+        ]
+      },
+      "ChatServiceGetChatRequest": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "chatId": {
+            "$ref": "#/components/schemas/Id"
+          }
+        },
+        "required": [
+          "chatId"
+        ]
+      },
+      "ChatServiceGetChatResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "chat": {
+            "$ref": "#/components/schemas/Chat"
+          }
+        },
+        "required": [
+          "chat"
+        ]
+      },
+      "ChatServiceCreateDirectChatRequest": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "peerUserId": {
+            "$ref": "#/components/schemas/Id"
+          }
+        },
+        "required": [
+          "peerUserId"
+        ]
+      },
+      "ChatServiceCreateDirectChatResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "chat": {
+            "$ref": "#/components/schemas/Chat"
+          }
+        },
+        "required": [
+          "chat"
+        ]
+      },
+      "ChatServiceCreateGroupChatRequest": {
+        "type": "object",
+        "properties": {
+          "clientRequestId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "\\S"
+          },
+          "memberIds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Id"
+            }
+          }
+        },
+        "required": [
+          "clientRequestId",
+          "name"
+        ]
+      },
+      "ChatServiceCreateGroupChatResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "chat": {
+            "$ref": "#/components/schemas/Chat"
+          }
+        },
+        "required": [
+          "chat"
+        ]
+      },
+      "ChatServiceAddGroupMemberRequest": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "chatId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "userId": {
+            "$ref": "#/components/schemas/Id"
+          }
+        },
+        "required": [
+          "chatId",
+          "userId"
+        ]
+      },
+      "ChatServiceAddGroupMemberResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "chat": {
+            "$ref": "#/components/schemas/Chat"
+          }
+        },
+        "required": [
+          "chat"
+        ]
+      },
+      "ChatServiceRemoveGroupMemberRequest": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "chatId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "userId": {
+            "$ref": "#/components/schemas/Id"
+          }
+        },
+        "required": [
+          "chatId",
+          "userId"
+        ]
+      },
+      "ChatServiceRemoveGroupMemberResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "chat": {
+            "$ref": "#/components/schemas/Chat"
+          }
+        },
+        "required": [
+          "chat"
+        ]
+      },
+      "ChatServiceLeaveGroupRequest": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "chatId": {
+            "$ref": "#/components/schemas/Id"
+          }
+        },
+        "required": [
+          "chatId"
+        ]
+      },
+      "ChatServiceLeaveGroupResponse": {
+        "type": "object",
+        "properties": {
+          "closed": {
+            "type": "boolean"
+          },
+          "newOwnerId": {
+            "$ref": "#/components/schemas/Id"
+          }
+        },
+        "required": [
+          "closed"
+        ]
+      },
+      "ChatServiceSetGroupMemberRoleRequest": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "chatId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "userId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "role": {
+            "type": "string",
+            "description": "",
+            "enum": [
+              "ADMIN",
+              "MEMBER"
+            ]
+          }
+        },
+        "required": [
+          "chatId",
+          "userId",
+          "role"
+        ]
+      },
+      "ChatServiceSetGroupMemberRoleResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "chat": {
+            "$ref": "#/components/schemas/Chat"
+          }
+        },
+        "required": [
+          "chat"
+        ]
+      },
+      "ChatServiceSendMessageRequest": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "chatId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "clientMessageId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "attachmentIds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Id"
+            },
+            "maxItems": 5,
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "chatId",
+          "clientMessageId"
+        ],
+        "anyOf": [
+          {
+            "required": [
+              "text"
+            ],
+            "properties": {
+              "text": {
+                "type": "string",
+                "pattern": "\\S"
+              }
+            }
+          },
+          {
+            "required": [
+              "attachmentIds"
+            ],
+            "properties": {
+              "attachmentIds": {
+                "type": "array",
+                "minItems": 1
+              }
+            }
+          }
+        ]
+      },
+      "ChatServiceSendMessageResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/Message"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "ChatServiceEditMessageRequest": {
+        "type": "object",
+        "properties": {
+          "chatId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "messageId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "expectedRevision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 4000
+          }
+        },
+        "required": [
+          "chatId",
+          "messageId",
+          "expectedRevision"
+        ]
+      },
+      "ChatServiceEditMessageResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/Message"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "ChatServiceDeleteMessageRequest": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "chatId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "messageId": {
+            "$ref": "#/components/schemas/Id"
+          }
+        },
+        "required": [
+          "chatId",
+          "messageId"
+        ]
+      },
+      "ChatServiceDeleteMessageResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "messageId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "messageId",
+          "revision"
+        ]
+      },
+      "ChatServiceGetMessagesRequest": {
+        "type": "object",
+        "properties": {
+          "chatId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "LATEST",
+              "BEFORE",
+              "AFTER",
+              "RANGE"
+            ],
+            "default": "LATEST"
+          },
+          "cursor": {
+            "type": "string"
+          },
+          "fromMessageId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "toMessageId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 50
+          }
+        },
+        "required": [
+          "chatId"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "required": [
+                "cursor"
+              ]
+            },
+            "then": {
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "mode"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "fromMessageId"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "toMessageId"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "if": {
+              "required": [
+                "mode"
+              ],
+              "properties": {
+                "mode": {
+                  "const": "BEFORE"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "toMessageId"
+              ]
+            }
+          },
+          {
+            "if": {
+              "required": [
+                "mode"
+              ],
+              "properties": {
+                "mode": {
+                  "const": "AFTER"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "fromMessageId"
+              ]
+            }
+          },
+          {
+            "if": {
+              "required": [
+                "mode"
+              ],
+              "properties": {
+                "mode": {
+                  "const": "RANGE"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "fromMessageId",
+                "toMessageId"
+              ]
+            }
+          }
+        ]
+      },
+      "ChatServiceGetMessagesResponse": {
+        "type": "object",
+        "properties": {
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Message"
+            }
+          },
+          "hasMore": {
+            "type": "boolean"
+          },
+          "nextCursor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "messages",
+          "hasMore"
+        ]
+      },
+      "ChatServiceConfirmDeliveryRequest": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "chatId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "messageIds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Id"
+            },
+            "minItems": 1,
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "chatId",
+          "messageIds"
+        ]
+      },
+      "ChatServiceConfirmDeliveryResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {},
+        "required": []
+      },
+      "ChatServiceMarkReadRequest": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "chatId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "messageIds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Id"
+            },
+            "minItems": 1,
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "chatId",
+          "messageIds"
+        ]
+      },
+      "ChatServiceMarkReadResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "readState": {
+            "$ref": "#/components/schemas/ReadState"
+          }
+        },
+        "required": [
+          "readState"
+        ]
+      },
+      "ChatServiceGetMessageReceiptsRequest": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "chatId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "messageId": {
+            "$ref": "#/components/schemas/Id"
+          }
+        },
+        "required": [
+          "chatId",
+          "messageId"
+        ]
+      },
+      "ChatServiceGetMessageReceiptsResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/ReceiptSummary"
+          },
+          "receipts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Receipt"
+            }
+          }
+        },
+        "required": [
+          "summary",
+          "receipts"
+        ]
+      },
+      "ChatServiceGetReadStatesRequest": {
+        "type": "object",
+        "description": "",
+        "properties": {},
+        "required": []
+      },
+      "ChatServiceGetReadStatesResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "states": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReadState"
+            }
+          }
+        },
+        "required": [
+          "states"
+        ]
+      },
+      "ChatServiceCheckChatAccessRequest": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "userId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "chatId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "attachmentId": {
+            "$ref": "#/components/schemas/Id"
+          }
+        },
+        "required": [
+          "userId",
+          "chatId"
+        ]
+      },
+      "ChatServiceCheckChatAccessResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "allowed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "allowed"
+        ]
+      },
+      "ChatServiceGetUserChatIdsRequest": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "userId": {
+            "$ref": "#/components/schemas/Id"
+          }
+        },
+        "required": [
+          "userId"
+        ]
+      },
+      "ChatServiceGetUserChatIdsResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "chatIds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Id"
+            }
+          },
+          "readStates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReadState"
+            }
+          }
+        },
+        "required": [
+          "chatIds",
+          "readStates"
+        ]
+      },
+      "MediaServicePrepareUploadRequest": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "purpose": {
+            "type": "string",
+            "description": "",
+            "enum": [
+              "AVATAR",
+              "MESSAGE_ATTACHMENT"
+            ]
+          },
+          "filename": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "pattern": "^[^/\\\\\\x00-\\x1F\\x7F]+$"
+          },
+          "contentType": {
+            "type": "string",
+            "description": ""
+          },
+          "sizeBytes": {
+            "type": "string",
+            "description": "",
+            "pattern": "^[0-9]+$"
+          }
+        },
+        "required": [
+          "purpose",
+          "filename",
+          "contentType",
+          "sizeBytes"
+        ]
+      },
+      "MediaServicePrepareUploadResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "attachmentId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "uploadUrl": {
+            "type": "string",
+            "description": "",
+            "format": "uri"
+          },
+          "uploadExpiresAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "requiredHeaders": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "attachmentId",
+          "uploadUrl",
+          "uploadExpiresAt",
+          "requiredHeaders"
+        ]
+      },
+      "MediaServiceCompleteUploadRequest": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "attachmentId": {
+            "$ref": "#/components/schemas/Id"
+          }
+        },
+        "required": [
+          "attachmentId"
+        ]
+      },
+      "MediaServiceCompleteUploadResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "attachment": {
+            "$ref": "#/components/schemas/Attachment"
+          }
+        },
+        "required": [
+          "attachment"
+        ]
+      },
+      "MediaServiceGetAttachmentRequest": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "attachmentId": {
+            "$ref": "#/components/schemas/Id"
+          }
+        },
+        "required": [
+          "attachmentId"
+        ]
+      },
+      "MediaServiceGetAttachmentResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "attachment": {
+            "$ref": "#/components/schemas/Attachment"
+          }
+        },
+        "required": [
+          "attachment"
+        ]
+      },
+      "MediaServiceGetDownloadURLRequest": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "attachmentId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "thumbnail": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "attachmentId"
+        ]
+      },
+      "MediaServiceGetDownloadURLResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "",
+            "format": "uri"
+          },
+          "expiresAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          }
+        },
+        "required": [
+          "url",
+          "expiresAt"
+        ]
+      },
+      "PresenceServiceGetPresenceRequest": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "userIds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Id"
+            },
+            "minItems": 1,
+            "maxItems": 200
+          }
+        },
+        "required": [
+          "userIds"
+        ]
+      },
+      "PresenceServiceGetPresenceResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "presences": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Presence"
+            }
+          }
+        },
+        "required": [
+          "presences"
+        ]
+      },
+      "PresenceServiceHeartbeatRequest": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "userId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "sessionId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "connectionId": {
+            "$ref": "#/components/schemas/Id"
+          }
+        },
+        "required": [
+          "userId",
+          "sessionId",
+          "connectionId"
+        ]
+      },
+      "PresenceServiceHeartbeatResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {},
+        "required": []
+      },
+      "PresenceServiceDisconnectRequest": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "userId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "sessionId": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "connectionId": {
+            "$ref": "#/components/schemas/Id"
+          }
+        },
+        "required": [
+          "userId",
+          "sessionId",
+          "connectionId"
+        ]
+      },
+      "PresenceServiceDisconnectResponse": {
+        "type": "object",
+        "description": "",
+        "properties": {},
+        "required": []
+      }
+    }
+  }
+}

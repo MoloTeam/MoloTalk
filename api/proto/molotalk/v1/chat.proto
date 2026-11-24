@@ -1,0 +1,223 @@
+syntax = "proto3";
+
+package molotalk.v1;
+
+import "buf/validate/validate.proto";
+import "google/api/field_behavior.proto";
+import "google/protobuf/empty.proto";
+import "molotalk/v1/types.proto";
+
+option go_package = "github.com/MoloTeam/MoloTalk/backend/gen/molotalk/v1;molotalkv1";
+
+enum GroupMemberRole {
+  GROUP_MEMBER_ROLE_UNSPECIFIED = 0;
+  GROUP_MEMBER_ROLE_ADMIN = 1;
+  GROUP_MEMBER_ROLE_MEMBER = 2;
+}
+
+service ChatService {
+  rpc ListChats(ListChatsRequest) returns (ListChatsResponse);
+  rpc GetChat(GetChatRequest) returns (GetChatResponse);
+  rpc CreateDirectChat(CreateDirectChatRequest) returns (CreateDirectChatResponse);
+  rpc CreateGroupChat(CreateGroupChatRequest) returns (CreateGroupChatResponse);
+  rpc AddGroupMember(AddGroupMemberRequest) returns (AddGroupMemberResponse);
+  rpc RemoveGroupMember(RemoveGroupMemberRequest) returns (RemoveGroupMemberResponse);
+  rpc LeaveGroup(LeaveGroupRequest) returns (LeaveGroupResponse);
+  rpc SetGroupMemberRole(SetGroupMemberRoleRequest) returns (SetGroupMemberRoleResponse);
+  rpc SendMessage(SendMessageRequest) returns (SendMessageResponse);
+  rpc EditMessage(EditMessageRequest) returns (EditMessageResponse);
+  rpc DeleteMessage(DeleteMessageRequest) returns (DeleteMessageResponse);
+  rpc GetMessages(GetMessagesRequest) returns (GetMessagesResponse);
+  rpc ConfirmDelivery(ConfirmDeliveryRequest) returns (google.protobuf.Empty);
+  rpc MarkRead(MarkReadRequest) returns (MarkReadResponse);
+  rpc GetMessageReceipts(GetMessageReceiptsRequest) returns (GetMessageReceiptsResponse);
+  rpc GetReadStates(google.protobuf.Empty) returns (GetReadStatesResponse);
+}
+
+message ListChatsRequest {
+  optional string cursor = 1;
+  // Отсутствие limit означает 50.
+  optional int32 limit = 2 [(buf.validate.field).int32 = {
+    gte: 1
+    lte: 100
+  }];
+}
+
+message ListChatsResponse {
+  repeated Chat chats = 1 [(google.api.field_behavior) = REQUIRED];
+  optional string next_cursor = 2;
+}
+
+message GetChatRequest {
+  string chat_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+}
+
+message GetChatResponse {
+  Chat chat = 1 [(buf.validate.field).required = true];
+}
+
+message CreateDirectChatRequest {
+  string peer_user_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+}
+
+message CreateDirectChatResponse {
+  Chat chat = 1 [(buf.validate.field).required = true];
+}
+
+message CreateGroupChatRequest {
+  string client_request_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string name = 2 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 100
+  }];
+  repeated string member_ids = 3 [(buf.validate.field).repeated.items.string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+}
+
+message CreateGroupChatResponse {
+  Chat chat = 1 [(buf.validate.field).required = true];
+}
+
+message AddGroupMemberRequest {
+  string chat_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string user_id = 2 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+}
+
+message AddGroupMemberResponse {
+  Chat chat = 1 [(buf.validate.field).required = true];
+}
+
+message RemoveGroupMemberRequest {
+  string chat_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string user_id = 2 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+}
+
+message RemoveGroupMemberResponse {
+  Chat chat = 1 [(buf.validate.field).required = true];
+}
+
+message LeaveGroupRequest {
+  string chat_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+}
+
+message LeaveGroupResponse {
+  bool closed = 1;
+  optional string new_owner_id = 2 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+}
+
+message SetGroupMemberRoleRequest {
+  string chat_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string user_id = 2 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  GroupMemberRole role = 3 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+}
+
+message SetGroupMemberRoleResponse {
+  Chat chat = 1 [(buf.validate.field).required = true];
+}
+
+message SendMessageRequest {
+  string chat_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string client_message_id = 2 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  optional string text = 3 [(buf.validate.field).string.max_len = 4096];
+  repeated string attachment_ids = 4 [(buf.validate.field).repeated = {
+    max_items: 5
+    items: {
+      string: {
+        pattern: "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      }
+    }
+  }];
+}
+
+message SendMessageResponse {
+  Message message = 1 [(buf.validate.field).required = true];
+}
+
+message EditMessageRequest {
+  string chat_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string message_id = 2 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  int32 expected_revision = 3 [(buf.validate.field).int32.gte = 1];
+  optional string text = 4 [(buf.validate.field).string.max_len = 4096];
+}
+
+message EditMessageResponse {
+  Message message = 1 [(buf.validate.field).required = true];
+}
+
+message DeleteMessageRequest {
+  string chat_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string message_id = 2 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+}
+
+message DeleteMessageResponse {
+  string message_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  int32 revision = 2 [(buf.validate.field).int32.gte = 1];
+}
+
+message GetMessagesRequest {
+  string chat_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  MessageQueryMode mode = 2 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  optional string cursor = 3;
+  optional string from_message_id = 4 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  optional string to_message_id = 5 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  // Отсутствие limit означает 50.
+  optional int32 limit = 6 [(buf.validate.field).int32 = {
+    gte: 1
+    lte: 100
+  }];
+}
+
+message GetMessagesResponse {
+  repeated Message messages = 1 [(google.api.field_behavior) = REQUIRED];
+  bool has_more = 2;
+  optional string next_cursor = 3;
+}
+
+message ConfirmDeliveryRequest {
+  string chat_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  repeated string message_ids = 2 [(buf.validate.field).repeated = {
+    min_items: 1
+    max_items: 100
+    items: {
+      string: {
+        pattern: "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      }
+    }
+  }];
+}
+
+message MarkReadRequest {
+  string chat_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  repeated string message_ids = 2 [(buf.validate.field).repeated = {
+    min_items: 1
+    max_items: 100
+    items: {
+      string: {
+        pattern: "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      }
+    }
+  }];
+}
+
+message MarkReadResponse {
+  ReadState read_state = 1 [(buf.validate.field).required = true];
+}
+
+message GetMessageReceiptsRequest {
+  string chat_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string message_id = 2 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+}
+
+message GetMessageReceiptsResponse {
+  ReceiptSummary summary = 1 [(buf.validate.field).required = true];
+  repeated Receipt receipts = 2 [(google.api.field_behavior) = REQUIRED];
+}
+
+message GetReadStatesResponse {
+  repeated ReadState states = 1 [(google.api.field_behavior) = REQUIRED];
+}

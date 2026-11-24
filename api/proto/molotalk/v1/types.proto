@@ -1,0 +1,174 @@
+syntax = "proto3";
+
+package molotalk.v1;
+
+import "buf/validate/validate.proto";
+import "google/api/field_behavior.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/MoloTeam/MoloTalk/backend/gen/molotalk/v1;molotalkv1";
+
+// Общие типы публичного контракта.
+
+enum ChatKind {
+  CHAT_KIND_UNSPECIFIED = 0;
+  CHAT_KIND_DIRECT = 1;
+  CHAT_KIND_GROUP = 2;
+}
+
+enum MemberRole {
+  MEMBER_ROLE_UNSPECIFIED = 0;
+  MEMBER_ROLE_OWNER = 1;
+  MEMBER_ROLE_ADMIN = 2;
+  MEMBER_ROLE_MEMBER = 3;
+}
+
+enum AttachmentPurpose {
+  ATTACHMENT_PURPOSE_UNSPECIFIED = 0;
+  ATTACHMENT_PURPOSE_AVATAR = 1;
+  ATTACHMENT_PURPOSE_MESSAGE_ATTACHMENT = 2;
+}
+
+enum AttachmentStatus {
+  ATTACHMENT_STATUS_UNSPECIFIED = 0;
+  ATTACHMENT_STATUS_PENDING = 1;
+  ATTACHMENT_STATUS_READY = 2;
+  ATTACHMENT_STATUS_REJECTED = 3;
+}
+
+enum MessageQueryMode {
+  MESSAGE_QUERY_MODE_UNSPECIFIED = 0;
+  MESSAGE_QUERY_MODE_LATEST = 1;
+  MESSAGE_QUERY_MODE_BEFORE = 2;
+  MESSAGE_QUERY_MODE_AFTER = 3;
+  MESSAGE_QUERY_MODE_RANGE = 4;
+}
+
+enum ReceiptState {
+  RECEIPT_STATE_UNSPECIFIED = 0;
+  RECEIPT_STATE_ACCEPTED = 1;
+  RECEIPT_STATE_DELIVERED = 2;
+  RECEIPT_STATE_READ = 3;
+}
+
+enum PresenceStatus {
+  PRESENCE_STATUS_UNSPECIFIED = 0;
+  PRESENCE_STATUS_ONLINE = 1;
+  PRESENCE_STATUS_OFFLINE = 2;
+}
+
+message User {
+  string id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  optional string identifier = 2 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 254
+    pattern: "^[^\\p{Lu}\\p{Lt}]*$"
+  }];
+  string display_name = 3 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 64
+  }];
+  optional string avatar_attachment_id = 4 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+}
+
+message Member {
+  User user = 1 [(buf.validate.field).required = true];
+  MemberRole role = 2 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  google.protobuf.Timestamp joined_at = 3 [(buf.validate.field).required = true];
+}
+
+message Attachment {
+  string id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  AttachmentPurpose purpose = 2 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  AttachmentStatus status = 3 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  string filename = 4 [(buf.validate.field).string.min_len = 1];
+  string content_type = 5 [(buf.validate.field).string.min_len = 1];
+  int32 size_bytes = 6 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 20971520
+  }];
+  bool has_thumbnail = 7;
+}
+
+message Receipt {
+  string message_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string user_id = 2 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  optional google.protobuf.Timestamp delivered_at = 3;
+  optional google.protobuf.Timestamp read_at = 4;
+}
+
+message ReceiptSummary {
+  int32 recipient_count = 1 [(buf.validate.field).int32.gte = 0];
+  int32 delivered_count = 2 [(buf.validate.field).int32.gte = 0];
+  int32 read_count = 3 [(buf.validate.field).int32.gte = 0];
+  ReceiptState state = 4 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+}
+
+message ReadState {
+  string chat_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  optional string last_read_message_id = 2 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  int32 unread_count = 3 [(buf.validate.field).int32.gte = 0];
+}
+
+message Message {
+  string id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string chat_id = 2 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string author_id = 3 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string client_message_id = 4 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  optional string text = 5 [(buf.validate.field).string.max_len = 4096];
+  repeated Attachment attachments = 6 [
+    (buf.validate.field).repeated.max_items = 5,
+    (google.api.field_behavior) = REQUIRED
+  ];
+  bool attachments_linked = 7;
+  int32 revision = 8 [(buf.validate.field).int32.gte = 1];
+  google.protobuf.Timestamp created_at = 9 [(buf.validate.field).required = true];
+  optional google.protobuf.Timestamp edited_at = 10;
+  optional google.protobuf.Timestamp deleted_at = 11;
+  optional ReceiptSummary receipt_summary = 12;
+  User author = 13;
+}
+
+message Chat {
+  string id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  ChatKind kind = 2 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  optional string name = 3;
+  optional string owner_id = 4 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  repeated Member members = 5 [(google.api.field_behavior) = REQUIRED];
+  int32 unread_count = 6 [(buf.validate.field).int32.gte = 0];
+  optional string last_message_id = 7 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  optional Message last_message = 8;
+  optional google.protobuf.Timestamp closed_at = 9;
+}
+
+message SessionTokens {
+  User user = 1 [(buf.validate.field).required = true];
+  string session_id = 2 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string access_token = 3 [(buf.validate.field).string.min_len = 1];
+  string refresh_token = 4 [(buf.validate.field).string.min_len = 1];
+  google.protobuf.Timestamp access_expires_at = 5 [(buf.validate.field).required = true];
+  google.protobuf.Timestamp refresh_expires_at = 6 [(buf.validate.field).required = true];
+}
+
+message Presence {
+  string user_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  PresenceStatus status = 2 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+}

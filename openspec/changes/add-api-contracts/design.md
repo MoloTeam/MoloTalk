@@ -32,8 +32,10 @@ api/
   proto/molotalk/v1/                 # публичные RPC, общие типы, Gateway среза C
   proto/molotalk/internal/v1/        # внутренние RPC, импорт публичных DTO допустим
   buf.yaml
-  buf.lock
-  buf.gen.yaml
+  third_party/proto/                 # закоммиченные buf.validate и google.api
+  buf.gen.go.yaml
+  buf.gen.ts.yaml
+  buf.gen.openapi.public.yaml
   openapi/base.public.yaml           # Bearer и исключения для 3 методов без access token
   openapi/base.internal.yaml         # служебный Bearer
   gen/openapi/public.json            # одновременно проверяемый golden
@@ -102,7 +104,7 @@ Base-файлы не повторяют DTO и их ограничения. Он
 
 Исследование выполнено вне репозитория в отдельной временной папке. Созданы минимальные proto, вызваны готовые Buf и protoc-gen-connect-openapi, затем сгенерированные JS-сообщения проверены реальным protovalidate. Полный API пока не реализован; результаты относятся к контрольным конструкциям, а не к уже выполненной полной сверке 34 RPC.
 
-Проверенные версии — Buf 1.75.0, `connectrpc.com/protoc-gen-connect-openapi` 0.30.0 (commit `9f17938b1e91f343a9be552af95c7cfad961d05d`, SHA-256 архива сверена), схема protovalidate v1.2.2 (`4baed765070e580226a0a30bf2a357cc027dc1f7`), Protobuf-ES/runtime 2.17.0, protovalidate-ES 1.3.0, Node 24.11.1. Источник стандартной field_behavior закрепляется в реализации buf.lock; исследован файл с SHA-256 `e2a1ac88c49909d4579bacbb18519085e82da32c2c7bb15c31037f3be19f667f`.
+Проверенные версии — Buf 1.75.0, `connectrpc.com/protoc-gen-connect-openapi` 0.30.0 (commit `9f17938b1e91f343a9be552af95c7cfad961d05d`, SHA-256 архива сверена), схема protovalidate v1.2.2 (`4baed765070e580226a0a30bf2a357cc027dc1f7`), Protobuf-ES/runtime 2.17.0, protovalidate-ES 1.3.0, Node 24.11.1. Источник стандартной field_behavior закоммичен в `api/third_party` (см. раздел о внешних proto); исследован файл с SHA-256 `e2a1ac88c49909d4579bacbb18519085e82da32c2c7bb15c31037f3be19f667f`.
 
 | Правило / свойство | Фактический результат генерации | Решение |
 |---|---|---|
@@ -158,12 +160,23 @@ ReceiptUpdated имеет обязательные ULID chat_id/message_id и op
 | connectrpc.com/protoc-gen-connect-openapi | v0.30.0 | MIT |
 | buf.build/go/protovalidate | v1.4.1 | Apache-2.0 |
 | connectrpc.com/validate | v0.9.0 | Apache-2.0 |
-| buf.build/bufbuild/protovalidate (schema) | v1.2.2, digest в buf.lock | Apache-2.0 |
+| buf.build/bufbuild/protovalidate (схема) | v1.2.2, файл закоммичен в `api/third_party` | Apache-2.0 |
 | @bufbuild/protoc-gen-es и @bufbuild/protobuf | 2.17.0 | Apache-2.0 |
 | @bufbuild/protovalidate для контрактных проверок TS | 1.3.0 | Apache-2.0 |
 | @connectrpc/connect и @connectrpc/connect-web | 2.3.0 | Apache-2.0 |
 
-Go-зависимости и инструменты сохраняются в go.mod/go.sum, JS — точные версии и package-lock.json. Node 24.11.1 использован в исследовании. Для проекта сохраняется Go 1.27 из существующего go.mod. Полная сборка Go-генераторов и их совместная работа в проекте проверяются при реализации, их выполнение на этом этапе не заявляется. Schema dependencies googleapis/protovalidate закрепляются buf.lock. Отдельный protoc и Docker для генерации не требуются.
+Go-зависимости и инструменты сохраняются в go.mod/go.sum, JS — точные версии и package-lock.json. Node 24.11.1 использован в исследовании. Для проекта сохраняется Go 1.27 из существующего go.mod. Полная сборка Go-генераторов и их совместная работа в проекте проверяются при реализации.
+
+### Внешние proto без реестра
+
+Реестр Buf в рабочем окружении недоступен (403 Forbidden), поэтому внешние схемы не подключаются remote-deps и `buf.lock` не используется. Необходимые файлы закоммичены в `api/third_party/proto` и объявлены локальным модулем `buf.yaml`:
+
+| Файл | Источник | Закрепление | SHA-256 |
+|---|---|---|---|
+| `buf/validate/validate.proto` | `bufbuild/protovalidate` | тег `v1.2.2` | `a1dc1163ebac930b3b070655b91f2bc78df8b4aea940021661fe5ec7904a7b88` |
+| `google/api/field_behavior.proto` | `googleapis/googleapis` | коммит `0616ac54ade8ad70502627e445fa786f93154459` | `e2a1ac88c49909d4579bacbb18519085e82da32c2c7bb15c31037f3be19f667f` |
+
+Лицензии Apache-2.0 сохранены в `api/third_party/licenses`, происхождение и порядок обновления — в `api/third_party/README.md`. Импорты `google/protobuf/*.proto` предоставляет компилятор Buf. Замена не меняет проверки: `buf lint`, `buf build`, `buf breaking` и генерация работают локально, TypeScript собирается только из публичного каталога. Это отклонение от прежнего решения о `buf.lock` записано в таблицу отклонений.
 
 Команды из корня
 
@@ -236,6 +249,7 @@ check включает buf format/lint/build, protovalidate-примеры, Go-�
 | ReceiptUpdated имеет два взаимоисключающих optional-поля и разные payload для автора/читателя | §5.8 | Явно выразить аудиторию и не раздавать список группе | Chat/Gateway/клиент используют receiptSummary либо собственный receipt, персональные отметки — GetMessageReceipts | Да, уточнить поля |
 | Допускающие [] массивы помечены стандартной field_behavior REQUIRED; optional schema может допускать null | §5.1–5.2, обязательность в таблицах | Протокол protobuf не хранит presence repeated, генератор имеет ограничения null | Ответы сохраняют [] и не выдают null, runtime protovalidate строже документа для required; без собственного транслятора | Уточнить ограничения generated OpenAPI |
 | Типизированный Gateway с oneof вместо смешанного protobuf/JSON — утверждённый вариант B | §5.8 и gateway.proto | Типизация, стандартная валидация и меньшие контрольные кадры | Одновременно меняются Gateway и клиент; формат среза C согласован | Да |
+| Внешние proto закоммичены в `api/third_party` вместо `buf.lock` | §5.1–5.7 и порядок контрактов | Реестр Buf недоступен в рабочем окружении (403) | Генерация и проверки не требуют сети; происхождение и SHA-256 зафиксированы | Да, описание зависимостей |
 
 ## Risks / Trade-offs
 

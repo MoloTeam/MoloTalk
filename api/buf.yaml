@@ -1,0 +1,16 @@
+version: v2
+modules:
+  - path: proto
+  - path: third_party/proto
+lint:
+  use:
+    - STANDARD
+  except:
+    - RPC_REQUEST_STANDARD_NAME
+    - RPC_RESPONSE_STANDARD_NAME
+    - RPC_REQUEST_RESPONSE_UNIQUE
+  ignore:
+    - third_party/proto
+breaking:
+  use:
+    - FILE

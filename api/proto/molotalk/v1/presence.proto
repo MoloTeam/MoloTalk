@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package molotalk.v1;
+
+import "buf/validate/validate.proto";
+import "google/api/field_behavior.proto";
+import "molotalk/v1/types.proto";
+
+option go_package = "github.com/MoloTeam/MoloTalk/backend/gen/molotalk/v1;molotalkv1";
+
+service PresenceService {
+  rpc GetPresence(GetPresenceRequest) returns (GetPresenceResponse);
+}
+
+message GetPresenceRequest {
+  repeated string user_ids = 1 [(buf.validate.field).repeated = {
+    min_items: 1
+    max_items: 200
+    items: {
+      string: {
+        pattern: "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      }
+    }
+  }];
+}
+
+message GetPresenceResponse {
+  repeated Presence presences = 1 [(google.api.field_behavior) = REQUIRED];
+}

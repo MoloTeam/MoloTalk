@@ -1,0 +1,4051 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "MoloTalk public API",
+    "version": "0.1.0",
+    "description": "Публичный контракт MoloTalk. Источник — proto; документ сгенерирован.\nRegister, Login и RefreshToken не требуют access token.\n"
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "connect-protocol-version": {
+        "type": "number",
+        "examples": [
+          1
+        ],
+        "title": "Connect-Protocol-Version",
+        "description": "Define the version of the Connect protocol",
+        "const": 1
+      },
+      "connect-timeout-header": {
+        "type": "number",
+        "examples": [
+          1000
+        ],
+        "title": "Connect-Timeout-Ms",
+        "description": "Define the timeout, in ms"
+      },
+      "connect.error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "examples": [
+              "not_found"
+            ],
+            "enum": [
+              "canceled",
+              "unknown",
+              "invalid_argument",
+              "deadline_exceeded",
+              "not_found",
+              "already_exists",
+              "permission_denied",
+              "resource_exhausted",
+              "failed_precondition",
+              "aborted",
+              "out_of_range",
+              "unimplemented",
+              "internal",
+              "unavailable",
+              "data_loss",
+              "unauthenticated"
+            ],
+            "description": "The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code]."
+          },
+          "message": {
+            "type": "string",
+            "description": "A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client."
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/connect.error_details.Any"
+            },
+            "description": "A list of messages that carry the error details. There is no limit on the number of messages."
+          }
+        },
+        "title": "Connect Error",
+        "additionalProperties": true,
+        "description": "Error type returned by Connect: https://connectrpc.com/docs/go/errors/#http-representation"
+      },
+      "connect.error_details.Any": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "A URL that acts as a globally unique identifier for the type of the serialized message. For example: `type.googleapis.com/google.rpc.ErrorInfo`."
+          },
+          "value": {
+            "type": "string",
+            "format": "byte",
+            "description": "The Protobuf message, serialized as bytes and base64-encoded. The specific message type is identified by the `type` field."
+          },
+          "debug": {
+            "type": "object",
+            "title": "Debug",
+            "additionalProperties": true,
+            "description": "Deserialized error detail payload. The 'type' field indicates the schema. This field is for easier debugging and should not be relied upon for application logic."
+          }
+        },
+        "additionalProperties": true,
+        "description": "Contains an arbitrary serialized message along with a @type that describes the type of the serialized message, with an additional debug field for ConnectRPC error details."
+      },
+      "google.protobuf.Empty": {
+        "type": "object",
+        "description": "An empty JSON object."
+      },
+      "google.protobuf.Timestamp": {
+        "type": "string",
+        "examples": [
+          "2023-01-15T01:30:15.01Z",
+          "2024-12-25T12:00:00Z"
+        ],
+        "format": "date-time",
+        "description": "A point in time in RFC 3339 format, with up to nanosecond precision. Output uses UTC (`Z`); input may use an offset from UTC."
+      },
+      "molotalk.v1.AddGroupMemberRequest": {
+        "type": "object",
+        "properties": {
+          "chatId": {
+            "type": "string",
+            "title": "chat_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "userId": {
+            "type": "string",
+            "title": "user_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          }
+        },
+        "title": "AddGroupMemberRequest",
+        "additionalProperties": false
+      },
+      "molotalk.v1.AddGroupMemberResponse": {
+        "type": "object",
+        "properties": {
+          "chat": {
+            "title": "chat",
+            "$ref": "#/components/schemas/molotalk.v1.Chat"
+          }
+        },
+        "title": "AddGroupMemberResponse",
+        "required": [
+          "chat"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.Attachment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "purpose": {
+            "not": {
+              "enum": [
+                "ATTACHMENT_PURPOSE_UNSPECIFIED"
+              ]
+            },
+            "title": "purpose",
+            "$ref": "#/components/schemas/molotalk.v1.AttachmentPurpose"
+          },
+          "status": {
+            "not": {
+              "enum": [
+                "ATTACHMENT_STATUS_UNSPECIFIED"
+              ]
+            },
+            "title": "status",
+            "$ref": "#/components/schemas/molotalk.v1.AttachmentStatus"
+          },
+          "filename": {
+            "type": "string",
+            "title": "filename",
+            "minLength": 1
+          },
+          "contentType": {
+            "type": "string",
+            "title": "content_type",
+            "minLength": 1
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "title": "size_bytes",
+            "maximum": 20971520,
+            "minimum": 0,
+            "format": "int32"
+          },
+          "hasThumbnail": {
+            "type": "boolean",
+            "title": "has_thumbnail"
+          }
+        },
+        "title": "Attachment",
+        "additionalProperties": false
+      },
+      "molotalk.v1.AttachmentPurpose": {
+        "type": "string",
+        "title": "AttachmentPurpose",
+        "enum": [
+          "ATTACHMENT_PURPOSE_UNSPECIFIED",
+          "ATTACHMENT_PURPOSE_AVATAR",
+          "ATTACHMENT_PURPOSE_MESSAGE_ATTACHMENT"
+        ]
+      },
+      "molotalk.v1.AttachmentStatus": {
+        "type": "string",
+        "title": "AttachmentStatus",
+        "enum": [
+          "ATTACHMENT_STATUS_UNSPECIFIED",
+          "ATTACHMENT_STATUS_PENDING",
+          "ATTACHMENT_STATUS_READY",
+          "ATTACHMENT_STATUS_REJECTED"
+        ]
+      },
+      "molotalk.v1.ChangePasswordRequest": {
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": "string",
+            "title": "current_password",
+            "maxLength": 64,
+            "minLength": 6
+          },
+          "newPassword": {
+            "type": "string",
+            "title": "new_password",
+            "maxLength": 64,
+            "minLength": 6
+          },
+          "newPasswordConfirmation": {
+            "type": "string",
+            "title": "new_password_confirmation",
+            "maxLength": 64,
+            "minLength": 6
+          }
+        },
+        "title": "ChangePasswordRequest",
+        "additionalProperties": false
+      },
+      "molotalk.v1.Chat": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "kind": {
+            "not": {
+              "enum": [
+                "CHAT_KIND_UNSPECIFIED"
+              ]
+            },
+            "title": "kind",
+            "$ref": "#/components/schemas/molotalk.v1.ChatKind"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "name"
+          },
+          "ownerId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "owner_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/molotalk.v1.Member"
+            },
+            "title": "members"
+          },
+          "unreadCount": {
+            "type": "integer",
+            "title": "unread_count",
+            "minimum": 0,
+            "format": "int32"
+          },
+          "lastMessageId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "last_message_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "lastMessage": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/molotalk.v1.Message"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "last_message"
+          },
+          "closedAt": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "closed_at"
+          }
+        },
+        "title": "Chat",
+        "required": [
+          "members"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.ChatKind": {
+        "type": "string",
+        "title": "ChatKind",
+        "enum": [
+          "CHAT_KIND_UNSPECIFIED",
+          "CHAT_KIND_DIRECT",
+          "CHAT_KIND_GROUP"
+        ]
+      },
+      "molotalk.v1.CompleteUploadRequest": {
+        "type": "object",
+        "properties": {
+          "attachmentId": {
+            "type": "string",
+            "title": "attachment_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          }
+        },
+        "title": "CompleteUploadRequest",
+        "additionalProperties": false
+      },
+      "molotalk.v1.CompleteUploadResponse": {
+        "type": "object",
+        "properties": {
+          "attachment": {
+            "title": "attachment",
+            "$ref": "#/components/schemas/molotalk.v1.Attachment"
+          }
+        },
+        "title": "CompleteUploadResponse",
+        "required": [
+          "attachment"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.ConfirmDeliveryRequest": {
+        "type": "object",
+        "properties": {
+          "chatId": {
+            "type": "string",
+            "title": "chat_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "messageIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            },
+            "title": "message_ids",
+            "maxItems": 100,
+            "minItems": 1
+          }
+        },
+        "title": "ConfirmDeliveryRequest",
+        "additionalProperties": false
+      },
+      "molotalk.v1.CreateDirectChatRequest": {
+        "type": "object",
+        "properties": {
+          "peerUserId": {
+            "type": "string",
+            "title": "peer_user_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          }
+        },
+        "title": "CreateDirectChatRequest",
+        "additionalProperties": false
+      },
+      "molotalk.v1.CreateDirectChatResponse": {
+        "type": "object",
+        "properties": {
+          "chat": {
+            "title": "chat",
+            "$ref": "#/components/schemas/molotalk.v1.Chat"
+          }
+        },
+        "title": "CreateDirectChatResponse",
+        "required": [
+          "chat"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.CreateGroupChatRequest": {
+        "type": "object",
+        "properties": {
+          "clientRequestId": {
+            "type": "string",
+            "title": "client_request_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "name": {
+            "type": "string",
+            "title": "name",
+            "maxLength": 100,
+            "minLength": 1
+          },
+          "memberIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            },
+            "title": "member_ids"
+          }
+        },
+        "title": "CreateGroupChatRequest",
+        "additionalProperties": false
+      },
+      "molotalk.v1.CreateGroupChatResponse": {
+        "type": "object",
+        "properties": {
+          "chat": {
+            "title": "chat",
+            "$ref": "#/components/schemas/molotalk.v1.Chat"
+          }
+        },
+        "title": "CreateGroupChatResponse",
+        "required": [
+          "chat"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.DeleteMessageRequest": {
+        "type": "object",
+        "properties": {
+          "chatId": {
+            "type": "string",
+            "title": "chat_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "messageId": {
+            "type": "string",
+            "title": "message_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          }
+        },
+        "title": "DeleteMessageRequest",
+        "additionalProperties": false
+      },
+      "molotalk.v1.DeleteMessageResponse": {
+        "type": "object",
+        "properties": {
+          "messageId": {
+            "type": "string",
+            "title": "message_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "revision",
+            "minimum": 1,
+            "format": "int32"
+          }
+        },
+        "title": "DeleteMessageResponse",
+        "additionalProperties": false
+      },
+      "molotalk.v1.EditMessageRequest": {
+        "type": "object",
+        "properties": {
+          "chatId": {
+            "type": "string",
+            "title": "chat_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "messageId": {
+            "type": "string",
+            "title": "message_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "expectedRevision": {
+            "type": "integer",
+            "title": "expected_revision",
+            "minimum": 1,
+            "format": "int32"
+          },
+          "text": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "text",
+            "maxLength": 4096
+          }
+        },
+        "title": "EditMessageRequest",
+        "additionalProperties": false
+      },
+      "molotalk.v1.EditMessageResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "title": "message",
+            "$ref": "#/components/schemas/molotalk.v1.Message"
+          }
+        },
+        "title": "EditMessageResponse",
+        "required": [
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.GatewayEnvelope": {
+        "type": "object",
+        "not": {
+          "anyOf": [
+            {
+              "allOf": [
+                {
+                  "anyOf": [
+                    {
+                      "required": [
+                        "identify"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "ready"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "heartbeat"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "heartbeatAck"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "serverEvent"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "not": {
+                    "oneOf": [
+                      {
+                        "required": [
+                          "identify"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "ready"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "heartbeat"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "heartbeatAck"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "serverEvent"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "anyOf": [
+                    {
+                      "required": [
+                        "identify"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "ready"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "heartbeat"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "heartbeatAck"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "serverEvent"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "not": {
+                    "oneOf": [
+                      {
+                        "required": [
+                          "identify"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "ready"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "heartbeat"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "heartbeatAck"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "serverEvent"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "identify"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "ready"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "heartbeat"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "heartbeatAck"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "serverEvent"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "properties": {
+          "identify": {
+            "title": "identify",
+            "$ref": "#/components/schemas/molotalk.v1.Identify"
+          },
+          "ready": {
+            "title": "ready",
+            "$ref": "#/components/schemas/molotalk.v1.Ready"
+          },
+          "heartbeat": {
+            "title": "heartbeat",
+            "$ref": "#/components/schemas/molotalk.v1.Heartbeat"
+          },
+          "heartbeatAck": {
+            "title": "heartbeat_ack",
+            "$ref": "#/components/schemas/molotalk.v1.HeartbeatAck"
+          },
+          "serverEvent": {
+            "title": "server_event",
+            "$ref": "#/components/schemas/molotalk.v1.ServerEvent"
+          }
+        },
+        "title": "GatewayEnvelope",
+        "additionalProperties": false,
+        "description": "At most one of `identify`, `ready`, `heartbeat`, `heartbeatAck`, `serverEvent` may be set.\n\nExactly one of `identify`, `ready`, `heartbeat`, `heartbeatAck`, `serverEvent` must be set."
+      },
+      "molotalk.v1.GetAttachmentRequest": {
+        "type": "object",
+        "properties": {
+          "attachmentId": {
+            "type": "string",
+            "title": "attachment_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          }
+        },
+        "title": "GetAttachmentRequest",
+        "additionalProperties": false
+      },
+      "molotalk.v1.GetAttachmentResponse": {
+        "type": "object",
+        "properties": {
+          "attachment": {
+            "title": "attachment",
+            "$ref": "#/components/schemas/molotalk.v1.Attachment"
+          }
+        },
+        "title": "GetAttachmentResponse",
+        "required": [
+          "attachment"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.GetChatRequest": {
+        "type": "object",
+        "properties": {
+          "chatId": {
+            "type": "string",
+            "title": "chat_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          }
+        },
+        "title": "GetChatRequest",
+        "additionalProperties": false
+      },
+      "molotalk.v1.GetChatResponse": {
+        "type": "object",
+        "properties": {
+          "chat": {
+            "title": "chat",
+            "$ref": "#/components/schemas/molotalk.v1.Chat"
+          }
+        },
+        "title": "GetChatResponse",
+        "required": [
+          "chat"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.GetDownloadURLRequest": {
+        "type": "object",
+        "properties": {
+          "attachmentId": {
+            "type": "string",
+            "title": "attachment_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "thumbnail": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "title": "thumbnail"
+          }
+        },
+        "title": "GetDownloadURLRequest",
+        "additionalProperties": false
+      },
+      "molotalk.v1.GetDownloadURLResponse": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "url",
+            "minLength": 1
+          },
+          "expiresAt": {
+            "title": "expires_at",
+            "$ref": "#/components/schemas/google.protobuf.Timestamp"
+          }
+        },
+        "title": "GetDownloadURLResponse",
+        "required": [
+          "expiresAt"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.GetMeResponse": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "title": "user",
+            "$ref": "#/components/schemas/molotalk.v1.User"
+          }
+        },
+        "title": "GetMeResponse",
+        "required": [
+          "user"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.GetMessageReceiptsRequest": {
+        "type": "object",
+        "properties": {
+          "chatId": {
+            "type": "string",
+            "title": "chat_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "messageId": {
+            "type": "string",
+            "title": "message_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          }
+        },
+        "title": "GetMessageReceiptsRequest",
+        "additionalProperties": false
+      },
+      "molotalk.v1.GetMessageReceiptsResponse": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "title": "summary",
+            "$ref": "#/components/schemas/molotalk.v1.ReceiptSummary"
+          },
+          "receipts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/molotalk.v1.Receipt"
+            },
+            "title": "receipts"
+          }
+        },
+        "title": "GetMessageReceiptsResponse",
+        "required": [
+          "summary",
+          "receipts"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.GetMessagesRequest": {
+        "type": "object",
+        "properties": {
+          "chatId": {
+            "type": "string",
+            "title": "chat_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "mode": {
+            "not": {
+              "enum": [
+                "MESSAGE_QUERY_MODE_UNSPECIFIED"
+              ]
+            },
+            "title": "mode",
+            "$ref": "#/components/schemas/molotalk.v1.MessageQueryMode"
+          },
+          "cursor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "cursor"
+          },
+          "fromMessageId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "from_message_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "toMessageId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "to_message_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "limit": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "title": "limit",
+            "maximum": 100,
+            "minimum": 1,
+            "format": "int32",
+            "description": "Отсутствие limit означает 50."
+          }
+        },
+        "title": "GetMessagesRequest",
+        "additionalProperties": false
+      },
+      "molotalk.v1.GetMessagesResponse": {
+        "type": "object",
+        "properties": {
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/molotalk.v1.Message"
+            },
+            "title": "messages"
+          },
+          "hasMore": {
+            "type": "boolean",
+            "title": "has_more"
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "next_cursor"
+          }
+        },
+        "title": "GetMessagesResponse",
+        "required": [
+          "messages"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.GetPresenceRequest": {
+        "type": "object",
+        "properties": {
+          "userIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            },
+            "title": "user_ids",
+            "maxItems": 200,
+            "minItems": 1
+          }
+        },
+        "title": "GetPresenceRequest",
+        "additionalProperties": false
+      },
+      "molotalk.v1.GetPresenceResponse": {
+        "type": "object",
+        "properties": {
+          "presences": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/molotalk.v1.Presence"
+            },
+            "title": "presences"
+          }
+        },
+        "title": "GetPresenceResponse",
+        "required": [
+          "presences"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.GetReadStatesResponse": {
+        "type": "object",
+        "properties": {
+          "states": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/molotalk.v1.ReadState"
+            },
+            "title": "states"
+          }
+        },
+        "title": "GetReadStatesResponse",
+        "required": [
+          "states"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.GroupMemberRole": {
+        "type": "string",
+        "title": "GroupMemberRole",
+        "enum": [
+          "GROUP_MEMBER_ROLE_UNSPECIFIED",
+          "GROUP_MEMBER_ROLE_ADMIN",
+          "GROUP_MEMBER_ROLE_MEMBER"
+        ]
+      },
+      "molotalk.v1.Heartbeat": {
+        "type": "object",
+        "title": "Heartbeat",
+        "additionalProperties": false
+      },
+      "molotalk.v1.HeartbeatAck": {
+        "type": "object",
+        "title": "HeartbeatAck",
+        "additionalProperties": false
+      },
+      "molotalk.v1.Identify": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "token",
+            "minLength": 1
+          }
+        },
+        "title": "Identify",
+        "additionalProperties": false
+      },
+      "molotalk.v1.LeaveGroupRequest": {
+        "type": "object",
+        "properties": {
+          "chatId": {
+            "type": "string",
+            "title": "chat_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          }
+        },
+        "title": "LeaveGroupRequest",
+        "additionalProperties": false
+      },
+      "molotalk.v1.LeaveGroupResponse": {
+        "type": "object",
+        "properties": {
+          "closed": {
+            "type": "boolean",
+            "title": "closed"
+          },
+          "newOwnerId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "new_owner_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          }
+        },
+        "title": "LeaveGroupResponse",
+        "additionalProperties": false
+      },
+      "molotalk.v1.ListChatsRequest": {
+        "type": "object",
+        "properties": {
+          "cursor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "cursor"
+          },
+          "limit": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "title": "limit",
+            "maximum": 100,
+            "minimum": 1,
+            "format": "int32",
+            "description": "Отсутствие limit означает 50."
+          }
+        },
+        "title": "ListChatsRequest",
+        "additionalProperties": false
+      },
+      "molotalk.v1.ListChatsResponse": {
+        "type": "object",
+        "properties": {
+          "chats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/molotalk.v1.Chat"
+            },
+            "title": "chats"
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "next_cursor"
+          }
+        },
+        "title": "ListChatsResponse",
+        "required": [
+          "chats"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.LoginRequest": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "title": "identifier",
+            "maxLength": 254,
+            "minLength": 1,
+            "pattern": "^[^\\p{Lu}\\p{Lt}]*$"
+          },
+          "password": {
+            "type": "string",
+            "title": "password",
+            "maxLength": 64,
+            "minLength": 6
+          }
+        },
+        "title": "LoginRequest",
+        "additionalProperties": false
+      },
+      "molotalk.v1.LoginResponse": {
+        "type": "object",
+        "properties": {
+          "tokens": {
+            "title": "tokens",
+            "$ref": "#/components/schemas/molotalk.v1.SessionTokens"
+          }
+        },
+        "title": "LoginResponse",
+        "required": [
+          "tokens"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.LogoutRequest": {
+        "type": "object",
+        "properties": {
+          "allSessions": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "title": "all_sessions"
+          }
+        },
+        "title": "LogoutRequest",
+        "additionalProperties": false
+      },
+      "molotalk.v1.MarkReadRequest": {
+        "type": "object",
+        "properties": {
+          "chatId": {
+            "type": "string",
+            "title": "chat_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "messageIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            },
+            "title": "message_ids",
+            "maxItems": 100,
+            "minItems": 1
+          }
+        },
+        "title": "MarkReadRequest",
+        "additionalProperties": false
+      },
+      "molotalk.v1.MarkReadResponse": {
+        "type": "object",
+        "properties": {
+          "readState": {
+            "title": "read_state",
+            "$ref": "#/components/schemas/molotalk.v1.ReadState"
+          }
+        },
+        "title": "MarkReadResponse",
+        "required": [
+          "readState"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.Member": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "title": "user",
+            "$ref": "#/components/schemas/molotalk.v1.User"
+          },
+          "role": {
+            "not": {
+              "enum": [
+                "MEMBER_ROLE_UNSPECIFIED"
+              ]
+            },
+            "title": "role",
+            "$ref": "#/components/schemas/molotalk.v1.MemberRole"
+          },
+          "joinedAt": {
+            "title": "joined_at",
+            "$ref": "#/components/schemas/google.protobuf.Timestamp"
+          }
+        },
+        "title": "Member",
+        "required": [
+          "user",
+          "joinedAt"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.MemberRole": {
+        "type": "string",
+        "title": "MemberRole",
+        "enum": [
+          "MEMBER_ROLE_UNSPECIFIED",
+          "MEMBER_ROLE_OWNER",
+          "MEMBER_ROLE_ADMIN",
+          "MEMBER_ROLE_MEMBER"
+        ]
+      },
+      "molotalk.v1.MembershipChanged": {
+        "type": "object",
+        "properties": {
+          "chatId": {
+            "type": "string",
+            "title": "chat_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "userId": {
+            "type": "string",
+            "title": "user_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          }
+        },
+        "title": "MembershipChanged",
+        "additionalProperties": false
+      },
+      "molotalk.v1.Message": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "chatId": {
+            "type": "string",
+            "title": "chat_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "authorId": {
+            "type": "string",
+            "title": "author_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "clientMessageId": {
+            "type": "string",
+            "title": "client_message_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "text": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "text",
+            "maxLength": 4096
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/molotalk.v1.Attachment"
+            },
+            "title": "attachments",
+            "maxItems": 5
+          },
+          "attachmentsLinked": {
+            "type": "boolean",
+            "title": "attachments_linked"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "revision",
+            "minimum": 1,
+            "format": "int32"
+          },
+          "createdAt": {
+            "title": "created_at",
+            "$ref": "#/components/schemas/google.protobuf.Timestamp"
+          },
+          "editedAt": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "edited_at"
+          },
+          "deletedAt": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "deleted_at"
+          },
+          "receiptSummary": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/molotalk.v1.ReceiptSummary"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "receipt_summary"
+          },
+          "author": {
+            "title": "author",
+            "$ref": "#/components/schemas/molotalk.v1.User"
+          }
+        },
+        "title": "Message",
+        "required": [
+          "attachments",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.MessageDeleted": {
+        "type": "object",
+        "properties": {
+          "chatId": {
+            "type": "string",
+            "title": "chat_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "messageId": {
+            "type": "string",
+            "title": "message_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "revision",
+            "minimum": 1,
+            "format": "int32"
+          }
+        },
+        "title": "MessageDeleted",
+        "additionalProperties": false
+      },
+      "molotalk.v1.MessageQueryMode": {
+        "type": "string",
+        "title": "MessageQueryMode",
+        "enum": [
+          "MESSAGE_QUERY_MODE_UNSPECIFIED",
+          "MESSAGE_QUERY_MODE_LATEST",
+          "MESSAGE_QUERY_MODE_BEFORE",
+          "MESSAGE_QUERY_MODE_AFTER",
+          "MESSAGE_QUERY_MODE_RANGE"
+        ]
+      },
+      "molotalk.v1.PrepareUploadRequest": {
+        "type": "object",
+        "properties": {
+          "purpose": {
+            "not": {
+              "enum": [
+                "ATTACHMENT_PURPOSE_UNSPECIFIED"
+              ]
+            },
+            "title": "purpose",
+            "$ref": "#/components/schemas/molotalk.v1.AttachmentPurpose"
+          },
+          "filename": {
+            "type": "string",
+            "title": "filename",
+            "maxLength": 255,
+            "minLength": 1,
+            "pattern": "^[^/\\\\\\x00-\\x1F\\x7F]+$"
+          },
+          "contentType": {
+            "type": "string",
+            "title": "content_type",
+            "minLength": 1
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "title": "size_bytes",
+            "maximum": 20971520,
+            "minimum": 0,
+            "format": "int32",
+            "description": "Общий предел вложения — 20 МиБ; предел аватара проверяет доменное правило."
+          }
+        },
+        "title": "PrepareUploadRequest",
+        "additionalProperties": false
+      },
+      "molotalk.v1.PrepareUploadResponse": {
+        "type": "object",
+        "properties": {
+          "attachmentId": {
+            "type": "string",
+            "title": "attachment_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "uploadUrl": {
+            "type": "string",
+            "title": "upload_url",
+            "minLength": 1
+          },
+          "uploadExpiresAt": {
+            "title": "upload_expires_at",
+            "$ref": "#/components/schemas/google.protobuf.Timestamp"
+          },
+          "requiredHeaders": {
+            "type": "object",
+            "title": "required_headers",
+            "additionalProperties": {
+              "type": "string",
+              "title": "value"
+            }
+          }
+        },
+        "title": "PrepareUploadResponse",
+        "required": [
+          "uploadExpiresAt"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.Presence": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "title": "user_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "status": {
+            "not": {
+              "enum": [
+                "PRESENCE_STATUS_UNSPECIFIED"
+              ]
+            },
+            "title": "status",
+            "$ref": "#/components/schemas/molotalk.v1.PresenceStatus"
+          }
+        },
+        "title": "Presence",
+        "additionalProperties": false
+      },
+      "molotalk.v1.PresenceStatus": {
+        "type": "string",
+        "title": "PresenceStatus",
+        "enum": [
+          "PRESENCE_STATUS_UNSPECIFIED",
+          "PRESENCE_STATUS_ONLINE",
+          "PRESENCE_STATUS_OFFLINE"
+        ]
+      },
+      "molotalk.v1.PublicProfile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "displayName": {
+            "type": "string",
+            "title": "display_name",
+            "maxLength": 64,
+            "minLength": 1
+          },
+          "avatarAttachmentId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "avatar_attachment_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          }
+        },
+        "title": "PublicProfile",
+        "additionalProperties": false,
+        "description": "Публичный профиль события не содержит identifier."
+      },
+      "molotalk.v1.ReadState": {
+        "type": "object",
+        "properties": {
+          "chatId": {
+            "type": "string",
+            "title": "chat_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "lastReadMessageId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "last_read_message_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "unreadCount": {
+            "type": "integer",
+            "title": "unread_count",
+            "minimum": 0,
+            "format": "int32"
+          }
+        },
+        "title": "ReadState",
+        "additionalProperties": false
+      },
+      "molotalk.v1.Ready": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "title": "user_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "chatIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            },
+            "title": "chat_ids"
+          },
+          "readStates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/molotalk.v1.ReadState"
+            },
+            "title": "read_states"
+          }
+        },
+        "title": "Ready",
+        "additionalProperties": false
+      },
+      "molotalk.v1.Receipt": {
+        "type": "object",
+        "properties": {
+          "messageId": {
+            "type": "string",
+            "title": "message_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "userId": {
+            "type": "string",
+            "title": "user_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "deliveredAt": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "delivered_at"
+          },
+          "readAt": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "read_at"
+          }
+        },
+        "title": "Receipt",
+        "additionalProperties": false
+      },
+      "molotalk.v1.ReceiptState": {
+        "type": "string",
+        "title": "ReceiptState",
+        "enum": [
+          "RECEIPT_STATE_UNSPECIFIED",
+          "RECEIPT_STATE_ACCEPTED",
+          "RECEIPT_STATE_DELIVERED",
+          "RECEIPT_STATE_READ"
+        ]
+      },
+      "molotalk.v1.ReceiptSummary": {
+        "type": "object",
+        "properties": {
+          "recipientCount": {
+            "type": "integer",
+            "title": "recipient_count",
+            "minimum": 0,
+            "format": "int32"
+          },
+          "deliveredCount": {
+            "type": "integer",
+            "title": "delivered_count",
+            "minimum": 0,
+            "format": "int32"
+          },
+          "readCount": {
+            "type": "integer",
+            "title": "read_count",
+            "minimum": 0,
+            "format": "int32"
+          },
+          "state": {
+            "not": {
+              "enum": [
+                "RECEIPT_STATE_UNSPECIFIED"
+              ]
+            },
+            "title": "state",
+            "$ref": "#/components/schemas/molotalk.v1.ReceiptState"
+          }
+        },
+        "title": "ReceiptSummary",
+        "additionalProperties": false
+      },
+      "molotalk.v1.ReceiptUpdated": {
+        "type": "object",
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "receiptSummary",
+                "receipt"
+              ]
+            },
+            {
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "receiptSummary"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "receipt"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "properties": {
+          "chatId": {
+            "type": "string",
+            "title": "chat_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "messageId": {
+            "type": "string",
+            "title": "message_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "receiptSummary": {
+            "title": "receipt_summary",
+            "$ref": "#/components/schemas/molotalk.v1.ReceiptSummary"
+          },
+          "receipt": {
+            "title": "receipt",
+            "$ref": "#/components/schemas/molotalk.v1.Receipt"
+          }
+        },
+        "title": "ReceiptUpdated",
+        "additionalProperties": false,
+        "description": "Автор получает receipt_summary, сеансы читателя — собственный receipt.\n\nExactly one of `receiptSummary`, `receipt` must be set."
+      },
+      "molotalk.v1.RefreshTokenRequest": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "title": "refresh_token",
+            "minLength": 1
+          }
+        },
+        "title": "RefreshTokenRequest",
+        "additionalProperties": false
+      },
+      "molotalk.v1.RefreshTokenResponse": {
+        "type": "object",
+        "properties": {
+          "tokens": {
+            "title": "tokens",
+            "$ref": "#/components/schemas/molotalk.v1.SessionTokens"
+          }
+        },
+        "title": "RefreshTokenResponse",
+        "required": [
+          "tokens"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.RegisterRequest": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "title": "identifier",
+            "maxLength": 254,
+            "minLength": 1,
+            "pattern": "^[^\\p{Lu}\\p{Lt}]*$"
+          },
+          "displayName": {
+            "type": "string",
+            "title": "display_name",
+            "maxLength": 64,
+            "minLength": 1
+          },
+          "password": {
+            "type": "string",
+            "title": "password",
+            "maxLength": 64,
+            "minLength": 6,
+            "description": "Состав пароля проверяет Auth; контракт ограничивает только длину."
+          }
+        },
+        "title": "RegisterRequest",
+        "additionalProperties": false
+      },
+      "molotalk.v1.RegisterResponse": {
+        "type": "object",
+        "properties": {
+          "tokens": {
+            "title": "tokens",
+            "$ref": "#/components/schemas/molotalk.v1.SessionTokens"
+          }
+        },
+        "title": "RegisterResponse",
+        "required": [
+          "tokens"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.RemoveGroupMemberRequest": {
+        "type": "object",
+        "properties": {
+          "chatId": {
+            "type": "string",
+            "title": "chat_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "userId": {
+            "type": "string",
+            "title": "user_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          }
+        },
+        "title": "RemoveGroupMemberRequest",
+        "additionalProperties": false
+      },
+      "molotalk.v1.RemoveGroupMemberResponse": {
+        "type": "object",
+        "properties": {
+          "chat": {
+            "title": "chat",
+            "$ref": "#/components/schemas/molotalk.v1.Chat"
+          }
+        },
+        "title": "RemoveGroupMemberResponse",
+        "required": [
+          "chat"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.SearchUsersRequest": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "query",
+            "maxLength": 100,
+            "minLength": 2
+          },
+          "limit": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "title": "limit",
+            "maximum": 50,
+            "minimum": 1,
+            "format": "int32",
+            "description": "Отсутствие limit означает 20."
+          }
+        },
+        "title": "SearchUsersRequest",
+        "additionalProperties": false
+      },
+      "molotalk.v1.SearchUsersResponse": {
+        "type": "object",
+        "properties": {
+          "users": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/molotalk.v1.User"
+            },
+            "title": "users"
+          }
+        },
+        "title": "SearchUsersResponse",
+        "required": [
+          "users"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.SendMessageRequest": {
+        "type": "object",
+        "properties": {
+          "chatId": {
+            "type": "string",
+            "title": "chat_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "clientMessageId": {
+            "type": "string",
+            "title": "client_message_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "text": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "text",
+            "maxLength": 4096
+          },
+          "attachmentIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            },
+            "title": "attachment_ids",
+            "maxItems": 5
+          }
+        },
+        "title": "SendMessageRequest",
+        "additionalProperties": false
+      },
+      "molotalk.v1.SendMessageResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "title": "message",
+            "$ref": "#/components/schemas/molotalk.v1.Message"
+          }
+        },
+        "title": "SendMessageResponse",
+        "required": [
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.ServerEvent": {
+        "type": "object",
+        "not": {
+          "anyOf": [
+            {
+              "allOf": [
+                {
+                  "anyOf": [
+                    {
+                      "required": [
+                        "messageCreated"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "messageUpdated"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "messageDeleted"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "receiptUpdated"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "chatChanged"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "membershipChanged"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "profileChanged"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "presenceChanged"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "not": {
+                    "oneOf": [
+                      {
+                        "required": [
+                          "messageCreated"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "messageUpdated"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "messageDeleted"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "receiptUpdated"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "chatChanged"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "membershipChanged"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "profileChanged"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "presenceChanged"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "anyOf": [
+                    {
+                      "required": [
+                        "messageCreated"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "messageUpdated"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "messageDeleted"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "receiptUpdated"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "chatChanged"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "membershipChanged"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "profileChanged"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "presenceChanged"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "not": {
+                    "oneOf": [
+                      {
+                        "required": [
+                          "messageCreated"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "messageUpdated"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "messageDeleted"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "receiptUpdated"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "chatChanged"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "membershipChanged"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "profileChanged"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "presenceChanged"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "messageCreated"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "messageUpdated"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "messageDeleted"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "receiptUpdated"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "chatChanged"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "membershipChanged"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "profileChanged"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "presenceChanged"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "title": "event_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "occurredAt": {
+            "title": "occurred_at",
+            "$ref": "#/components/schemas/google.protobuf.Timestamp"
+          },
+          "messageCreated": {
+            "title": "message_created",
+            "$ref": "#/components/schemas/molotalk.v1.Message"
+          },
+          "messageUpdated": {
+            "title": "message_updated",
+            "$ref": "#/components/schemas/molotalk.v1.Message"
+          },
+          "messageDeleted": {
+            "title": "message_deleted",
+            "$ref": "#/components/schemas/molotalk.v1.MessageDeleted"
+          },
+          "receiptUpdated": {
+            "title": "receipt_updated",
+            "$ref": "#/components/schemas/molotalk.v1.ReceiptUpdated"
+          },
+          "chatChanged": {
+            "title": "chat_changed",
+            "$ref": "#/components/schemas/molotalk.v1.Chat"
+          },
+          "membershipChanged": {
+            "title": "membership_changed",
+            "$ref": "#/components/schemas/molotalk.v1.MembershipChanged"
+          },
+          "profileChanged": {
+            "title": "profile_changed",
+            "$ref": "#/components/schemas/molotalk.v1.PublicProfile"
+          },
+          "presenceChanged": {
+            "title": "presence_changed",
+            "$ref": "#/components/schemas/molotalk.v1.Presence"
+          }
+        },
+        "title": "ServerEvent",
+        "required": [
+          "occurredAt"
+        ],
+        "additionalProperties": false,
+        "description": "At most one of `messageCreated`, `messageUpdated`, `messageDeleted`, `receiptUpdated`, `chatChanged`, `membershipChanged`, `profileChanged`, `presenceChanged` may be set.\n\nExactly one of `messageCreated`, `messageUpdated`, `messageDeleted`, `receiptUpdated`, `chatChanged`, `membershipChanged`, `profileChanged`, `presenceChanged` must be set."
+      },
+      "molotalk.v1.SessionTokens": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "title": "user",
+            "$ref": "#/components/schemas/molotalk.v1.User"
+          },
+          "sessionId": {
+            "type": "string",
+            "title": "session_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "accessToken": {
+            "type": "string",
+            "title": "access_token",
+            "minLength": 1
+          },
+          "refreshToken": {
+            "type": "string",
+            "title": "refresh_token",
+            "minLength": 1
+          },
+          "accessExpiresAt": {
+            "title": "access_expires_at",
+            "$ref": "#/components/schemas/google.protobuf.Timestamp"
+          },
+          "refreshExpiresAt": {
+            "title": "refresh_expires_at",
+            "$ref": "#/components/schemas/google.protobuf.Timestamp"
+          }
+        },
+        "title": "SessionTokens",
+        "required": [
+          "user",
+          "accessExpiresAt",
+          "refreshExpiresAt"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.SetGroupMemberRoleRequest": {
+        "type": "object",
+        "properties": {
+          "chatId": {
+            "type": "string",
+            "title": "chat_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "userId": {
+            "type": "string",
+            "title": "user_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "role": {
+            "not": {
+              "enum": [
+                "GROUP_MEMBER_ROLE_UNSPECIFIED"
+              ]
+            },
+            "title": "role",
+            "$ref": "#/components/schemas/molotalk.v1.GroupMemberRole"
+          }
+        },
+        "title": "SetGroupMemberRoleRequest",
+        "additionalProperties": false
+      },
+      "molotalk.v1.SetGroupMemberRoleResponse": {
+        "type": "object",
+        "properties": {
+          "chat": {
+            "title": "chat",
+            "$ref": "#/components/schemas/molotalk.v1.Chat"
+          }
+        },
+        "title": "SetGroupMemberRoleResponse",
+        "required": [
+          "chat"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.UpdateProfileRequest": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "display_name",
+            "maxLength": 64,
+            "minLength": 1,
+            "description": "Отсутствие поля сохраняет текущее значение; явное false в clear_avatar\n означает удаление аватара и отличается от отсутствия поля."
+          },
+          "avatarAttachmentId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "avatar_attachment_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "clearAvatar": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "title": "clear_avatar"
+          }
+        },
+        "title": "UpdateProfileRequest",
+        "additionalProperties": false
+      },
+      "molotalk.v1.UpdateProfileResponse": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "title": "user",
+            "$ref": "#/components/schemas/molotalk.v1.User"
+          }
+        },
+        "title": "UpdateProfileResponse",
+        "required": [
+          "user"
+        ],
+        "additionalProperties": false
+      },
+      "molotalk.v1.User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          },
+          "identifier": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "identifier",
+            "maxLength": 254,
+            "minLength": 1,
+            "pattern": "^[^\\p{Lu}\\p{Lt}]*$"
+          },
+          "displayName": {
+            "type": "string",
+            "title": "display_name",
+            "maxLength": 64,
+            "minLength": 1
+          },
+          "avatarAttachmentId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "avatar_attachment_id",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+          }
+        },
+        "title": "User",
+        "additionalProperties": false
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/molotalk.v1.AuthService/Register": {
+      "post": {
+        "security": [],
+        "tags": [
+          "molotalk.v1.AuthService"
+        ],
+        "summary": "Register",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/molotalk.v1.RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/molotalk.v1.AuthService/Login": {
+      "post": {
+        "security": [],
+        "tags": [
+          "molotalk.v1.AuthService"
+        ],
+        "summary": "Login",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/molotalk.v1.LoginRequest"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/molotalk.v1.AuthService/RefreshToken": {
+      "post": {
+        "security": [],
+        "tags": [
+          "molotalk.v1.AuthService"
+        ],
+        "summary": "RefreshToken",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/molotalk.v1.RefreshTokenRequest"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/molotalk.v1.ChatService/GetChat": {
+      "post": {
+        "tags": [
+          "molotalk.v1.ChatService"
+        ],
+        "summary": "GetChat",
+        "operationId": "molotalk.v1.ChatService.GetChat",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/molotalk.v1.GetChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/molotalk.v1.GetChatResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/molotalk.v1.ChatService/GetMessages": {
+      "post": {
+        "tags": [
+          "molotalk.v1.ChatService"
+        ],
+        "summary": "GetMessages",
+        "operationId": "molotalk.v1.ChatService.GetMessages",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/molotalk.v1.GetMessagesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/molotalk.v1.GetMessagesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/molotalk.v1.AuthService/GetMe": {
+      "post": {
+        "tags": [
+          "molotalk.v1.AuthService"
+        ],
+        "summary": "GetMe",
+        "operationId": "molotalk.v1.AuthService.GetMe",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/google.protobuf.Empty"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/molotalk.v1.GetMeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/molotalk.v1.AuthService/SearchUsers": {
+      "post": {
+        "tags": [
+          "molotalk.v1.AuthService"
+        ],
+        "summary": "SearchUsers",
+        "operationId": "molotalk.v1.AuthService.SearchUsers",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/molotalk.v1.SearchUsersRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/molotalk.v1.SearchUsersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/molotalk.v1.AuthService/UpdateProfile": {
+      "post": {
+        "tags": [
+          "molotalk.v1.AuthService"
+        ],
+        "summary": "UpdateProfile",
+        "operationId": "molotalk.v1.AuthService.UpdateProfile",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/molotalk.v1.UpdateProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/molotalk.v1.UpdateProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/molotalk.v1.ChatService/AddGroupMember": {
+      "post": {
+        "tags": [
+          "molotalk.v1.ChatService"
+        ],
+        "summary": "AddGroupMember",
+        "operationId": "molotalk.v1.ChatService.AddGroupMember",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/molotalk.v1.AddGroupMemberRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/molotalk.v1.AddGroupMemberResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/molotalk.v1.ChatService/ConfirmDelivery": {
+      "post": {
+        "tags": [
+          "molotalk.v1.ChatService"
+        ],
+        "summary": "ConfirmDelivery",
+        "operationId": "molotalk.v1.ChatService.ConfirmDelivery",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/molotalk.v1.ConfirmDeliveryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/google.protobuf.Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/molotalk.v1.ChatService/CreateDirectChat": {
+      "post": {
+        "tags": [
+          "molotalk.v1.ChatService"
+        ],
+        "summary": "CreateDirectChat",
+        "operationId": "molotalk.v1.ChatService.CreateDirectChat",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/molotalk.v1.CreateDirectChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/molotalk.v1.CreateDirectChatResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/molotalk.v1.ChatService/CreateGroupChat": {
+      "post": {
+        "tags": [
+          "molotalk.v1.ChatService"
+        ],
+        "summary": "CreateGroupChat",
+        "operationId": "molotalk.v1.ChatService.CreateGroupChat",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/molotalk.v1.CreateGroupChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/molotalk.v1.CreateGroupChatResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/molotalk.v1.ChatService/DeleteMessage": {
+      "post": {
+        "tags": [
+          "molotalk.v1.ChatService"
+        ],
+        "summary": "DeleteMessage",
+        "operationId": "molotalk.v1.ChatService.DeleteMessage",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/molotalk.v1.DeleteMessageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/molotalk.v1.DeleteMessageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/molotalk.v1.ChatService/EditMessage": {
+      "post": {
+        "tags": [
+          "molotalk.v1.ChatService"
+        ],
+        "summary": "EditMessage",
+        "operationId": "molotalk.v1.ChatService.EditMessage",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/molotalk.v1.EditMessageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/molotalk.v1.EditMessageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/molotalk.v1.AuthService/ChangePassword": {
+      "post": {
+        "tags": [
+          "molotalk.v1.AuthService"
+        ],
+        "summary": "ChangePassword",
+        "operationId": "molotalk.v1.AuthService.ChangePassword",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/molotalk.v1.ChangePasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/google.protobuf.Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/molotalk.v1.ChatService/GetMessageReceipts": {
+      "post": {
+        "tags": [
+          "molotalk.v1.ChatService"
+        ],
+        "summary": "GetMessageReceipts",
+        "operationId": "molotalk.v1.ChatService.GetMessageReceipts",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/molotalk.v1.GetMessageReceiptsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/molotalk.v1.GetMessageReceiptsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/molotalk.v1.AuthService/Logout": {
+      "post": {
+        "tags": [
+          "molotalk.v1.AuthService"
+        ],
+        "summary": "Logout",
+        "operationId": "molotalk.v1.AuthService.Logout",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/molotalk.v1.LogoutRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/google.protobuf.Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/molotalk.v1.ChatService/GetReadStates": {
+      "post": {
+        "tags": [
+          "molotalk.v1.ChatService"
+        ],
+        "summary": "GetReadStates",
+        "operationId": "molotalk.v1.ChatService.GetReadStates",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/google.protobuf.Empty"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/molotalk.v1.GetReadStatesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/molotalk.v1.ChatService/LeaveGroup": {
+      "post": {
+        "tags": [
+          "molotalk.v1.ChatService"
+        ],
+        "summary": "LeaveGroup",
+        "operationId": "molotalk.v1.ChatService.LeaveGroup",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/molotalk.v1.LeaveGroupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/molotalk.v1.LeaveGroupResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/molotalk.v1.ChatService/ListChats": {
+      "post": {
+        "tags": [
+          "molotalk.v1.ChatService"
+        ],
+        "summary": "ListChats",
+        "operationId": "molotalk.v1.ChatService.ListChats",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/molotalk.v1.ListChatsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/molotalk.v1.ListChatsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/molotalk.v1.ChatService/MarkRead": {
+      "post": {
+        "tags": [
+          "molotalk.v1.ChatService"
+        ],
+        "summary": "MarkRead",
+        "operationId": "molotalk.v1.ChatService.MarkRead",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/molotalk.v1.MarkReadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/molotalk.v1.MarkReadResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/molotalk.v1.ChatService/RemoveGroupMember": {
+      "post": {
+        "tags": [
+          "molotalk.v1.ChatService"
+        ],
+        "summary": "RemoveGroupMember",
+        "operationId": "molotalk.v1.ChatService.RemoveGroupMember",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/molotalk.v1.RemoveGroupMemberRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/molotalk.v1.RemoveGroupMemberResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/molotalk.v1.ChatService/SendMessage": {
+      "post": {
+        "tags": [
+          "molotalk.v1.ChatService"
+        ],
+        "summary": "SendMessage",
+        "operationId": "molotalk.v1.ChatService.SendMessage",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/molotalk.v1.SendMessageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/molotalk.v1.SendMessageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/molotalk.v1.ChatService/SetGroupMemberRole": {
+      "post": {
+        "tags": [
+          "molotalk.v1.ChatService"
+        ],
+        "summary": "SetGroupMemberRole",
+        "operationId": "molotalk.v1.ChatService.SetGroupMemberRole",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/molotalk.v1.SetGroupMemberRoleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/molotalk.v1.SetGroupMemberRoleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/molotalk.v1.MediaService/CompleteUpload": {
+      "post": {
+        "tags": [
+          "molotalk.v1.MediaService"
+        ],
+        "summary": "CompleteUpload",
+        "operationId": "molotalk.v1.MediaService.CompleteUpload",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/molotalk.v1.CompleteUploadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/molotalk.v1.CompleteUploadResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/molotalk.v1.MediaService/GetAttachment": {
+      "post": {
+        "tags": [
+          "molotalk.v1.MediaService"
+        ],
+        "summary": "GetAttachment",
+        "operationId": "molotalk.v1.MediaService.GetAttachment",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/molotalk.v1.GetAttachmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/molotalk.v1.GetAttachmentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/molotalk.v1.MediaService/GetDownloadURL": {
+      "post": {
+        "tags": [
+          "molotalk.v1.MediaService"
+        ],
+        "summary": "GetDownloadURL",
+        "operationId": "molotalk.v1.MediaService.GetDownloadURL",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/molotalk.v1.GetDownloadURLRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/molotalk.v1.GetDownloadURLResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/molotalk.v1.MediaService/PrepareUpload": {
+      "post": {
+        "tags": [
+          "molotalk.v1.MediaService"
+        ],
+        "summary": "PrepareUpload",
+        "operationId": "molotalk.v1.MediaService.PrepareUpload",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/molotalk.v1.PrepareUploadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/molotalk.v1.PrepareUploadResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/molotalk.v1.PresenceService/GetPresence": {
+      "post": {
+        "tags": [
+          "molotalk.v1.PresenceService"
+        ],
+        "summary": "GetPresence",
+        "operationId": "molotalk.v1.PresenceService.GetPresence",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/molotalk.v1.GetPresenceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/molotalk.v1.GetPresenceResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "molotalk.v1.AuthService"
+    },
+    {
+      "name": "molotalk.v1.ChatService"
+    },
+    {
+      "name": "molotalk.v1.MediaService"
+    },
+    {
+      "name": "molotalk.v1.PresenceService"
+    }
+  ]
+}

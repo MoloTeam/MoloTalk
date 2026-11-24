@@ -1,0 +1,25 @@
+openapi: 3.1.0
+info:
+  title: MoloTalk public API
+  version: 0.1.0
+  description: |
+    Публичный контракт MoloTalk. Источник — proto; документ сгенерирован.
+    Register, Login и RefreshToken не требуют access token.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - bearerAuth: []
+paths:
+  /molotalk.v1.AuthService/Register:
+    post:
+      security: []
+  /molotalk.v1.AuthService/Login:
+    post:
+      security: []
+  /molotalk.v1.AuthService/RefreshToken:
+    post:
+      security: []

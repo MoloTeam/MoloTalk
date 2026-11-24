@@ -1,0 +1,114 @@
+syntax = "proto3";
+
+package molotalk.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+import "molotalk/v1/types.proto";
+
+option go_package = "github.com/MoloTeam/MoloTalk/backend/gen/molotalk/v1;molotalkv1";
+
+// Типизированный протокол WebSocket (утверждённый вариант B).
+// Один protobuf-кадр GatewayEnvelope на кадр WebSocket.
+
+message GatewayEnvelope {
+  option (buf.validate.message).oneof = {
+    fields: [
+      "identify",
+      "ready",
+      "heartbeat",
+      "heartbeat_ack",
+      "server_event"
+    ]
+    required: true
+  };
+
+  oneof payload {
+    Identify identify = 1;
+    Ready ready = 2;
+    Heartbeat heartbeat = 3;
+    HeartbeatAck heartbeat_ack = 4;
+    ServerEvent server_event = 5;
+  }
+}
+
+message Identify {
+  string token = 1 [(buf.validate.field).string.min_len = 1];
+}
+
+message Ready {
+  string user_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  repeated string chat_ids = 2 [(buf.validate.field).repeated.items.string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  repeated ReadState read_states = 3;
+}
+
+message Heartbeat {}
+
+message HeartbeatAck {}
+
+message ServerEvent {
+  option (buf.validate.message).oneof = {
+    fields: [
+      "message_created",
+      "message_updated",
+      "message_deleted",
+      "receipt_updated",
+      "chat_changed",
+      "membership_changed",
+      "profile_changed",
+      "presence_changed"
+    ]
+    required: true
+  };
+
+  string event_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  google.protobuf.Timestamp occurred_at = 2 [(buf.validate.field).required = true];
+
+  oneof event {
+    Message message_created = 3;
+    Message message_updated = 4;
+    MessageDeleted message_deleted = 5;
+    ReceiptUpdated receipt_updated = 6;
+    Chat chat_changed = 7;
+    MembershipChanged membership_changed = 8;
+    PublicProfile profile_changed = 9;
+    Presence presence_changed = 10;
+  }
+}
+
+message MessageDeleted {
+  string chat_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string message_id = 2 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  int32 revision = 3 [(buf.validate.field).int32.gte = 1];
+}
+
+// Автор получает receipt_summary, сеансы читателя — собственный receipt.
+message ReceiptUpdated {
+  option (buf.validate.message).oneof = {
+    fields: [
+      "receipt_summary",
+      "receipt"
+    ]
+    required: true
+  };
+
+  string chat_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string message_id = 2 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  ReceiptSummary receipt_summary = 3;
+  Receipt receipt = 4;
+}
+
+message MembershipChanged {
+  string chat_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string user_id = 2 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+}
+
+// Публичный профиль события не содержит identifier.
+message PublicProfile {
+  string id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string display_name = 2 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 64
+  }];
+  optional string avatar_attachment_id = 3 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+}

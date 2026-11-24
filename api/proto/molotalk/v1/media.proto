@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package molotalk.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+import "molotalk/v1/types.proto";
+
+option go_package = "github.com/MoloTeam/MoloTalk/backend/gen/molotalk/v1;molotalkv1";
+
+service MediaService {
+  rpc PrepareUpload(PrepareUploadRequest) returns (PrepareUploadResponse);
+  rpc CompleteUpload(CompleteUploadRequest) returns (CompleteUploadResponse);
+  rpc GetAttachment(GetAttachmentRequest) returns (GetAttachmentResponse);
+  rpc GetDownloadURL(GetDownloadURLRequest) returns (GetDownloadURLResponse);
+}
+
+message PrepareUploadRequest {
+  AttachmentPurpose purpose = 1 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  string filename = 2 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 255
+    pattern: "^[^/\\\\\\x00-\\x1F\\x7F]+$"
+  }];
+  string content_type = 3 [(buf.validate.field).string.min_len = 1];
+  // Общий предел вложения — 20 МиБ; предел аватара проверяет доменное правило.
+  int32 size_bytes = 4 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 20971520
+  }];
+}
+
+message PrepareUploadResponse {
+  string attachment_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string upload_url = 2 [(buf.validate.field).string.min_len = 1];
+  google.protobuf.Timestamp upload_expires_at = 3 [(buf.validate.field).required = true];
+  map<string, string> required_headers = 4;
+}
+
+message CompleteUploadRequest {
+  string attachment_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+}
+
+message CompleteUploadResponse {
+  Attachment attachment = 1 [(buf.validate.field).required = true];
+}
+
+message GetAttachmentRequest {
+  string attachment_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+}
+
+message GetAttachmentResponse {
+  Attachment attachment = 1 [(buf.validate.field).required = true];
+}
+
+message GetDownloadURLRequest {
+  string attachment_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  optional bool thumbnail = 2;
+}
+
+message GetDownloadURLResponse {
+  string url = 1 [(buf.validate.field).string.min_len = 1];
+  google.protobuf.Timestamp expires_at = 2 [(buf.validate.field).required = true];
+}

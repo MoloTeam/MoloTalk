@@ -1,0 +1,10 @@
+version: v2
+plugins:
+  - local: protoc-gen-connect-openapi
+    out: .
+    opt:
+      - path=gen/openapi/internal.json
+      - format=json
+      - content-types=json
+      - features=connectrpc
+      - base=openapi/base.internal.yaml

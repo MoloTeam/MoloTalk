@@ -1,0 +1,120 @@
+syntax = "proto3";
+
+package molotalk.v1;
+
+import "buf/validate/validate.proto";
+import "google/api/field_behavior.proto";
+import "google/protobuf/empty.proto";
+import "molotalk/v1/types.proto";
+
+option go_package = "github.com/MoloTeam/MoloTalk/backend/gen/molotalk/v1;molotalkv1";
+
+service AuthService {
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc Login(LoginRequest) returns (LoginResponse);
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
+  rpc Logout(LogoutRequest) returns (google.protobuf.Empty);
+  rpc GetMe(google.protobuf.Empty) returns (GetMeResponse);
+  rpc UpdateProfile(UpdateProfileRequest) returns (UpdateProfileResponse);
+  rpc ChangePassword(ChangePasswordRequest) returns (google.protobuf.Empty);
+  rpc SearchUsers(SearchUsersRequest) returns (SearchUsersResponse);
+}
+
+message RegisterRequest {
+  string identifier = 1 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 254
+    pattern: "^[^\\p{Lu}\\p{Lt}]*$"
+  }];
+  string display_name = 2 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 64
+  }];
+  // Состав пароля проверяет Auth; контракт ограничивает только длину.
+  string password = 3 [(buf.validate.field).string = {
+    min_len: 6
+    max_len: 64
+  }];
+}
+
+message RegisterResponse {
+  SessionTokens tokens = 1 [(buf.validate.field).required = true];
+}
+
+message LoginRequest {
+  string identifier = 1 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 254
+    pattern: "^[^\\p{Lu}\\p{Lt}]*$"
+  }];
+  string password = 2 [(buf.validate.field).string = {
+    min_len: 6
+    max_len: 64
+  }];
+}
+
+message LoginResponse {
+  SessionTokens tokens = 1 [(buf.validate.field).required = true];
+}
+
+message RefreshTokenRequest {
+  string refresh_token = 1 [(buf.validate.field).string.min_len = 1];
+}
+
+message RefreshTokenResponse {
+  SessionTokens tokens = 1 [(buf.validate.field).required = true];
+}
+
+message LogoutRequest {
+  optional bool all_sessions = 1;
+}
+
+message GetMeResponse {
+  User user = 1 [(buf.validate.field).required = true];
+}
+
+message UpdateProfileRequest {
+  // Отсутствие поля сохраняет текущее значение; явное false в clear_avatar
+  // означает удаление аватара и отличается от отсутствия поля.
+  optional string display_name = 1 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 64
+  }];
+  optional string avatar_attachment_id = 2 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  optional bool clear_avatar = 3;
+}
+
+message UpdateProfileResponse {
+  User user = 1 [(buf.validate.field).required = true];
+}
+
+message ChangePasswordRequest {
+  string current_password = 1 [(buf.validate.field).string = {
+    min_len: 6
+    max_len: 64
+  }];
+  string new_password = 2 [(buf.validate.field).string = {
+    min_len: 6
+    max_len: 64
+  }];
+  string new_password_confirmation = 3 [(buf.validate.field).string = {
+    min_len: 6
+    max_len: 64
+  }];
+}
+
+message SearchUsersRequest {
+  string query = 1 [(buf.validate.field).string = {
+    min_len: 2
+    max_len: 100
+  }];
+  // Отсутствие limit означает 20.
+  optional int32 limit = 2 [(buf.validate.field).int32 = {
+    gte: 1
+    lte: 50
+  }];
+}
+
+message SearchUsersResponse {
+  repeated User users = 1 [(google.api.field_behavior) = REQUIRED];
+}

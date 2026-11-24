@@ -1,0 +1,15 @@
+openapi: 3.1.0
+info:
+  title: MoloTalk internal API
+  version: 0.1.0
+  description: |
+    Внутренний контракт MoloTalk. Источник — proto; документ сгенерирован.
+    Все операции требуют служебного токена.
+components:
+  securitySchemes:
+    serviceBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - serviceBearer: []
