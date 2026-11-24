@@ -143,6 +143,9 @@ function main() {
   run("node", [path.join(apiDir, "node_modules", "typescript", "bin", "tsc"), "--noEmit"], { cwd: apiDir });
   console.log("ok typescript typecheck");
 
+  run("node", ["--experimental-transform-types", "--test", "--test-timeout=120000", "src/test/gateway.test.mjs", "src/test/contract.test.mjs"], { cwd: apiDir });
+  console.log("ok typescript contract tests");
+
   const protoInMain = spawnSync("git", ["cat-file", "-e", "main:api/proto/molotalk/v1/types.proto"], { cwd: root });
   if (protoInMain.status === 0) {
     buf("breaking", "--against", ".git#branch=main");

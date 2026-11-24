@@ -9,7 +9,7 @@
     "generate:openapi": "buf generate --template buf.gen.openapi.yaml",
     "generate": "npm run generate:go && npm run generate:ts && npm run generate:openapi",
     "typecheck": "tsc --noEmit",
-    "test": "node --test src/test/*.test.ts",
+    "test": "node --experimental-transform-types --test --test-timeout=120000 src/test/gateway.test.mjs src/test/contract.test.mjs",
     "check": "node scripts/check.mjs"
   },
   "dependencies": {
@@ -22,5 +22,6 @@
     "@bufbuild/protovalidate": "1.3.0",
     "@types/node": "^24.10.1",
     "typescript": "5.9.3"
-  }
+  },
+  "type": "module"
 }
