@@ -19,7 +19,7 @@ const packages = [
  * Собирает инструменты в targetDir и возвращает путь к buf вместе с окружением,
  * в котором плагины находятся по PATH.
  */
-export function buildTools({ backendDir, apiDir, targetDir, env = process.env, log = () => {} }) {
+export function buildTools({ backendDir, repoRoot, targetDir, env = process.env, log = () => {} }) {
   fs.mkdirSync(targetDir, { recursive: true });
   for (const [name, pkg] of packages) {
     const output = path.join(targetDir, name + exe);
@@ -30,7 +30,8 @@ export function buildTools({ backendDir, apiDir, targetDir, env = process.env, l
   }
   log("ok tools built");
 
-  const npmBin = apiDir ? path.join(apiDir, "node_modules", ".bin") : "";
+  // npm workspaces держат исполняемые файлы плагинов в корне.
+  const npmBin = repoRoot ? path.join(repoRoot, "node_modules", ".bin") : "";
   const toolsPath = [targetDir, npmBin].filter(Boolean).join(path.delimiter) + path.delimiter + (env.PATH ?? "");
   return {
     buf: path.join(targetDir, "buf" + exe),

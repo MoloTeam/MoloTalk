@@ -51,10 +51,13 @@ Go-инструменты закреплены директивами `tool` в 
 Из корня репозитория:
 
 ```bash
-npm --prefix api ci
-npm --prefix api run generate
-npm --prefix api run check
+npm ci
+npm run generate
+npm run check
 ```
+
+JS-зависимости общие с веб-клиентом и ставятся из корня через workspaces;
+каталог `api` отдельного lock-файла не имеет.
 
 Генерация ограничена каталогами контрактов: Go получает оба пакета, TypeScript —
 только `proto/molotalk/v1` (и импортируемые им внешние схемы), OpenAPI собирается

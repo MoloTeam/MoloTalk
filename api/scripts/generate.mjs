@@ -7,7 +7,8 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 
 export const apiDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-export const backendDir = path.resolve(apiDir, "..", "backend");
+export const repoRoot = path.resolve(apiDir, "..");
+export const backendDir = path.resolve(repoRoot, "backend");
 
 export const steps = [
   {
@@ -54,7 +55,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const { buildTools } = await import("./tools.mjs");
   const tools = buildTools({
     backendDir,
-    apiDir,
+    repoRoot,
     targetDir: path.resolve(apiDir, "..", ".tmp", "tools"),
     env: process.env,
     log: console.log,

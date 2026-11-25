@@ -8,10 +8,10 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
-import { apiDir, backendDir, generate } from "./generate.mjs";
+import { apiDir, backendDir, generate, repoRoot } from "./generate.mjs";
 import { buildTools } from "./tools.mjs";
 
-const root = path.resolve(apiDir, "..");
+const root = repoRoot;
 const workRoot = path.join(root, ".tmp");
 fs.mkdirSync(workRoot, { recursive: true });
 const workDir = fs.mkdtempSync(path.join(workRoot, "check-"));
@@ -28,6 +28,13 @@ const env = {
   GOTMPDIR: workDir,
   PATH: `${extraPath}${process.env.PATH ?? ""}`,
 };
+
+// В PATH для buf format попадает Git usr/bin с GNU tar, который читает "D:"
+// как имя хоста; системный tar Windows таких путей не боится.
+const tarCommand =
+  process.platform === "win32"
+    ? path.join(process.env.SystemRoot ?? "C:\\Windows", "System32", "tar.exe")
+    : "tar";
 
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, { cwd: options.cwd ?? root, env, encoding: "utf8" });
@@ -98,7 +105,7 @@ function copySources(target) {
 function main() {
   const tools = buildTools({
     backendDir,
-    apiDir,
+    repoRoot,
     targetDir: path.join(workDir, "tools"),
     env,
     log: console.log,
@@ -128,7 +135,7 @@ function main() {
   run("go", ["test", "-count=1", "./..."], { cwd: backendDir });
   console.log("ok go build/vet/test");
 
-  run("node", [path.join(apiDir, "node_modules", "typescript", "bin", "tsc"), "--noEmit"], { cwd: apiDir });
+  run("node", [path.join(root, "node_modules", "typescript", "bin", "tsc"), "--noEmit"], { cwd: apiDir });
   console.log("ok typescript typecheck");
 
   run(
@@ -140,8 +147,14 @@ function main() {
 
   const protoInMain = spawnSync("git", ["cat-file", "-e", "main:api/proto/molotalk/v1/types.proto"], { cwd: root, env });
   if (protoInMain.status === 0) {
-    // .git лежит в корне репозитория, а buf.yaml — в api/, поэтому нужен subdir.
-    run(tools.buf, ["breaking", "--against", "../.git#branch=main,subdir=api"], { cwd: apiDir });
+    // Базу выгружаем из git в каталог и сравниваем с ним: buf не клонирует
+    // репозиторий, поэтому проверка не зависит от сети и настроек git.
+    const baseline = path.join(workDir, "baseline");
+    const archive = path.join(workDir, "baseline.tar");
+    fs.mkdirSync(baseline, { recursive: true });
+    run("git", ["archive", "--format=tar", "-o", archive, "main", "api"], { cwd: root });
+    run(tarCommand, ["-xf", archive, "-C", baseline], { cwd: root });
+    run(tools.buf, ["breaking", "--against", path.join(baseline, "api")], { cwd: apiDir });
     console.log("ok buf breaking against main");
   } else {
     console.log("skip buf breaking: main has no proto baseline yet (bootstrap)");
