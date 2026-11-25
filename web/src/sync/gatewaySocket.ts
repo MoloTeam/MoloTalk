@@ -1,7 +1,7 @@
 import { create, fromBinary, toBinary } from "@bufbuild/protobuf";
-import { GatewayEnvelopeSchema, type ServerEvent } from "@api/molotalk/v1/gateway_pb";
+import { GatewayEnvelopeSchema } from "@api/molotalk/v1/gateway_pb";
 
-import type { SocketPort } from "./ports";
+import type { ClientFrame, SocketPort } from "./ports";
 
 export interface SocketLike {
   binaryType: string;
@@ -63,10 +63,8 @@ export function createGatewaySocket(options: GatewaySocketOptions = {}): SocketP
       };
     },
 
-    send(event: ServerEvent) {
-      const envelope = create(GatewayEnvelopeSchema, {
-        payload: { case: "serverEvent", value: event },
-      });
+    send(frame: ClientFrame) {
+      const envelope = create(GatewayEnvelopeSchema, { payload: frame });
       socket?.send(toBinary(GatewayEnvelopeSchema, envelope));
     },
   };

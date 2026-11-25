@@ -9,11 +9,11 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "node scripts/ensure-api-deps.mjs && tsc --noEmit && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "typecheck": "node scripts/ensure-api-deps.mjs && tsc --noEmit",
+    "test": "node scripts/ensure-api-deps.mjs && vitest run"
   },
   "dependencies": {
     "@bufbuild/protobuf": "^2.17.0",

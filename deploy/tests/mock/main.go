@@ -484,6 +484,20 @@ func checkSPA(client *http.Client) error {
 		return fmt.Errorf("/assets/app.js: unexpected body")
 	}
 
+	unmatched := []string{"/chats/", "/chats/01ARZ3NDEKTSV4RRFFQ69G5FA4/extra", "/unknown/path"}
+	for _, path := range unmatched {
+		response, err := fetchSPA(client, path)
+		if err != nil {
+			return err
+		}
+		if response.status != http.StatusNotFound {
+			return fmt.Errorf("%s: status %d, want 404", path, response.status)
+		}
+		if strings.Contains(response.body, "spa-shell") {
+			return fmt.Errorf("%s: SPA fallback masked an unknown route", path)
+		}
+	}
+
 	missing, err := fetchSPA(client, "/assets/missing.js")
 	if err != nil {
 		return err
@@ -495,7 +509,7 @@ func checkSPA(client *http.Client) error {
 		return fmt.Errorf("/assets/missing.js: SPA fallback masked a missing asset")
 	}
 
-	fmt.Printf("PASS spa routes: %d html, 1 asset, 1 missing\n", len(htmlRoutes))
+	fmt.Printf("PASS spa routes: %d html, 1 asset, 1 missing, %d unmatched\n", len(htmlRoutes), len(unmatched))
 	return nil
 }
 

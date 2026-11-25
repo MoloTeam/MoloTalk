@@ -27,9 +27,22 @@ export interface Store {
 }
 
 // Начальное состояние создаётся заново для каждого экземпляра: общих
+// Изменяемые вложенные сущности копируются: переданный набор данных не должен
+// становиться общим для двух экземпляров приложения.
+function cloneState(state: AppState): AppState {
+  return {
+    ...state,
+    profile: state.profile ? { ...state.profile } : null,
+    chats: state.chats.map((chat) => ({ ...chat })),
+    messages: Object.fromEntries(
+      Object.entries(state.messages).map(([chatId, ids]) => [chatId, [...ids]]),
+    ),
+  };
+}
+
 // изменяемых коллекций между вкладками и тестами быть не должно.
 export function createInitialState(overrides: Partial<AppState> = {}): AppState {
-  return {
+  return cloneState({
     profile: null,
     chats: [
       { id: "01ARZ3NDEKTSV4RRFFQ69G5FA4", title: "Alice", kind: "direct" },
@@ -40,7 +53,7 @@ export function createInitialState(overrides: Partial<AppState> = {}): AppState 
     lastEventType: null,
     error: null,
     ...overrides,
-  };
+  });
 }
 
 export function createStore(initial: Partial<AppState> = {}): Store {

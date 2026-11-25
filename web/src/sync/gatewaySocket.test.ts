@@ -1,6 +1,8 @@
 import { create, fromBinary, toBinary } from "@bufbuild/protobuf";
 import {
   GatewayEnvelopeSchema,
+  HeartbeatSchema,
+  IdentifySchema,
   MessageDeletedSchema,
   ServerEventSchema,
   type ServerEvent,
@@ -94,22 +96,36 @@ describe("gatewaySocket", () => {
     expect(handlers.onError).toHaveBeenCalledTimes(1);
   });
 
-  it("encodes an outgoing event and closes on release", () => {
+  it("encodes a client Identify frame and closes on release", () => {
     const socket = new FakeSocket();
     const handlers: SocketHandlers = { onEvent: vi.fn() };
     const port = createGatewaySocket({ origin: "https://example.test", createSocket: () => socket });
 
     const release = port.connect(handlers);
-    port.send?.(event());
+    port.send?.({ case: "identify", value: create(IdentifySchema, { token: "token" }) });
 
     expect(socket.sent).toHaveLength(1);
     const envelope = fromBinary(GatewayEnvelopeSchema, socket.sent[0]);
-    expect(envelope.payload.case).toBe("serverEvent");
+    expect(envelope.payload.case).toBe("identify");
+    if (envelope.payload.case === "identify") {
+      expect(envelope.payload.value.token).toBe("token");
+    }
 
     release();
     expect(socket.closed).toBe(1);
 
     socket.deliver(frame(event()));
     expect(handlers.onEvent).not.toHaveBeenCalled();
+  });
+
+  it("encodes a client Heartbeat frame", () => {
+    const socket = new FakeSocket();
+    const port = createGatewaySocket({ origin: "https://example.test", createSocket: () => socket });
+
+    port.connect({ onEvent: vi.fn() });
+    port.send?.({ case: "heartbeat", value: create(HeartbeatSchema, {}) });
+
+    const envelope = fromBinary(GatewayEnvelopeSchema, socket.sent[0]);
+    expect(envelope.payload.case).toBe("heartbeat");
   });
 });

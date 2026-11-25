@@ -89,12 +89,17 @@ docker compose --project-directory . --env-file .env.example -f deploy/docker-co
 ```bash
 cd web
 npm ci
+npm --prefix ../api ci --omit=dev   # зависимости сгенерированных контрактов
 npm run dev       # http://127.0.0.1:5173, каркас работает без backend
 npm run lint
 npm run typecheck
 npm run test
 npm run build     # dist/ с готовой раздачей SPA
 ```
+
+Файлы `api/src/gen` импортируют `@bufbuild/protobuf`, и TypeScript ищет его в
+`api/node_modules`, поэтому вторая команда обязательна; без неё `typecheck`,
+`test` и `build` завершатся с подсказкой.
 
 В dev известные маршруты (`/`, `/login`, `/profile`, `/chats`, `/chats/:chatId`) открываются напрямую благодаря history fallback, неизвестный путь показывает экран «Страница не найдена». Сетевые вызовы в dev не требуются: API и WebSocket подставляются точкой сборки.
 

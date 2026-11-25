@@ -11,13 +11,19 @@ backend-сервисов: API и WebSocket подставляются на гр�
 ## Команды
 
 ```bash
-npm ci            # установка по lock-файлу
+npm ci                              # зависимости веб-клиента
+npm --prefix ../api ci --omit=dev   # зависимости сгенерированных контрактов
 npm run dev       # http://127.0.0.1:5173
 npm run lint
 npm run typecheck
 npm run test
 npm run build     # dist/
 ```
+
+Сгенерированные дескрипторы лежат в `api/src/gen` и импортируют
+`@bufbuild/protobuf`; TypeScript и Vite ищут его в `api/node_modules`, поэтому
+зависимости api ставятся отдельно. Если их нет, `typecheck`, `test` и `build`
+завершаются с подсказкой о команде установки.
 
 ## Структура
 

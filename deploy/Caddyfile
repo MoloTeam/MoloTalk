@@ -53,12 +53,23 @@ https://localhost {
 		reverse_proxy gateway:8085
 	}
 
-	# Сборка веб-клиента: известные клиентские маршруты отдают SPA.
-	@spa {
+	# Оболочка SPA: только точные клиентские маршруты без параметров.
+	@spa_shell {
 		method GET HEAD
-		path / /login /profile /chats /chats/*
+		path / /login /profile /chats
 	}
-	handle @spa {
+	handle @spa_shell {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+
+	# Диалог — ровно один сегмент пути, как маршрут /chats/:chatId.
+	@spa_chat {
+		method GET HEAD
+		path_regexp chat ^/chats/[^/]+/?$
+	}
+	handle @spa_chat {
 		root * /srv
 		try_files {path} /index.html
 		file_server

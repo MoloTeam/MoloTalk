@@ -1,4 +1,4 @@
-import type { ServerEvent } from "@api/molotalk/v1/gateway_pb";
+import type { Heartbeat, Identify, ServerEvent } from "@api/molotalk/v1/gateway_pb";
 
 import type { Profile } from "../state/store";
 
@@ -14,7 +14,13 @@ export interface SocketHandlers {
   onError?(error: Error): void;
 }
 
+// Браузер отправляет Gateway только Identify и Heartbeat. Ready, HeartbeatAck
+// и события приходят от сервера через onEvent.
+export type ClientFrame =
+  | { case: "identify"; value: Identify }
+  | { case: "heartbeat"; value: Heartbeat };
+
 export interface SocketPort {
   connect(handlers: SocketHandlers): () => void;
-  send?(event: ServerEvent): void;
+  send?(frame: ClientFrame): void;
 }
