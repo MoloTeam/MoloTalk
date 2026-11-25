@@ -9,9 +9,12 @@
 **/.tmp
 openspec
 deploy
+!deploy/Caddyfile
 coverage
 coverage.out
 *.md
 *.log
 *.db
 *.sqlite
+**/node_modules
+web/dist

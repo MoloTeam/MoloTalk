@@ -247,6 +247,9 @@ func verifyRouting(caPath, caddyAddr string) error {
 	if err := checkForbidden(client); err != nil {
 		return err
 	}
+	if err := checkSPA(client); err != nil {
+		return err
+	}
 	return checkWebSocket(pool, caddyAddr)
 }
 
@@ -421,6 +424,79 @@ func allStats() (map[string]int64, error) {
 		result[service] = value.Requests
 	}
 	return result, nil
+}
+
+type spaResponse struct {
+	status      int
+	contentType string
+	body        string
+}
+
+func fetchSPA(client *http.Client, path string) (spaResponse, error) {
+	response, err := client.Get("https://localhost" + path)
+	if err != nil {
+		return spaResponse{}, fmt.Errorf("%s: %w", path, err)
+	}
+	defer response.Body.Close()
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return spaResponse{}, fmt.Errorf("%s: read: %w", path, err)
+	}
+	return spaResponse{
+		status:      response.StatusCode,
+		contentType: response.Header.Get("Content-Type"),
+		body:        string(body),
+	}, nil
+}
+
+// checkSPA проверяет выдачу сборки клиента и отсутствие подмены API.
+func checkSPA(client *http.Client) error {
+	htmlRoutes := []string{"/", "/login", "/chats/01ARZ3NDEKTSV4RRFFQ69G5FA4"}
+
+	for _, path := range htmlRoutes {
+		response, err := fetchSPA(client, path)
+		if err != nil {
+			return err
+		}
+		if response.status != http.StatusOK {
+			return fmt.Errorf("%s: status %d, want 200", path, response.status)
+		}
+		if !strings.Contains(response.contentType, "text/html") {
+			return fmt.Errorf("%s: content type %q, want text/html", path, response.contentType)
+		}
+		if !strings.Contains(response.body, "spa-shell") {
+			return fmt.Errorf("%s: body is not the SPA shell", path)
+		}
+	}
+
+	asset, err := fetchSPA(client, "/assets/app.js")
+	if err != nil {
+		return err
+	}
+	if asset.status != http.StatusOK {
+		return fmt.Errorf("/assets/app.js: status %d, want 200", asset.status)
+	}
+	if !strings.Contains(asset.contentType, "javascript") {
+		return fmt.Errorf("/assets/app.js: content type %q, want javascript", asset.contentType)
+	}
+	if !strings.Contains(asset.body, "spa-asset") {
+		return fmt.Errorf("/assets/app.js: unexpected body")
+	}
+
+	missing, err := fetchSPA(client, "/assets/missing.js")
+	if err != nil {
+		return err
+	}
+	if missing.status != http.StatusNotFound {
+		return fmt.Errorf("/assets/missing.js: status %d, want 404", missing.status)
+	}
+	if strings.Contains(missing.body, "spa-shell") {
+		return fmt.Errorf("/assets/missing.js: SPA fallback masked a missing asset")
+	}
+
+	fmt.Printf("PASS spa routes: %d html, 1 asset, 1 missing\n", len(htmlRoutes))
+	return nil
 }
 
 func checkWebSocket(pool *x509.CertPool, caddyAddr string) error {

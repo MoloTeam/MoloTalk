@@ -86,6 +86,7 @@ services:
       - "127.0.0.1:18443:443"
     volumes:
       - ../Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./spa:/srv:ro
       - caddy-data:/data
 
   verify:
