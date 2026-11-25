@@ -4,10 +4,7 @@
   "description": "Proto contracts, generated TypeScript and OpenAPI for MoloTalk",
   "scripts": {
     "buf": "buf",
-    "generate:go": "buf generate --template buf.gen.go.yaml",
-    "generate:ts": "buf generate --template buf.gen.ts.yaml --path proto/molotalk/v1 --path third_party/proto/buf/validate --path third_party/proto/google/api",
-    "generate:openapi": "buf generate --template buf.gen.openapi.yaml",
-    "generate": "npm run generate:go && npm run generate:ts && npm run generate:openapi",
+    "generate": "node scripts/generate.mjs",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-transform-types --test --test-timeout=120000 src/test/gateway.test.mjs src/test/contract.test.mjs",
     "check": "node scripts/check.mjs"

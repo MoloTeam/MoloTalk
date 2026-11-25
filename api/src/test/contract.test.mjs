@@ -5,10 +5,11 @@ import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
+import { timestampDate } from "@bufbuild/protobuf/wkt";
 import { Code, ConnectError, createClient } from "@connectrpc/connect";
 import { createConnectTransport } from "@connectrpc/connect-web";
-import { timestampDate } from "@bufbuild/protobuf/wkt";
 
+import { ViolationsSchema } from "../gen/buf/validate/validate_pb.ts";
 import { AuthService } from "../gen/molotalk/v1/auth_pb.ts";
 import { MediaService } from "../gen/molotalk/v1/media_pb.ts";
 
@@ -57,6 +58,13 @@ function startServer() {
   });
 }
 
+const invalidUpload = {
+  purpose: 2,
+  filename: "photo.png",
+  contentType: "image/png",
+  sizeBytes: 20971521,
+};
+
 test("TypeScript client talks to the Go Connect server", async (t) => {
   buildServer();
   const { child, baseUrl } = await startServer();
@@ -66,12 +74,37 @@ test("TypeScript client talks to the Go Connect server", async (t) => {
     child.stderr.destroy();
   });
 
+  // Connect-ES не вызывает onHeader для unary: заголовок читаем интерцептором.
+  function headerCapture() {
+    const state = { value: undefined };
+    const interceptor = (next) => async (request) => {
+      try {
+        const response = await next(request);
+        state.value = response.header.get("X-Request-Id");
+        return response;
+      } catch (error) {
+        state.value = error?.metadata?.get?.("X-Request-Id");
+        throw error;
+      }
+    };
+    return { interceptor, state };
+  }
+
   const client = createClient(AuthService, createConnectTransport({ baseUrl }));
   const media = createClient(MediaService, createConnectTransport({ baseUrl }));
 
-  await t.test("success returns typed data and an empty array", async () => {
-    const response = await client.searchUsers({ query: "alice" });
+  await t.test("success returns typed data, empty array and request id", async () => {
+    const capture = headerCapture();
+    const withHeader = createClient(
+      AuthService,
+      createConnectTransport({ baseUrl, interceptors: [capture.interceptor] }),
+    );
+    const response = await withHeader.searchUsers(
+      { query: "alice" },
+      { headers: { "X-Request-Id": "abc-123" } },
+    );
     assert.deepEqual(response.users, []);
+    assert.equal(capture.state.value, "abc-123");
   });
 
   await t.test("response decodes Timestamp and enum", async () => {
@@ -85,21 +118,26 @@ test("TypeScript client talks to the Go Connect server", async (t) => {
     assert.equal(timestampDate(response.uploadExpiresAt).toISOString(), "2026-11-24T09:00:00.000Z");
   });
 
-  await t.test("invalid request is rejected before the handler", async () => {
+  await t.test("invalid request is rejected before the handler with typed details", async () => {
+    const capture = headerCapture();
+    const withHeader = createClient(
+      MediaService,
+      createConnectTransport({ baseUrl, interceptors: [capture.interceptor] }),
+    );
     await assert.rejects(
-      media.prepareUpload({
-        purpose: 2,
-        filename: "photo.png",
-        contentType: "image/png",
-        sizeBytes: 20971521,
-      }),
+      withHeader.prepareUpload(invalidUpload, { headers: { "X-Request-Id": "abc-123" } }),
       (error) => {
         assert.ok(error instanceof ConnectError);
         assert.equal(error.code, Code.InvalidArgument);
         assert.match(error.rawMessage, /size_bytes/);
+
+        const details = error.findDetails(ViolationsSchema);
+        assert.ok(details.length > 0, "typed violations are missing");
+        assert.ok(details[0].violations.length > 0);
         return true;
       },
     );
+    assert.equal(capture.state.value, "abc-123");
   });
 
   await t.test("GetMe decodes an Empty request and a typed response", async () => {

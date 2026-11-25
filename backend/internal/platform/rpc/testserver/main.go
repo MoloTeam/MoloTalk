@@ -67,9 +67,17 @@ func main() {
 		w.WriteHeader(http.StatusOK)
 	})
 
+	// Действующий контракт корреляции: заголовок запроса возвращается в ответе.
+	handler := http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if id := request.Header.Get("X-Request-Id"); id != "" {
+			writer.Header().Set("X-Request-Id", id)
+		}
+		mux.ServeHTTP(writer, request)
+	})
+
 	// Строка готовности читается запускающей стороной.
 	fmt.Printf("listening http://%s\n", listener.Addr().String())
-	if err := http.Serve(listener, mux); err != nil {
+	if err := http.Serve(listener, handler); err != nil {
 		fmt.Fprintf(os.Stderr, "testserver: %v\n", err)
 		os.Exit(1)
 	}

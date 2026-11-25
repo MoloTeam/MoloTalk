@@ -1,6 +1,8 @@
 // Кросс-языковая проверка Gateway: TypeScript декодирует кадр, собранный Go,
-// и кодирует кадр, который Go читает тем же контрактом.
+// и собирает кадр, который Go декодирует в своём тесте.
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
 import test from "node:test";
 
 import { create, fromBinary, toBinary } from "@bufbuild/protobuf";
@@ -14,6 +16,25 @@ import {
 
 // Байты, снятые с Go: GatewayEnvelope{identify{token:"token"}}.
 const goIdentifyHex = "0a070a05746f6b656e";
+
+const fixture = fs
+  .readFileSync(path.resolve(import.meta.dirname, "../../testdata/gateway-server-event.b64"), "utf8")
+  .trim();
+
+function sampleEvent() {
+  return create(ServerEventSchema, {
+    eventId: "01ARZ3NDEKTSV4RRFFQ69G5FA1",
+    occurredAt: { seconds: 1795000000n, nanos: 0 },
+    event: {
+      case: "messageDeleted",
+      value: create(MessageDeletedSchema, {
+        chatId: "01ARZ3NDEKTSV4RRFFQ69G5FA2",
+        messageId: "01ARZ3NDEKTSV4RRFFQ69G5FA3",
+        revision: 2,
+      }),
+    },
+  });
+}
 
 test("TypeScript decodes the frame produced by Go", () => {
   const bytes = Uint8Array.from(Buffer.from(goIdentifyHex, "hex"));
@@ -36,21 +57,15 @@ test("TypeScript encodes a frame the same way Go does", () => {
   assert.equal(decoded.payload.case, "heartbeat");
 });
 
-test("ServerEvent keeps exactly one event", () => {
-  const event = create(ServerEventSchema, {
-    eventId: "01ARZ3NDEKTSV4RRFFQ69G5FA1",
-    occurredAt: { seconds: 1795000000n, nanos: 0 },
-    event: {
-      case: "messageDeleted",
-      value: create(MessageDeletedSchema, {
-        chatId: "01ARZ3NDEKTSV4RRFFQ69G5FA2",
-        messageId: "01ARZ3NDEKTSV4RRFFQ69G5FA3",
-        revision: 2,
-      }),
-    },
-  });
+test("TypeScript frame matches the fixture that Go decodes", () => {
+  const encoded = Buffer.from(toBinary(ServerEventSchema, sampleEvent())).toString("base64");
+  assert.equal(encoded, fixture);
+});
 
+test("ServerEvent keeps exactly one event", () => {
+  const event = sampleEvent();
   const decoded = fromBinary(ServerEventSchema, toBinary(ServerEventSchema, event));
+
   assert.equal(decoded.event.case, "messageDeleted");
   assert.equal(decoded.event.value.revision, 2);
   assert.equal(decoded.eventId, "01ARZ3NDEKTSV4RRFFQ69G5FA1");

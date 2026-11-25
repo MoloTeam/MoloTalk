@@ -864,13 +864,21 @@
             "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
           },
           "mode": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/molotalk.v1.MessageQueryMode"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "not": {
               "enum": [
                 "MESSAGE_QUERY_MODE_UNSPECIFIED"
               ]
             },
             "title": "mode",
-            "$ref": "#/components/schemas/molotalk.v1.MessageQueryMode"
+            "description": "Отсутствие mode означает LATEST; продолжение по cursor не требует mode."
           },
           "cursor": {
             "type": [

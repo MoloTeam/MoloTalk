@@ -1179,12 +1179,13 @@ func (x *DeleteMessageResponse) GetRevision() int32 {
 }
 
 type GetMessagesRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ChatId        string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
-	Mode          MessageQueryMode       `protobuf:"varint,2,opt,name=mode,proto3,enum=molotalk.v1.MessageQueryMode" json:"mode,omitempty"`
-	Cursor        *string                `protobuf:"bytes,3,opt,name=cursor,proto3,oneof" json:"cursor,omitempty"`
-	FromMessageId *string                `protobuf:"bytes,4,opt,name=from_message_id,json=fromMessageId,proto3,oneof" json:"from_message_id,omitempty"`
-	ToMessageId   *string                `protobuf:"bytes,5,opt,name=to_message_id,json=toMessageId,proto3,oneof" json:"to_message_id,omitempty"`
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	ChatId string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	// Отсутствие mode означает LATEST; продолжение по cursor не требует mode.
+	Mode          *MessageQueryMode `protobuf:"varint,2,opt,name=mode,proto3,enum=molotalk.v1.MessageQueryMode,oneof" json:"mode,omitempty"`
+	Cursor        *string           `protobuf:"bytes,3,opt,name=cursor,proto3,oneof" json:"cursor,omitempty"`
+	FromMessageId *string           `protobuf:"bytes,4,opt,name=from_message_id,json=fromMessageId,proto3,oneof" json:"from_message_id,omitempty"`
+	ToMessageId   *string           `protobuf:"bytes,5,opt,name=to_message_id,json=toMessageId,proto3,oneof" json:"to_message_id,omitempty"`
 	// Отсутствие limit означает 50.
 	Limit         *int32 `protobuf:"varint,6,opt,name=limit,proto3,oneof" json:"limit,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -1229,8 +1230,8 @@ func (x *GetMessagesRequest) GetChatId() string {
 }
 
 func (x *GetMessagesRequest) GetMode() MessageQueryMode {
-	if x != nil {
-		return x.Mode
+	if x != nil && x.Mode != nil {
+		return *x.Mode
 	}
 	return MessageQueryMode_MESSAGE_QUERY_MODE_UNSPECIFIED
 }
@@ -1698,15 +1699,16 @@ const file_molotalk_v1_chat_proto_rawDesc = "" +
 	"\x15DeleteMessageResponse\x12C\n" +
 	"\n" +
 	"message_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\tmessageId\x12#\n" +
-	"\brevision\x18\x02 \x01(\x05B\a\xbaH\x04\x1a\x02(\x01R\brevision\"\xb2\x03\n" +
+	"\brevision\x18\x02 \x01(\x05B\a\xbaH\x04\x1a\x02(\x01R\brevision\"\xc0\x03\n" +
 	"\x12GetMessagesRequest\x12=\n" +
-	"\achat_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06chatId\x12=\n" +
+	"\achat_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06chatId\x12B\n" +
 	"\x04mode\x18\x02 \x01(\x0e2\x1d.molotalk.v1.MessageQueryModeB\n" +
-	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\x04mode\x12\x1b\n" +
-	"\x06cursor\x18\x03 \x01(\tH\x00R\x06cursor\x88\x01\x01\x12Q\n" +
-	"\x0ffrom_message_id\x18\x04 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$H\x01R\rfromMessageId\x88\x01\x01\x12M\n" +
-	"\rto_message_id\x18\x05 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$H\x02R\vtoMessageId\x88\x01\x01\x12$\n" +
-	"\x05limit\x18\x06 \x01(\x05B\t\xbaH\x06\x1a\x04\x18d(\x01H\x03R\x05limit\x88\x01\x01B\t\n" +
+	"\xbaH\a\x82\x01\x04\x10\x01 \x00H\x00R\x04mode\x88\x01\x01\x12\x1b\n" +
+	"\x06cursor\x18\x03 \x01(\tH\x01R\x06cursor\x88\x01\x01\x12Q\n" +
+	"\x0ffrom_message_id\x18\x04 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$H\x02R\rfromMessageId\x88\x01\x01\x12M\n" +
+	"\rto_message_id\x18\x05 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$H\x03R\vtoMessageId\x88\x01\x01\x12$\n" +
+	"\x05limit\x18\x06 \x01(\x05B\t\xbaH\x06\x1a\x04\x18d(\x01H\x04R\x05limit\x88\x01\x01B\a\n" +
+	"\x05_modeB\t\n" +
 	"\a_cursorB\x12\n" +
 	"\x10_from_message_idB\x10\n" +
 	"\x0e_to_message_idB\b\n" +

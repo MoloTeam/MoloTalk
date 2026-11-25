@@ -1,65 +1,42 @@
 #!/usr/bin/env node
 // Проверка контрактов: buf format/lint/build, повторная генерация без
-// расхождений, сборка и тесты Go, typecheck TypeScript.
+// расхождений, сборка и тесты Go, typecheck и контрактные тесты TypeScript.
 // Скрипт не требует глобальных плагинов, protoc и Docker.
 
-import { execFileSync, spawnSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
-const root = path.resolve(import.meta.dirname, "..", "..");
-const apiDir = path.join(root, "api");
-const backendDir = path.join(root, "backend");
-const exe = process.platform === "win32" ? ".exe" : "";
+import { apiDir, backendDir, generate } from "./generate.mjs";
+import { buildTools } from "./tools.mjs";
 
-// Рабочий каталог внутри репозитория: системный TMP может быть недоступен.
-const workDir = path.join(root, ".tmp");
-fs.mkdirSync(workDir, { recursive: true });
-const tools = fs.mkdtempSync(path.join(workDir, "check-"));
+const root = path.resolve(apiDir, "..");
+const workRoot = path.join(root, ".tmp");
+fs.mkdirSync(workRoot, { recursive: true });
+const workDir = fs.mkdtempSync(path.join(workRoot, "check-"));
 
 // buf format использует системный diff; Git для Windows поставляет его сам.
 const gitUsrBin = "C:\\Program Files\\Git\\usr\\bin";
 const extraPath = fs.existsSync(path.join(gitUsrBin, "diff.exe")) ? `${gitUsrBin}${path.delimiter}` : "";
 
-function environment() {
-  return {
-    ...process.env,
-    PATH: `${tools}${path.delimiter}${extraPath}${path.join(apiDir, "node_modules", ".bin")}${path.delimiter}${process.env.PATH}`,
-    TMP: tools,
-    TEMP: tools,
-    GOTMPDIR: tools,
-  };
-}
+// Системный TMP может быть недоступен: buf и go используют рабочий каталог.
+const env = {
+  ...process.env,
+  TMP: workDir,
+  TEMP: workDir,
+  GOTMPDIR: workDir,
+  PATH: `${extraPath}${process.env.PATH ?? ""}`,
+};
 
 function run(command, args, options = {}) {
-  const result = spawnSync(command, args, {
-    cwd: options.cwd ?? root,
-    env: environment(),
-    encoding: "utf8",
-  });
+  const result = spawnSync(command, args, { cwd: options.cwd ?? root, env, encoding: "utf8" });
   if (result.status !== 0) {
     process.stderr.write(result.stdout ?? "");
     process.stderr.write(result.stderr ?? "");
     throw new Error(`${command} ${args.join(" ")} failed with ${result.status}`);
   }
   return result.stdout ?? "";
-}
-
-function buildTools() {
-  const toolsToBuild = [
-    ["buf", "github.com/bufbuild/buf/cmd/buf"],
-    ["protoc-gen-go", "google.golang.org/protobuf/cmd/protoc-gen-go"],
-    ["protoc-gen-connect-go", "connectrpc.com/connect/v2/cmd/protoc-gen-connect-go"],
-    ["protoc-gen-connect-openapi", "connectrpc.com/protoc-gen-connect-openapi"],
-  ];
-  for (const [name, pkg] of toolsToBuild) {
-    run("go", ["build", "-o", path.join(tools, name + exe), pkg], { cwd: backendDir });
-  }
-}
-
-function buf(...args) {
-  return run(path.join(tools, "buf" + exe), args, { cwd: apiDir });
 }
 
 function listFiles(directory) {
@@ -85,13 +62,12 @@ function compareTrees(generated, tracked) {
   const generatedFiles = listFiles(generated);
   const trackedFiles = listFiles(tracked);
   for (const file of trackedFiles) {
-    const expectedPath = path.join(tracked, file);
-    const actualPath = path.join(generated, file);
-    if (!fs.existsSync(actualPath)) {
+    const actual = path.join(generated, file);
+    if (!fs.existsSync(actual)) {
       problems.push(`${file}: missing in generated output`);
       continue;
     }
-    if (!fs.readFileSync(expectedPath).equals(fs.readFileSync(actualPath))) {
+    if (!fs.readFileSync(path.join(tracked, file)).equals(fs.readFileSync(actual))) {
       problems.push(`${file}: content differs`);
     }
   }
@@ -103,35 +79,47 @@ function compareTrees(generated, tracked) {
   return problems;
 }
 
-function generatedDrift() {
-  const result = spawnSync("git", ["status", "--porcelain", "--", "backend/gen", "api/src/gen", "api/gen"], {
-    cwd: root,
-    encoding: "utf8",
-  });
-  return (result.stdout ?? "").trim();
+function copySources(target) {
+  const entries = [
+    "proto",
+    "third_party",
+    "openapi",
+    "buf.yaml",
+    "buf.gen.go.yaml",
+    "buf.gen.ts.yaml",
+    "buf.gen.openapi.public.yaml",
+    "buf.gen.openapi.internal.yaml",
+  ];
+  for (const entry of entries) {
+    fs.cpSync(path.join(apiDir, entry), path.join(target, entry), { recursive: true });
+  }
 }
 
 function main() {
-  buildTools();
+  const tools = buildTools({
+    backendDir,
+    apiDir,
+    targetDir: path.join(workDir, "tools"),
+    env,
+    log: console.log,
+  });
 
-  buf("format", "-d");
-  buf("lint");
-  buf("build", "-o", path.join(tools, "schema.binpb"));
+  run(tools.buf, ["format", "-d"], { cwd: apiDir });
+  run(tools.buf, ["lint"], { cwd: apiDir });
+  run(tools.buf, ["build", "-o", path.join(workDir, "schema.binpb")], { cwd: apiDir });
   console.log("ok buf format/lint/build");
 
-  const output = path.join(tools, "out");
-  buf("generate", "--template", "buf.gen.go.yaml", "--output", path.join(output, "go"), "--path", "proto/molotalk/v1", "--path", "proto/molotalk/internal/v1");
-  buf("generate", "--template", "buf.gen.ts.yaml", "--output", path.join(output, "ts"), "--path", "proto/molotalk/v1", "--path", "third_party/proto/buf/validate", "--path", "third_party/proto/google/api");
-  buf("generate", "--template", "buf.gen.openapi.public.yaml", "--output", path.join(output, "openapi"), "--path", "proto/molotalk/v1");
-  buf("generate", "--template", "buf.gen.openapi.internal.yaml", "--output", path.join(output, "openapi"), "--path", "proto/molotalk/internal/v1");
+  const generatedRoot = path.join(workDir, "generated");
+  copySources(path.join(generatedRoot, "api"));
+  generate({ buf: tools.buf, root: path.join(generatedRoot, "api"), env: tools.env, log: console.log });
 
-  const differences = [
-    ...compareTrees(path.join(output, "backend", "gen"), path.join(backendDir, "gen")),
-    ...compareTrees(path.join(output, "ts", "src", "gen"), path.join(apiDir, "src", "gen")),
-    ...compareTrees(path.join(output, "openapi", "gen", "openapi"), path.join(apiDir, "gen", "openapi")),
+  const problems = [
+    ...compareTrees(path.join(generatedRoot, "backend", "gen"), path.join(backendDir, "gen")),
+    ...compareTrees(path.join(generatedRoot, "api", "src", "gen"), path.join(apiDir, "src", "gen")),
+    ...compareTrees(path.join(generatedRoot, "api", "gen", "openapi"), path.join(apiDir, "gen", "openapi")),
   ];
-  if (differences.length > 0) {
-    throw new Error(`generated artifacts are stale:\n${differences.join("\n")}`);
+  if (problems.length > 0) {
+    throw new Error(`generated artifacts are stale:\n${problems.join("\n")}`);
   }
   console.log("ok generated artifacts match committed files");
 
@@ -143,12 +131,17 @@ function main() {
   run("node", [path.join(apiDir, "node_modules", "typescript", "bin", "tsc"), "--noEmit"], { cwd: apiDir });
   console.log("ok typescript typecheck");
 
-  run("node", ["--experimental-transform-types", "--test", "--test-timeout=120000", "src/test/gateway.test.mjs", "src/test/contract.test.mjs"], { cwd: apiDir });
+  run(
+    "node",
+    ["--experimental-transform-types", "--test", "--test-timeout=120000", "src/test/gateway.test.mjs", "src/test/contract.test.mjs"],
+    { cwd: apiDir },
+  );
   console.log("ok typescript contract tests");
 
-  const protoInMain = spawnSync("git", ["cat-file", "-e", "main:api/proto/molotalk/v1/types.proto"], { cwd: root });
+  const protoInMain = spawnSync("git", ["cat-file", "-e", "main:api/proto/molotalk/v1/types.proto"], { cwd: root, env });
   if (protoInMain.status === 0) {
-    buf("breaking", "--against", ".git#branch=main");
+    // .git лежит в корне репозитория, а buf.yaml — в api/, поэтому нужен subdir.
+    run(tools.buf, ["breaking", "--against", "../.git#branch=main,subdir=api"], { cwd: apiDir });
     console.log("ok buf breaking against main");
   } else {
     console.log("skip buf breaking: main has no proto baseline yet (bootstrap)");
@@ -163,5 +156,5 @@ try {
   console.error(error.message);
   process.exit(1);
 } finally {
-  fs.rmSync(tools, { recursive: true, force: true });
+  fs.rmSync(workDir, { recursive: true, force: true });
 }

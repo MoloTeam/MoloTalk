@@ -7,8 +7,10 @@ import (
 	"errors"
 	"strings"
 
+	validatepb "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	"buf.build/go/protovalidate"
 	"connectrpc.com/connect/v2"
+	"connectrpc.com/connect/v2/connectproto"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -50,11 +52,19 @@ func validationError(err error) error {
 	}
 
 	parts := make([]string, 0, len(validation.Violations))
+	violations := &validatepb.Violations{Violations: make([]*validatepb.Violation, 0, len(validation.Violations))}
 	for _, violation := range validation.Violations {
 		field := protovalidate.FieldPathString(violation.Proto.GetField())
 		parts = append(parts, field+": "+violation.Proto.GetMessage())
+		violations.Violations = append(violations.Violations, violation.Proto)
 	}
-	return connect.NewError(connect.CodeInvalidArgument, strings.Join(parts, "; "))
+
+	connectError := connect.NewError(connect.CodeInvalidArgument, strings.Join(parts, "; "))
+	// Клиент получает структурированные нарушения, а не только текст.
+	if detail, err := connectproto.NewErrorDetail(violations); err == nil {
+		connectError = connectError.WithDetail(detail)
+	}
+	return connectError
 }
 
 // ErrorInterceptor сохраняет доменные коды Connect и заменяет прочие ошибки

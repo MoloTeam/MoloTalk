@@ -158,7 +158,8 @@ message DeleteMessageResponse {
 
 message GetMessagesRequest {
   string chat_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
-  MessageQueryMode mode = 2 [(buf.validate.field).enum = {
+  // Отсутствие mode означает LATEST; продолжение по cursor не требует mode.
+  optional MessageQueryMode mode = 2 [(buf.validate.field).enum = {
     defined_only: true
     not_in: [0]
   }];
