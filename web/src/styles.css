@@ -1,0 +1,122 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #f6f6f7;
+  color: #1c1c1e;
+}
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #d9d9de;
+  background: #ffffff;
+}
+
+.app-header nav {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.app-header nav a {
+  color: #2f5cff;
+  text-decoration: none;
+}
+
+.app-header nav a.active {
+  font-weight: 600;
+}
+
+.app-main {
+  flex: 1;
+  padding: 1rem;
+}
+
+.screen,
+.dialogs,
+.timeline,
+.composer {
+  background: #ffffff;
+  border: 1px solid #e1e1e6;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.dialogs ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dialogs li {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.25rem 0;
+}
+
+.dialogs li.selected button {
+  font-weight: 600;
+}
+
+.badge {
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  color: #6b6b70;
+}
+
+.chat-screen {
+  display: grid;
+  grid-template-columns: minmax(220px, 320px) 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.chat-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.hint {
+  color: #6b6b70;
+}
+
+.error {
+  color: #b3261e;
+}
+
+.skeleton-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 320px;
+}
+
+.skeleton-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.composer textarea {
+  width: 100%;
+  margin: 0.5rem 0;
+}
+
+@media (max-width: 720px) {
+  .chat-screen {
+    grid-template-columns: 1fr;
+  }
+}

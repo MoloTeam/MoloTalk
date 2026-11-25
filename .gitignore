@@ -55,6 +55,7 @@ docker-compose.override.yml
 
 # Logs
 tmp/
+.tmp/
 *.log
 logs/
 
