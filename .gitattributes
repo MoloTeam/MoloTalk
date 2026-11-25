@@ -15,6 +15,11 @@
 *.bat text eol=crlf
 *.cmd text eol=crlf
 
+# Сгенерированные контракты: GitHub сворачивает их диффы, ревью идёт по proto.
+backend/gen/** linguist-generated=true
+api/src/gen/** linguist-generated=true
+api/gen/** linguist-generated=true
+
 # Двоичные файлы не преобразуются.
 *.png binary
 *.jpg binary
