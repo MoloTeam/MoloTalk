@@ -1,9 +1,9 @@
 import { create } from "@bufbuild/protobuf";
-import { MessageDeletedSchema, ServerEventSchema, type ServerEvent } from "@api/molotalk/v1/gateway_pb";
+import { ReadySchema, ServerEventSchema, MessageDeletedSchema } from "@api/molotalk/v1/gateway_pb";
 import { describe, expect, it } from "vitest";
 
 import { createApp } from "../app/createApp";
-import type { ApiPort, SocketHandlers, SocketPort } from "./ports";
+import type { ApiPort, ServerFrame, SocketHandlers, SocketPort } from "./ports";
 
 class FakeApi implements ApiPort {
   calls = 0;
@@ -31,35 +31,46 @@ class FakeSocket implements SocketPort {
     };
   }
 
-  emit(event: ServerEvent) {
-    this.handlers?.onEvent(event);
+  frame(frame: ServerFrame) {
+    this.handlers?.onFrame(frame);
+  }
+
+  open() {
+    this.handlers?.onOpen?.();
+  }
+
+  close(code = 4001, reason = "replaced") {
+    this.handlers?.onClose?.(code, reason);
+  }
+
+  fail() {
+    this.handlers?.onError?.(new Error("socket failed"));
   }
 }
 
-function deletedEvent(): ServerEvent {
-  return create(ServerEventSchema, {
-    eventId: "01ARZ3NDEKTSV4RRFFQ69G5FA1",
-    occurredAt: { seconds: 1795000000n, nanos: 0 },
-    event: {
-      case: "messageDeleted",
-      value: create(MessageDeletedSchema, {
-        chatId: "01ARZ3NDEKTSV4RRFFQ69G5FA4",
-        messageId: "01ARZ3NDEKTSV4RRFFQ69G5FA2",
-        revision: 2,
-      }),
-    },
-  });
+function readyFrame(): ServerFrame {
+  return {
+    case: "ready",
+    value: create(ReadySchema, { userId: "01ARZ3NDEKTSV4RRFFQ69G5FA1" }),
+  };
 }
 
-function presenceEvent(): ServerEvent {
-  return create(ServerEventSchema, {
-    eventId: "01ARZ3NDEKTSV4RRFFQ69G5FA3",
-    occurredAt: { seconds: 1795000001n, nanos: 0 },
-    event: {
-      case: "presenceChanged",
-      value: { userId: "01ARZ3NDEKTSV4RRFFQ69G5FA4", status: 1 },
-    },
-  });
+function deletedEvent(): ServerFrame {
+  return {
+    case: "serverEvent",
+    value: create(ServerEventSchema, {
+      eventId: "01ARZ3NDEKTSV4RRFFQ69G5FA1",
+      occurredAt: { seconds: 1795000000n, nanos: 0 },
+      event: {
+        case: "messageDeleted",
+        value: create(MessageDeletedSchema, {
+          chatId: "01ARZ3NDEKTSV4RRFFQ69G5FA4",
+          messageId: "01ARZ3NDEKTSV4RRFFQ69G5FA2",
+          revision: 2,
+        }),
+      },
+    }),
+  };
 }
 
 describe("actions", () => {
@@ -83,19 +94,61 @@ describe("actions", () => {
     expect(JSON.stringify(app.store.getState())).not.toContain("secret from dependency");
   });
 
-  it("applies a socket event and drops the subscription on dispose", () => {
+  it("follows the socket lifecycle and applies frames", () => {
     const socket = new FakeSocket();
     const app = createApp({ api: new FakeApi(new Error("unused")), socket });
 
     app.actions.startRealtime();
-    socket.emit(deletedEvent());
+    expect(app.store.getState().connection).toBe("connecting");
+
+    socket.open();
+    expect(app.store.getState().connection).toBe("open");
+
+    socket.frame(readyFrame());
+    expect(app.store.getState().connection).toBe("ready");
+
+    socket.frame(deletedEvent());
     expect(app.store.getState().lastEventType).toBe("messageDeleted");
+
+    socket.close(4008, "idle timeout");
+    expect(app.store.getState().connection).toBe("closed");
 
     app.dispose();
     expect(socket.unsubscribed).toBe(1);
+  });
 
-    socket.emit(presenceEvent());
+  it("drops the subscription on dispose and ignores later frames", () => {
+    const socket = new FakeSocket();
+    const app = createApp({ api: new FakeApi(new Error("unused")), socket });
+
+    app.actions.startRealtime();
+    socket.frame(deletedEvent());
+    app.dispose();
+
+    socket.frame({
+      case: "serverEvent",
+      value: create(ServerEventSchema, {
+        eventId: "01ARZ3NDEKTSV4RRFFQ69G5FA3",
+        occurredAt: { seconds: 1795000001n, nanos: 0 },
+        event: {
+          case: "presenceChanged",
+          value: { userId: "01ARZ3NDEKTSV4RRFFQ69G5FA4", status: 1 },
+        },
+      }),
+    });
+
     expect(app.store.getState().lastEventType).toBe("messageDeleted");
+    expect(app.store.getState().connection).toBe("closed");
+  });
+
+  it("stores a safe category for socket failures", () => {
+    const socket = new FakeSocket();
+    const app = createApp({ api: new FakeApi(new Error("unused")), socket });
+
+    app.actions.startRealtime();
+    socket.fail();
+
+    expect(app.store.getState().error).toBe("socket_error");
   });
 
   it("selects a chat through the action layer", () => {

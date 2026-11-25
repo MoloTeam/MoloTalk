@@ -37,12 +37,26 @@ export function createActions({ store, api, socket }: ActionDeps): AppActions {
       if (unsubscribe) {
         return;
       }
+      store.update({ connection: "connecting" });
       unsubscribe = socket.connect({
-        onEvent(event) {
-          store.update({ lastEventType: event.event.case ?? null });
+        onOpen() {
+          store.update({ connection: "open" });
+        },
+        onFrame(frame) {
+          if (frame.case === "ready") {
+            store.update({ connection: "ready" });
+            return;
+          }
+          if (frame.case === "serverEvent") {
+            store.update({ lastEventType: frame.value.event.case ?? null });
+          }
+          // HeartbeatAck пока не наблюдаем в состоянии: таймеры вне карточки.
+        },
+        onClose() {
+          store.update({ connection: "closed" });
         },
         onError() {
-          store.update({ error: "socket_frame_rejected" });
+          store.update({ error: "socket_error" });
         },
       });
     },
@@ -50,6 +64,7 @@ export function createActions({ store, api, socket }: ActionDeps): AppActions {
     stopRealtime() {
       unsubscribe?.();
       unsubscribe = null;
+      store.update({ connection: "closed" });
     },
   };
 }

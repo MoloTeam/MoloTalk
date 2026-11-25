@@ -11,6 +11,7 @@ describe("store", () => {
 
     expect(first.getState().selectedChatId).toBe("chat-1");
     expect(second.getState().selectedChatId).toBeNull();
+    expect(second.getState().connection).toBe("closed");
     expect(second.getState().chats).not.toBe(first.getState().chats);
   });
 

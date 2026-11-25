@@ -9,7 +9,10 @@ export interface Profile {
   displayName: string;
 }
 
+export type ConnectionStatus = "closed" | "connecting" | "open" | "ready";
+
 export interface AppState {
+  connection: ConnectionStatus;
   profile: Profile | null;
   chats: ChatSummary[];
   selectedChatId: string | null;
@@ -43,6 +46,7 @@ function cloneState(state: AppState): AppState {
 // изменяемых коллекций между вкладками и тестами быть не должно.
 export function createInitialState(overrides: Partial<AppState> = {}): AppState {
   return cloneState({
+    connection: "closed",
     profile: null,
     chats: [
       { id: "01ARZ3NDEKTSV4RRFFQ69G5FA4", title: "Alice", kind: "direct" },

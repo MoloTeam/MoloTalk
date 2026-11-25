@@ -48,7 +48,7 @@ Vite; в собранном виде его обеспечивает Caddy.
 - `src/sync/ports.ts` — интерфейсы `ApiPort` и `SocketPort`; UI о них не знает.
 - `src/sync/connectApi.ts` — Connect-клиент поверх публичных дескрипторов
   `api/src/gen` (алиас `@api`), метод `GetMe`.
-- `src/sync/gatewaySocket.ts` — бинарный `GatewayEnvelope` по `/ws`, схема
+- `src/sync/gatewaySocket.ts` — бинарный `GatewayEnvelope` по `/ws`: доставляет `Ready`, `HeartbeatAck` и `ServerEvent`, сообщает об открытии и закрытии (код и причина без интерпретации), а кадры `Identify`/`Heartbeat` от сервера, пустую оболочку и повреждённый кадр отдаёт как ошибку протокола. Схема
   `ws`/`wss` из origin приложения, повреждённый кадр не выдаётся как событие.
 - `src/app/createApp.ts` — принимает независимые порты и создаёт экземпляр
   приложения со своим store.
