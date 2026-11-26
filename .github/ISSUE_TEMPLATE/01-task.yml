@@ -56,13 +56,6 @@ body:
         - [ ] F_XXX_2: ...
     validations:
       required: true
-  - type: textarea
-    id: deps
-    attributes:
-      label: Зависимости
-      description: От каких карточек/PR зависит эта задача (#номер).
-    validations:
-      required: false
   - type: checkboxes
     id: dod
     attributes:
