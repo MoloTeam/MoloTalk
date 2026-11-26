@@ -3,6 +3,7 @@ package auth
 
 import (
 	"context"
+	"time"
 
 	"github.com/MoloTeam/MoloTalk/backend/internal/platform/clock"
 	"github.com/MoloTeam/MoloTalk/backend/internal/platform/httpserver"
@@ -10,10 +11,17 @@ import (
 )
 
 // Account — учётная запись пользователя.
+//
+// Identifier хранится в нормализованном виде (см. NormalizeIdentifier).
+// PasswordHash — результат PasswordHasher.Hash; пароль в открытом виде в
+// Account не попадает.
 type Account struct {
-	ID           string
-	Identifier   string
-	PasswordHash string
+	ID                string
+	Identifier        string
+	DisplayName       string
+	PasswordHash      string
+	CreatedAt         time.Time
+	PasswordChangedAt time.Time
 }
 
 // Session — сеанс обновления токена.
@@ -29,6 +37,11 @@ type Claims struct {
 }
 
 // AccountRepository хранит учётные записи.
+//
+// FindByIdentifier получает уже нормализованный идентификатор и возвращает
+// ErrAccountNotFound, если учётной записи нет. Create сохраняет пользователя и
+// его хеш пароля одной операцией и возвращает ErrIdentifierTaken, если
+// идентификатор уже занят (в том числе при гонке двух регистраций).
 type AccountRepository interface {
 	FindByIdentifier(ctx context.Context, identifier string) (Account, error)
 	Create(ctx context.Context, account Account) error
@@ -41,7 +54,9 @@ type SessionRepository interface {
 	Revoke(ctx context.Context, sessionID string) error
 }
 
-// PasswordHasher хеширует и проверяет пароли.
+// PasswordHasher хеширует и проверяет пароли. Hash обязан использовать
+// случайную соль и возвращать самодостаточную строку, из которой пароль
+// невосстановим; Verify сравнивает пароль с такой строкой.
 type PasswordHasher interface {
 	Hash(ctx context.Context, password string) (string, error)
 	Verify(ctx context.Context, password, hash string) (bool, error)
