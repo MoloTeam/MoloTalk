@@ -41,7 +41,9 @@ type Claims struct {
 // FindByIdentifier получает уже нормализованный идентификатор и возвращает
 // ErrAccountNotFound, если учётной записи нет. Create сохраняет пользователя и
 // его хеш пароля одной операцией и возвращает ErrIdentifierTaken, если
-// идентификатор уже занят (в том числе при гонке двух регистраций).
+// идентификатор уже занят (в том числе при гонке двух регистраций). Update
+// сохраняет изменяемые учётные данные (хеш пароля и время его смены) и
+// возвращает ErrAccountNotFound для неизвестного ID.
 type AccountRepository interface {
 	FindByIdentifier(ctx context.Context, identifier string) (Account, error)
 	Create(ctx context.Context, account Account) error

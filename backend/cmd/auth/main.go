@@ -10,11 +10,15 @@ import (
 	"github.com/MoloTeam/MoloTalk/backend/internal/auth"
 	"github.com/MoloTeam/MoloTalk/backend/internal/platform/bootstrap"
 	"github.com/MoloTeam/MoloTalk/backend/internal/platform/config"
+	"github.com/MoloTeam/MoloTalk/backend/internal/platform/passwordhash"
 )
 
 func main() {
-	// Реализации портов хранения, хеширования и токенов подключаются в T-02/T-03.
-	module := auth.New(auth.Deps{})
+	// Хеширование паролей подключено; реализации портов хранения и токенов
+	// подключаются в T-02/T-03.
+	module := auth.New(auth.Deps{
+		Hasher: passwordhash.NewArgon2id(passwordhash.DefaultParams()),
+	})
 
 	if err := bootstrap.Run(context.Background(), bootstrap.Options{
 		Service: config.Auth,
