@@ -35,6 +35,6 @@ export function buildTools({ backendDir, repoRoot, targetDir, env = process.env,
   const toolsPath = [targetDir, npmBin].filter(Boolean).join(path.delimiter) + path.delimiter + (env.PATH ?? "");
   return {
     buf: path.join(targetDir, "buf" + exe),
-    env: { ...env, PATH: toolsPath, TMP: env.TMP, TEMP: env.TEMP, GOTMPDIR: env.GOTMPDIR },
+    env: { ...env, PATH: toolsPath },
   };
 }

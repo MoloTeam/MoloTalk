@@ -16,25 +16,8 @@ const workRoot = path.join(root, ".tmp");
 fs.mkdirSync(workRoot, { recursive: true });
 const workDir = fs.mkdtempSync(path.join(workRoot, "check-"));
 
-// buf format использует системный diff; Git для Windows поставляет его сам.
-const gitUsrBin = "C:\\Program Files\\Git\\usr\\bin";
-const extraPath = fs.existsSync(path.join(gitUsrBin, "diff.exe")) ? `${gitUsrBin}${path.delimiter}` : "";
-
-// Системный TMP может быть недоступен: buf и go используют рабочий каталог.
-const env = {
-  ...process.env,
-  TMP: workDir,
-  TEMP: workDir,
-  GOTMPDIR: workDir,
-  PATH: `${extraPath}${process.env.PATH ?? ""}`,
-};
-
-// В PATH для buf format попадает Git usr/bin с GNU tar, который читает "D:"
-// как имя хоста; системный tar Windows таких путей не боится.
-const tarCommand =
-  process.platform === "win32"
-    ? path.join(process.env.SystemRoot ?? "C:\\Windows", "System32", "tar.exe")
-    : "tar";
+// Скрипт не подменяет окружение: buf, go и git используют системные настройки.
+const env = process.env;
 
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, { cwd: options.cwd ?? root, env, encoding: "utf8" });
@@ -153,7 +136,7 @@ function main() {
     const archive = path.join(workDir, "baseline.tar");
     fs.mkdirSync(baseline, { recursive: true });
     run("git", ["archive", "--format=tar", "-o", archive, "main", "api"], { cwd: root });
-    run(tarCommand, ["-xf", archive, "-C", baseline], { cwd: root });
+    run("tar", ["-xf", archive, "-C", baseline], { cwd: root });
     run(tools.buf, ["breaking", "--against", path.join(baseline, "api")], { cwd: apiDir });
     console.log("ok buf breaking against main");
   } else {
