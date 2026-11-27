@@ -444,36 +444,36 @@ var File_molotalk_internal_v1_internal_proto protoreflect.FileDescriptor
 
 const file_molotalk_internal_v1_internal_proto_rawDesc = "" +
 	"\n" +
-	"#molotalk/internal/v1/internal.proto\x12\x14molotalk.internal.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x17molotalk/v1/types.proto\"\x9e\x01\n" +
-	"\x18IntrospectSessionRequest\x12C\n" +
+	"#molotalk/internal/v1/internal.proto\x12\x14molotalk.internal.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x17molotalk/v1/rules.proto\x1a\x17molotalk/v1/types.proto\"h\n" +
+	"\x18IntrospectSessionRequest\x12(\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\tsessionId\x12=\n" +
-	"\auser_id\x18\x02 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06userId\"3\n" +
+	"session_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\tsessionId\x12\"\n" +
+	"\auser_id\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x06userId\"3\n" +
 	"\x19IntrospectSessionResponse\x12\x16\n" +
-	"\x06active\x18\x01 \x01(\bR\x06active\"\xf8\x01\n" +
-	"\x16CheckChatAccessRequest\x12=\n" +
-	"\auser_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06userId\x12=\n" +
-	"\achat_id\x18\x02 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06chatId\x12N\n" +
-	"\rattachment_id\x18\x03 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$H\x00R\fattachmentId\x88\x01\x01B\x10\n" +
+	"\x06active\x18\x01 \x01(\bR\x06active\"\xa7\x01\n" +
+	"\x16CheckChatAccessRequest\x12\"\n" +
+	"\auser_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x06userId\x12\"\n" +
+	"\achat_id\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x06chatId\x123\n" +
+	"\rattachment_id\x18\x03 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01H\x00R\fattachmentId\x88\x01\x01B\x10\n" +
 	"\x0e_attachment_id\"3\n" +
 	"\x17CheckChatAccessResponse\x12\x18\n" +
-	"\aallowed\x18\x01 \x01(\bR\aallowed\"V\n" +
-	"\x15GetUserChatIdsRequest\x12=\n" +
-	"\auser_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06userId\"\x97\x01\n" +
-	"\x16GetUserChatIdsResponse\x12D\n" +
-	"\bchat_ids\x18\x01 \x03(\tB)\xbaH&\x92\x01#\"!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\achatIds\x127\n" +
+	"\aallowed\x18\x01 \x01(\bR\aallowed\";\n" +
+	"\x15GetUserChatIdsRequest\x12\"\n" +
+	"\auser_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x06userId\"|\n" +
+	"\x16GetUserChatIdsResponse\x12)\n" +
+	"\bchat_ids\x18\x01 \x03(\tB\x0e\xbaH\v\x92\x01\b\"\x06r\x04\x88\xf4\x03\x01R\achatIds\x127\n" +
 	"\vread_states\x18\x02 \x03(\v2\x16.molotalk.v1.ReadStateR\n" +
-	"readStates\"\xe1\x01\n" +
-	"\x10HeartbeatRequest\x12=\n" +
-	"\auser_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06userId\x12C\n" +
+	"readStates\"\x90\x01\n" +
+	"\x10HeartbeatRequest\x12\"\n" +
+	"\auser_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x06userId\x12(\n" +
 	"\n" +
-	"session_id\x18\x02 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\tsessionId\x12I\n" +
-	"\rconnection_id\x18\x03 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\fconnectionId\"\xe2\x01\n" +
-	"\x11DisconnectRequest\x12=\n" +
-	"\auser_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06userId\x12C\n" +
+	"session_id\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\tsessionId\x12.\n" +
+	"\rconnection_id\x18\x03 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\fconnectionId\"\x91\x01\n" +
+	"\x11DisconnectRequest\x12\"\n" +
+	"\auser_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x06userId\x12(\n" +
 	"\n" +
-	"session_id\x18\x02 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\tsessionId\x12I\n" +
-	"\rconnection_id\x18\x03 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\fconnectionId2\x8b\x01\n" +
+	"session_id\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\tsessionId\x12.\n" +
+	"\rconnection_id\x18\x03 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\fconnectionId2\x8b\x01\n" +
 	"\x13AuthInternalService\x12t\n" +
 	"\x11IntrospectSession\x12..molotalk.internal.v1.IntrospectSessionRequest\x1a/.molotalk.internal.v1.IntrospectSessionResponse2\xf2\x01\n" +
 	"\x13ChatInternalService\x12n\n" +

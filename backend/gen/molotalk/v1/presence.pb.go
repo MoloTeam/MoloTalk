@@ -115,9 +115,9 @@ var File_molotalk_v1_presence_proto protoreflect.FileDescriptor
 
 const file_molotalk_v1_presence_proto_rawDesc = "" +
 	"\n" +
-	"\x1amolotalk/v1/presence.proto\x12\vmolotalk.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x17molotalk/v1/types.proto\"_\n" +
-	"\x12GetPresenceRequest\x12I\n" +
-	"\buser_ids\x18\x01 \x03(\tB.\xbaH+\x92\x01(\b\x01\x10\xc8\x01\"!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\auserIds\"P\n" +
+	"\x1amolotalk/v1/presence.proto\x12\vmolotalk.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x17molotalk/v1/rules.proto\x1a\x17molotalk/v1/types.proto\"D\n" +
+	"\x12GetPresenceRequest\x12.\n" +
+	"\buser_ids\x18\x01 \x03(\tB\x13\xbaH\x10\x92\x01\r\b\x01\x10\xc8\x01\"\x06r\x04\x88\xf4\x03\x01R\auserIds\"P\n" +
 	"\x13GetPresenceResponse\x129\n" +
 	"\tpresences\x18\x01 \x03(\v2\x15.molotalk.v1.PresenceB\x04\xe2A\x01\x02R\tpresences2c\n" +
 	"\x0fPresenceService\x12P\n" +
@@ -157,6 +157,7 @@ func file_molotalk_v1_presence_proto_init() {
 	if File_molotalk_v1_presence_proto != nil {
 		return
 	}
+	file_molotalk_v1_rules_proto_init()
 	file_molotalk_v1_types_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{

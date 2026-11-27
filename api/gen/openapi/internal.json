@@ -107,12 +107,12 @@
           "userId": {
             "type": "string",
             "title": "user_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "chatId": {
             "type": "string",
             "title": "chat_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "attachmentId": {
             "type": [
@@ -120,7 +120,7 @@
               "null"
             ],
             "title": "attachment_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           }
         },
         "title": "CheckChatAccessRequest",
@@ -143,17 +143,17 @@
           "userId": {
             "type": "string",
             "title": "user_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "sessionId": {
             "type": "string",
             "title": "session_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "connectionId": {
             "type": "string",
             "title": "connection_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           }
         },
         "title": "DisconnectRequest",
@@ -165,7 +165,7 @@
           "userId": {
             "type": "string",
             "title": "user_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           }
         },
         "title": "GetUserChatIdsRequest",
@@ -178,7 +178,7 @@
             "type": "array",
             "items": {
               "type": "string",
-              "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+              "description": "molotalk.v1.ulid = true // must be a ULID\n"
             },
             "title": "chat_ids"
           },
@@ -199,17 +199,17 @@
           "userId": {
             "type": "string",
             "title": "user_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "sessionId": {
             "type": "string",
             "title": "session_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "connectionId": {
             "type": "string",
             "title": "connection_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           }
         },
         "title": "HeartbeatRequest",
@@ -221,12 +221,12 @@
           "sessionId": {
             "type": "string",
             "title": "session_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "userId": {
             "type": "string",
             "title": "user_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           }
         },
         "title": "IntrospectSessionRequest",
@@ -249,7 +249,7 @@
           "chatId": {
             "type": "string",
             "title": "chat_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "lastReadMessageId": {
             "type": [
@@ -257,7 +257,7 @@
               "null"
             ],
             "title": "last_read_message_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "unreadCount": {
             "type": "integer",

@@ -668,7 +668,7 @@ var File_molotalk_v1_auth_proto protoreflect.FileDescriptor
 
 const file_molotalk_v1_auth_proto_rawDesc = "" +
 	"\n" +
-	"\x16molotalk/v1/auth.proto\x12\vmolotalk.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x17molotalk/v1/types.proto\"\xa6\x01\n" +
+	"\x16molotalk/v1/auth.proto\x12\vmolotalk.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x17molotalk/v1/rules.proto\x1a\x17molotalk/v1/types.proto\"\xa6\x01\n" +
 	"\x0fRegisterRequest\x12>\n" +
 	"\n" +
 	"identifier\x18\x01 \x01(\tB\x1e\xbaH\x1br\x19\x10\x01\x18\xfe\x012\x12^[^\\p{Lu}\\p{Lt}]*$R\n" +
@@ -692,10 +692,10 @@ const file_molotalk_v1_auth_proto_rawDesc = "" +
 	"\fall_sessions\x18\x01 \x01(\bH\x00R\vallSessions\x88\x01\x01B\x0f\n" +
 	"\r_all_sessions\">\n" +
 	"\rGetMeResponse\x12-\n" +
-	"\x04user\x18\x01 \x01(\v2\x11.molotalk.v1.UserB\x06\xbaH\x03\xc8\x01\x01R\x04user\"\x89\x02\n" +
+	"\x04user\x18\x01 \x01(\v2\x11.molotalk.v1.UserB\x06\xbaH\x03\xc8\x01\x01R\x04user\"\xee\x01\n" +
 	"\x14UpdateProfileRequest\x121\n" +
-	"\fdisplay_name\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18@H\x00R\vdisplayName\x88\x01\x01\x12[\n" +
-	"\x14avatar_attachment_id\x18\x02 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$H\x01R\x12avatarAttachmentId\x88\x01\x01\x12&\n" +
+	"\fdisplay_name\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18@H\x00R\vdisplayName\x88\x01\x01\x12@\n" +
+	"\x14avatar_attachment_id\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01H\x01R\x12avatarAttachmentId\x88\x01\x01\x12&\n" +
 	"\fclear_avatar\x18\x03 \x01(\bH\x02R\vclearAvatar\x88\x01\x01B\x0f\n" +
 	"\r_display_nameB\x17\n" +
 	"\x15_avatar_attachment_idB\x0f\n" +
@@ -788,6 +788,7 @@ func file_molotalk_v1_auth_proto_init() {
 	if File_molotalk_v1_auth_proto != nil {
 		return
 	}
+	file_molotalk_v1_rules_proto_init()
 	file_molotalk_v1_types_proto_init()
 	file_molotalk_v1_auth_proto_msgTypes[6].OneofWrappers = []any{}
 	file_molotalk_v1_auth_proto_msgTypes[8].OneofWrappers = []any{}

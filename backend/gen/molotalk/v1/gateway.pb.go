@@ -769,7 +769,7 @@ var File_molotalk_v1_gateway_proto protoreflect.FileDescriptor
 
 const file_molotalk_v1_gateway_proto_rawDesc = "" +
 	"\n" +
-	"\x19molotalk/v1/gateway.proto\x12\vmolotalk.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17molotalk/v1/types.proto\"\xf8\x02\n" +
+	"\x19molotalk/v1/gateway.proto\x12\vmolotalk.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17molotalk/v1/rules.proto\x1a\x17molotalk/v1/types.proto\"\xf8\x02\n" +
 	"\x0fGatewayEnvelope\x123\n" +
 	"\bidentify\x18\x01 \x01(\v2\x15.molotalk.v1.IdentifyH\x00R\bidentify\x12*\n" +
 	"\x05ready\x18\x02 \x01(\v2\x12.molotalk.v1.ReadyH\x00R\x05ready\x126\n" +
@@ -783,16 +783,16 @@ const file_molotalk_v1_gateway_proto_rawDesc = "" +
 	"\fserver_event\x10\x01B\t\n" +
 	"\apayload\")\n" +
 	"\bIdentify\x12\x1d\n" +
-	"\x05token\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x05token\"\xc5\x01\n" +
-	"\x05Ready\x12=\n" +
-	"\auser_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06userId\x12D\n" +
-	"\bchat_ids\x18\x02 \x03(\tB)\xbaH&\x92\x01#\"!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\achatIds\x127\n" +
+	"\x05token\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x05token\"\x8f\x01\n" +
+	"\x05Ready\x12\"\n" +
+	"\auser_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x06userId\x12)\n" +
+	"\bchat_ids\x18\x02 \x03(\tB\x0e\xbaH\v\x92\x01\b\"\x06r\x04\x88\xf4\x03\x01R\achatIds\x127\n" +
 	"\vread_states\x18\x03 \x03(\v2\x16.molotalk.v1.ReadStateR\n" +
 	"readStates\"\v\n" +
 	"\tHeartbeat\"\x0e\n" +
-	"\fHeartbeatAck\"\xd7\x06\n" +
-	"\vServerEvent\x12?\n" +
-	"\bevent_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\aeventId\x12C\n" +
+	"\fHeartbeatAck\"\xbc\x06\n" +
+	"\vServerEvent\x12$\n" +
+	"\bevent_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\aeventId\x12C\n" +
 	"\voccurred_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampB\x06\xbaH\x03\xc8\x01\x01R\n" +
 	"occurredAt\x12?\n" +
 	"\x0fmessage_created\x18\x03 \x01(\v2\x14.molotalk.v1.MessageH\x00R\x0emessageCreated\x12?\n" +
@@ -812,27 +812,27 @@ const file_molotalk_v1_gateway_proto_rawDesc = "" +
 	"\x12membership_changed\n" +
 	"\x0fprofile_changed\n" +
 	"\x10presence_changed\x10\x01B\a\n" +
-	"\x05event\"\xb9\x01\n" +
-	"\x0eMessageDeleted\x12=\n" +
-	"\achat_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06chatId\x12C\n" +
+	"\x05event\"\x83\x01\n" +
+	"\x0eMessageDeleted\x12\"\n" +
+	"\achat_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x06chatId\x12(\n" +
 	"\n" +
-	"message_id\x18\x02 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\tmessageId\x12#\n" +
-	"\brevision\x18\x03 \x01(\x05B\a\xbaH\x04\x1a\x02(\x01R\brevision\"\xad\x02\n" +
-	"\x0eReceiptUpdated\x12=\n" +
-	"\achat_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06chatId\x12C\n" +
+	"message_id\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\tmessageId\x12#\n" +
+	"\brevision\x18\x03 \x01(\x05B\a\xbaH\x04\x1a\x02(\x01R\brevision\"\xf7\x01\n" +
+	"\x0eReceiptUpdated\x12\"\n" +
+	"\achat_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x06chatId\x12(\n" +
 	"\n" +
-	"message_id\x18\x02 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\tmessageId\x12D\n" +
+	"message_id\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\tmessageId\x12D\n" +
 	"\x0freceipt_summary\x18\x03 \x01(\v2\x1b.molotalk.v1.ReceiptSummaryR\x0ereceiptSummary\x12.\n" +
 	"\areceipt\x18\x04 \x01(\v2\x14.molotalk.v1.ReceiptR\areceipt:!\xbaH\x1e\"\x1c\n" +
 	"\x0freceipt_summary\n" +
-	"\areceipt\x10\x01\"\x91\x01\n" +
-	"\x11MembershipChanged\x12=\n" +
-	"\achat_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06chatId\x12=\n" +
-	"\auser_id\x18\x02 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06userId\"\xe9\x01\n" +
-	"\rPublicProfile\x124\n" +
-	"\x02id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x02id\x12,\n" +
-	"\fdisplay_name\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18@R\vdisplayName\x12[\n" +
-	"\x14avatar_attachment_id\x18\x03 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$H\x00R\x12avatarAttachmentId\x88\x01\x01B\x17\n" +
+	"\areceipt\x10\x01\"[\n" +
+	"\x11MembershipChanged\x12\"\n" +
+	"\achat_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x06chatId\x12\"\n" +
+	"\auser_id\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x06userId\"\xb3\x01\n" +
+	"\rPublicProfile\x12\x19\n" +
+	"\x02id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x02id\x12,\n" +
+	"\fdisplay_name\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18@R\vdisplayName\x12@\n" +
+	"\x14avatar_attachment_id\x18\x03 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01H\x00R\x12avatarAttachmentId\x88\x01\x01B\x17\n" +
 	"\x15_avatar_attachment_idBAZ?github.com/MoloTeam/MoloTalk/backend/gen/molotalk/v1;molotalkv1b\x06proto3"
 
 var (
@@ -897,6 +897,7 @@ func file_molotalk_v1_gateway_proto_init() {
 	if File_molotalk_v1_gateway_proto != nil {
 		return
 	}
+	file_molotalk_v1_rules_proto_init()
 	file_molotalk_v1_types_proto_init()
 	file_molotalk_v1_gateway_proto_msgTypes[0].OneofWrappers = []any{
 		(*GatewayEnvelope_Identify)(nil),

@@ -444,7 +444,7 @@ var File_molotalk_v1_media_proto protoreflect.FileDescriptor
 
 const file_molotalk_v1_media_proto_rawDesc = "" +
 	"\n" +
-	"\x17molotalk/v1/media.proto\x12\vmolotalk.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17molotalk/v1/types.proto\"\xf5\x01\n" +
+	"\x17molotalk/v1/media.proto\x12\vmolotalk.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17molotalk/v1/rules.proto\x1a\x17molotalk/v1/types.proto\"\xf5\x01\n" +
 	"\x14PrepareUploadRequest\x12D\n" +
 	"\apurpose\x18\x01 \x01(\x0e2\x1e.molotalk.v1.AttachmentPurposeB\n" +
 	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\apurpose\x12>\n" +
@@ -452,30 +452,30 @@ const file_molotalk_v1_media_proto_rawDesc = "" +
 	"\fcontent_type\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\vcontentType\x12+\n" +
 	"\n" +
 	"size_bytes\x18\x04 \x01(\x05B\f\xbaH\t\x1a\a\x18\x80\x80\x80\n" +
-	"(\x00R\tsizeBytes\"\x82\x03\n" +
-	"\x15PrepareUploadResponse\x12I\n" +
-	"\rattachment_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\fattachmentId\x12&\n" +
+	"(\x00R\tsizeBytes\"\xe7\x02\n" +
+	"\x15PrepareUploadResponse\x12.\n" +
+	"\rattachment_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\fattachmentId\x12&\n" +
 	"\n" +
 	"upload_url\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\tuploadUrl\x12N\n" +
 	"\x11upload_expires_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampB\x06\xbaH\x03\xc8\x01\x01R\x0fuploadExpiresAt\x12b\n" +
 	"\x10required_headers\x18\x04 \x03(\v27.molotalk.v1.PrepareUploadResponse.RequiredHeadersEntryR\x0frequiredHeaders\x1aB\n" +
 	"\x14RequiredHeadersEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"b\n" +
-	"\x15CompleteUploadRequest\x12I\n" +
-	"\rattachment_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\fattachmentId\"Y\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"G\n" +
+	"\x15CompleteUploadRequest\x12.\n" +
+	"\rattachment_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\fattachmentId\"Y\n" +
 	"\x16CompleteUploadResponse\x12?\n" +
 	"\n" +
 	"attachment\x18\x01 \x01(\v2\x17.molotalk.v1.AttachmentB\x06\xbaH\x03\xc8\x01\x01R\n" +
-	"attachment\"a\n" +
-	"\x14GetAttachmentRequest\x12I\n" +
-	"\rattachment_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\fattachmentId\"X\n" +
+	"attachment\"F\n" +
+	"\x14GetAttachmentRequest\x12.\n" +
+	"\rattachment_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\fattachmentId\"X\n" +
 	"\x15GetAttachmentResponse\x12?\n" +
 	"\n" +
 	"attachment\x18\x01 \x01(\v2\x17.molotalk.v1.AttachmentB\x06\xbaH\x03\xc8\x01\x01R\n" +
-	"attachment\"\x93\x01\n" +
-	"\x15GetDownloadURLRequest\x12I\n" +
-	"\rattachment_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\fattachmentId\x12!\n" +
+	"attachment\"x\n" +
+	"\x15GetDownloadURLRequest\x12.\n" +
+	"\rattachment_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\fattachmentId\x12!\n" +
 	"\tthumbnail\x18\x02 \x01(\bH\x00R\tthumbnail\x88\x01\x01B\f\n" +
 	"\n" +
 	"_thumbnail\"v\n" +
@@ -543,6 +543,7 @@ func file_molotalk_v1_media_proto_init() {
 	if File_molotalk_v1_media_proto != nil {
 		return
 	}
+	file_molotalk_v1_rules_proto_init()
 	file_molotalk_v1_types_proto_init()
 	file_molotalk_v1_media_proto_msgTypes[6].OneofWrappers = []any{}
 	type x struct{}

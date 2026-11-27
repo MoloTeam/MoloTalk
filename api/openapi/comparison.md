@@ -1,6 +1,8 @@
 # Сверка с исходным OpenAPI HLD
 
-Источник: `api/materials/openapi.json` (SHA-256 `17eedbb8627022554792728a4bb36afea4b8b535932ef6ef1a3c5b93d2a1bfeb`).
+Источник: `openapi.json` из материалов HLD (SHA-256
+`17eedbb8627022554792728a4bb36afea4b8b535932ef6ef1a3c5b93d2a1bfeb`); снимок
+хранился в `api/materials/` до change `simplify-contract-tooling`.
 Результат: `api/gen/openapi/public.json` и `api/gen/openapi/internal.json`.
 
 Сверка выполнена один раз вручную; дальше действует golden и обычный diff.
@@ -44,7 +46,7 @@ Login.security:   []            Register/RefreshToken: []
 GetMe.security:   null (наследует bearerAuth)
 internal:         serviceBearer
 text.maxLength:   4096
-attachmentIds:    maxItems 5, items.pattern ULID
+attachmentIds:    maxItems 5, ULID — CEL-правило, в схеме pattern отсутствует
 ```
 
 Необъяснённых пропусков методов, полей и обязательности не найдено. Все отличия
@@ -59,9 +61,20 @@ Generated OpenAPI попадает в `required` только для полей 
 `SendMessageRequest` и другие).
 
 Решение: обязательность скалярных полей обеспечивается правилами protovalidate
-(`pattern`, `min_len`, `gte`), а не JSON Schema. Пустая строка или нулевой
-идентификатор отклоняются на стороне сервера до вызова метода; тесты
+(`min_len`, `gte`, для ULID — CEL-правило), а не JSON Schema. Пустая строка или
+нулевой идентификатор отклоняются на стороне сервера до вызова метода; тесты
 `validation_rules_test.go` проверяют границы. Массовая расстановка
 `field_behavior = REQUIRED` изменила бы generated-клиенты, поэтому выполняется
 отдельным решением, а не в рамках первой сверки. Расхождение перечислено в
 таблице отклонений design.md (D9).
+
+## ULID: CEL-правило вместо pattern
+
+В change `simplify-contract-tooling` повторяющийся регэксп ULID (75 вхождений)
+заменён предопределённым правилом `(buf.validate.field).string.(molotalk.v1.ulid)`.
+Protovalidate исполняет его как CEL, а генератор OpenAPI не знает пользовательских
+правил, поэтому в схемах больше нет `pattern` для ULID-полей.
+
+Это осознанное отклонение: ограничение по-прежнему проверяется в рантайме до
+вызова метода (тесты `validation_rules_test.go` и контрактные тесты), а
+документация его не выводит. Все остальные `pattern` (не ULID) сохранены.

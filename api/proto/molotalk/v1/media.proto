@@ -4,6 +4,7 @@ package molotalk.v1;
 
 import "buf/validate/validate.proto";
 import "google/protobuf/timestamp.proto";
+import "molotalk/v1/rules.proto";
 import "molotalk/v1/types.proto";
 
 option go_package = "github.com/MoloTeam/MoloTalk/backend/gen/molotalk/v1;molotalkv1";
@@ -34,14 +35,14 @@ message PrepareUploadRequest {
 }
 
 message PrepareUploadResponse {
-  string attachment_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string attachment_id = 1 [(buf.validate.field).string.(molotalk.v1.ulid) = true];
   string upload_url = 2 [(buf.validate.field).string.min_len = 1];
   google.protobuf.Timestamp upload_expires_at = 3 [(buf.validate.field).required = true];
   map<string, string> required_headers = 4;
 }
 
 message CompleteUploadRequest {
-  string attachment_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string attachment_id = 1 [(buf.validate.field).string.(molotalk.v1.ulid) = true];
 }
 
 message CompleteUploadResponse {
@@ -49,7 +50,7 @@ message CompleteUploadResponse {
 }
 
 message GetAttachmentRequest {
-  string attachment_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string attachment_id = 1 [(buf.validate.field).string.(molotalk.v1.ulid) = true];
 }
 
 message GetAttachmentResponse {
@@ -57,7 +58,7 @@ message GetAttachmentResponse {
 }
 
 message GetDownloadURLRequest {
-  string attachment_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string attachment_id = 1 [(buf.validate.field).string.(molotalk.v1.ulid) = true];
   optional bool thumbnail = 2;
 }
 

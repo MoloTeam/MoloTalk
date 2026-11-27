@@ -1,0 +1,18 @@
+syntax = "proto2";
+
+package molotalk.v1;
+
+import "buf/validate/validate.proto";
+
+option go_package = "github.com/MoloTeam/MoloTalk/backend/gen/molotalk/v1;molotalkv1";
+
+// ULID-идентификатор: 26 символов Crockford base32, первый — 0..7.
+// Правило объявлено один раз и применяется как
+// (buf.validate.field).string.(molotalk.v1.ulid) = true.
+extend buf.validate.StringRules {
+  optional bool ulid = 8001 [(buf.validate.predefined).cel = {
+    id: "molotalk.v1.ulid"
+    message: "must be a ULID"
+    expression: "!rule || this.matches('^[0-7][0-9A-HJKMNP-TV-Z]{25}$')"
+  }];
+}

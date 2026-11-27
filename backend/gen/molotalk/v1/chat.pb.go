@@ -1624,7 +1624,7 @@ var File_molotalk_v1_chat_proto protoreflect.FileDescriptor
 
 const file_molotalk_v1_chat_proto_rawDesc = "" +
 	"\n" +
-	"\x16molotalk/v1/chat.proto\x12\vmolotalk.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x17molotalk/v1/types.proto\"j\n" +
+	"\x16molotalk/v1/chat.proto\x12\vmolotalk.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x17molotalk/v1/rules.proto\x1a\x17molotalk/v1/types.proto\"j\n" +
 	"\x10ListChatsRequest\x12\x1b\n" +
 	"\x06cursor\x18\x01 \x01(\tH\x00R\x06cursor\x88\x01\x01\x12$\n" +
 	"\x05limit\x18\x02 \x01(\x05B\t\xbaH\x06\x1a\x04\x18d(\x01H\x01R\x05limit\x88\x01\x01B\t\n" +
@@ -1634,79 +1634,80 @@ const file_molotalk_v1_chat_proto_rawDesc = "" +
 	"\x05chats\x18\x01 \x03(\v2\x11.molotalk.v1.ChatB\x04\xe2A\x01\x02R\x05chats\x12$\n" +
 	"\vnext_cursor\x18\x02 \x01(\tH\x00R\n" +
 	"nextCursor\x88\x01\x01B\x0e\n" +
-	"\f_next_cursor\"O\n" +
-	"\x0eGetChatRequest\x12=\n" +
-	"\achat_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06chatId\"@\n" +
+	"\f_next_cursor\"4\n" +
+	"\x0eGetChatRequest\x12\"\n" +
+	"\achat_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x06chatId\"@\n" +
 	"\x0fGetChatResponse\x12-\n" +
-	"\x04chat\x18\x01 \x01(\v2\x11.molotalk.v1.ChatB\x06\xbaH\x03\xc8\x01\x01R\x04chat\"a\n" +
-	"\x17CreateDirectChatRequest\x12F\n" +
-	"\fpeer_user_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\n" +
+	"\x04chat\x18\x01 \x01(\v2\x11.molotalk.v1.ChatB\x06\xbaH\x03\xc8\x01\x01R\x04chat\"F\n" +
+	"\x17CreateDirectChatRequest\x12+\n" +
+	"\fpeer_user_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\n" +
 	"peerUserId\"I\n" +
 	"\x18CreateDirectChatResponse\x12-\n" +
-	"\x04chat\x18\x01 \x01(\v2\x11.molotalk.v1.ChatB\x06\xbaH\x03\xc8\x01\x01R\x04chat\"\xd3\x01\n" +
-	"\x16CreateGroupChatRequest\x12P\n" +
-	"\x11client_request_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x0fclientRequestId\x12\x1d\n" +
-	"\x04name\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18dR\x04name\x12H\n" +
+	"\x04chat\x18\x01 \x01(\v2\x11.molotalk.v1.ChatB\x06\xbaH\x03\xc8\x01\x01R\x04chat\"\x9d\x01\n" +
+	"\x16CreateGroupChatRequest\x125\n" +
+	"\x11client_request_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x0fclientRequestId\x12\x1d\n" +
+	"\x04name\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18dR\x04name\x12-\n" +
 	"\n" +
-	"member_ids\x18\x03 \x03(\tB)\xbaH&\x92\x01#\"!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\tmemberIds\"H\n" +
+	"member_ids\x18\x03 \x03(\tB\x0e\xbaH\v\x92\x01\b\"\x06r\x04\x88\xf4\x03\x01R\tmemberIds\"H\n" +
 	"\x17CreateGroupChatResponse\x12-\n" +
-	"\x04chat\x18\x01 \x01(\v2\x11.molotalk.v1.ChatB\x06\xbaH\x03\xc8\x01\x01R\x04chat\"\x95\x01\n" +
-	"\x15AddGroupMemberRequest\x12=\n" +
-	"\achat_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06chatId\x12=\n" +
-	"\auser_id\x18\x02 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06userId\"G\n" +
+	"\x04chat\x18\x01 \x01(\v2\x11.molotalk.v1.ChatB\x06\xbaH\x03\xc8\x01\x01R\x04chat\"_\n" +
+	"\x15AddGroupMemberRequest\x12\"\n" +
+	"\achat_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x06chatId\x12\"\n" +
+	"\auser_id\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x06userId\"G\n" +
 	"\x16AddGroupMemberResponse\x12-\n" +
-	"\x04chat\x18\x01 \x01(\v2\x11.molotalk.v1.ChatB\x06\xbaH\x03\xc8\x01\x01R\x04chat\"\x98\x01\n" +
-	"\x18RemoveGroupMemberRequest\x12=\n" +
-	"\achat_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06chatId\x12=\n" +
-	"\auser_id\x18\x02 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06userId\"J\n" +
+	"\x04chat\x18\x01 \x01(\v2\x11.molotalk.v1.ChatB\x06\xbaH\x03\xc8\x01\x01R\x04chat\"b\n" +
+	"\x18RemoveGroupMemberRequest\x12\"\n" +
+	"\achat_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x06chatId\x12\"\n" +
+	"\auser_id\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x06userId\"J\n" +
 	"\x19RemoveGroupMemberResponse\x12-\n" +
-	"\x04chat\x18\x01 \x01(\v2\x11.molotalk.v1.ChatB\x06\xbaH\x03\xc8\x01\x01R\x04chat\"R\n" +
-	"\x11LeaveGroupRequest\x12=\n" +
-	"\achat_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06chatId\"\x8a\x01\n" +
+	"\x04chat\x18\x01 \x01(\v2\x11.molotalk.v1.ChatB\x06\xbaH\x03\xc8\x01\x01R\x04chat\"7\n" +
+	"\x11LeaveGroupRequest\x12\"\n" +
+	"\achat_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x06chatId\"o\n" +
 	"\x12LeaveGroupResponse\x12\x16\n" +
-	"\x06closed\x18\x01 \x01(\bR\x06closed\x12K\n" +
-	"\fnew_owner_id\x18\x02 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$H\x00R\n" +
+	"\x06closed\x18\x01 \x01(\bR\x06closed\x120\n" +
+	"\fnew_owner_id\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01H\x00R\n" +
 	"newOwnerId\x88\x01\x01B\x0f\n" +
-	"\r_new_owner_id\"\xd7\x01\n" +
-	"\x19SetGroupMemberRoleRequest\x12=\n" +
-	"\achat_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06chatId\x12=\n" +
-	"\auser_id\x18\x02 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06userId\x12<\n" +
+	"\r_new_owner_id\"\xa1\x01\n" +
+	"\x19SetGroupMemberRoleRequest\x12\"\n" +
+	"\achat_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x06chatId\x12\"\n" +
+	"\auser_id\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x06userId\x12<\n" +
 	"\x04role\x18\x03 \x01(\x0e2\x1c.molotalk.v1.GroupMemberRoleB\n" +
 	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\x04role\"K\n" +
 	"\x1aSetGroupMemberRoleResponse\x12-\n" +
-	"\x04chat\x18\x01 \x01(\v2\x11.molotalk.v1.ChatB\x06\xbaH\x03\xc8\x01\x01R\x04chat\"\xa5\x02\n" +
-	"\x12SendMessageRequest\x12=\n" +
-	"\achat_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06chatId\x12P\n" +
-	"\x11client_message_id\x18\x02 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x0fclientMessageId\x12!\n" +
-	"\x04text\x18\x03 \x01(\tB\b\xbaH\x05r\x03\x18\x80 H\x00R\x04text\x88\x01\x01\x12R\n" +
-	"\x0eattachment_ids\x18\x04 \x03(\tB+\xbaH(\x92\x01%\x10\x05\"!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\rattachmentIdsB\a\n" +
+	"\x04chat\x18\x01 \x01(\v2\x11.molotalk.v1.ChatB\x06\xbaH\x03\xc8\x01\x01R\x04chat\"\xd4\x01\n" +
+	"\x12SendMessageRequest\x12\"\n" +
+	"\achat_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x06chatId\x125\n" +
+	"\x11client_message_id\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x0fclientMessageId\x12!\n" +
+	"\x04text\x18\x03 \x01(\tB\b\xbaH\x05r\x03\x18\x80 H\x00R\x04text\x88\x01\x01\x127\n" +
+	"\x0eattachment_ids\x18\x04 \x03(\tB\x10\xbaH\r\x92\x01\n" +
+	"\x10\x05\"\x06r\x04\x88\xf4\x03\x01R\rattachmentIdsB\a\n" +
 	"\x05_text\"M\n" +
 	"\x13SendMessageResponse\x126\n" +
-	"\amessage\x18\x01 \x01(\v2\x14.molotalk.v1.MessageB\x06\xbaH\x03\xc8\x01\x01R\amessage\"\xfa\x01\n" +
-	"\x12EditMessageRequest\x12=\n" +
-	"\achat_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06chatId\x12C\n" +
+	"\amessage\x18\x01 \x01(\v2\x14.molotalk.v1.MessageB\x06\xbaH\x03\xc8\x01\x01R\amessage\"\xc4\x01\n" +
+	"\x12EditMessageRequest\x12\"\n" +
+	"\achat_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x06chatId\x12(\n" +
 	"\n" +
-	"message_id\x18\x02 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\tmessageId\x124\n" +
+	"message_id\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\tmessageId\x124\n" +
 	"\x11expected_revision\x18\x03 \x01(\x05B\a\xbaH\x04\x1a\x02(\x01R\x10expectedRevision\x12!\n" +
 	"\x04text\x18\x04 \x01(\tB\b\xbaH\x05r\x03\x18\x80 H\x00R\x04text\x88\x01\x01B\a\n" +
 	"\x05_text\"M\n" +
 	"\x13EditMessageResponse\x126\n" +
-	"\amessage\x18\x01 \x01(\v2\x14.molotalk.v1.MessageB\x06\xbaH\x03\xc8\x01\x01R\amessage\"\x9a\x01\n" +
-	"\x14DeleteMessageRequest\x12=\n" +
-	"\achat_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06chatId\x12C\n" +
+	"\amessage\x18\x01 \x01(\v2\x14.molotalk.v1.MessageB\x06\xbaH\x03\xc8\x01\x01R\amessage\"d\n" +
+	"\x14DeleteMessageRequest\x12\"\n" +
+	"\achat_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x06chatId\x12(\n" +
 	"\n" +
-	"message_id\x18\x02 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\tmessageId\"\x81\x01\n" +
-	"\x15DeleteMessageResponse\x12C\n" +
+	"message_id\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\tmessageId\"f\n" +
+	"\x15DeleteMessageResponse\x12(\n" +
 	"\n" +
-	"message_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\tmessageId\x12#\n" +
-	"\brevision\x18\x02 \x01(\x05B\a\xbaH\x04\x1a\x02(\x01R\brevision\"\xc0\x03\n" +
-	"\x12GetMessagesRequest\x12=\n" +
-	"\achat_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06chatId\x12B\n" +
+	"message_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\tmessageId\x12#\n" +
+	"\brevision\x18\x02 \x01(\x05B\a\xbaH\x04\x1a\x02(\x01R\brevision\"\xef\x02\n" +
+	"\x12GetMessagesRequest\x12\"\n" +
+	"\achat_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x06chatId\x12B\n" +
 	"\x04mode\x18\x02 \x01(\x0e2\x1d.molotalk.v1.MessageQueryModeB\n" +
 	"\xbaH\a\x82\x01\x04\x10\x01 \x00H\x00R\x04mode\x88\x01\x01\x12\x1b\n" +
-	"\x06cursor\x18\x03 \x01(\tH\x01R\x06cursor\x88\x01\x01\x12Q\n" +
-	"\x0ffrom_message_id\x18\x04 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$H\x02R\rfromMessageId\x88\x01\x01\x12M\n" +
-	"\rto_message_id\x18\x05 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$H\x03R\vtoMessageId\x88\x01\x01\x12$\n" +
+	"\x06cursor\x18\x03 \x01(\tH\x01R\x06cursor\x88\x01\x01\x126\n" +
+	"\x0ffrom_message_id\x18\x04 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01H\x02R\rfromMessageId\x88\x01\x01\x122\n" +
+	"\rto_message_id\x18\x05 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01H\x03R\vtoMessageId\x88\x01\x01\x12$\n" +
 	"\x05limit\x18\x06 \x01(\x05B\t\xbaH\x06\x1a\x04\x18d(\x01H\x04R\x05limit\x88\x01\x01B\a\n" +
 	"\x05_modeB\t\n" +
 	"\a_cursorB\x12\n" +
@@ -1718,22 +1719,22 @@ const file_molotalk_v1_chat_proto_rawDesc = "" +
 	"\bhas_more\x18\x02 \x01(\bR\ahasMore\x12$\n" +
 	"\vnext_cursor\x18\x03 \x01(\tH\x00R\n" +
 	"nextCursor\x88\x01\x01B\x0e\n" +
-	"\f_next_cursor\"\xa7\x01\n" +
-	"\x16ConfirmDeliveryRequest\x12=\n" +
-	"\achat_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06chatId\x12N\n" +
-	"\vmessage_ids\x18\x02 \x03(\tB-\xbaH*\x92\x01'\b\x01\x10d\"!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\n" +
-	"messageIds\"\xa0\x01\n" +
-	"\x0fMarkReadRequest\x12=\n" +
-	"\achat_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06chatId\x12N\n" +
-	"\vmessage_ids\x18\x02 \x03(\tB-\xbaH*\x92\x01'\b\x01\x10d\"!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\n" +
+	"\f_next_cursor\"q\n" +
+	"\x16ConfirmDeliveryRequest\x12\"\n" +
+	"\achat_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x06chatId\x123\n" +
+	"\vmessage_ids\x18\x02 \x03(\tB\x12\xbaH\x0f\x92\x01\f\b\x01\x10d\"\x06r\x04\x88\xf4\x03\x01R\n" +
+	"messageIds\"j\n" +
+	"\x0fMarkReadRequest\x12\"\n" +
+	"\achat_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x06chatId\x123\n" +
+	"\vmessage_ids\x18\x02 \x03(\tB\x12\xbaH\x0f\x92\x01\f\b\x01\x10d\"\x06r\x04\x88\xf4\x03\x01R\n" +
 	"messageIds\"Q\n" +
 	"\x10MarkReadResponse\x12=\n" +
 	"\n" +
-	"read_state\x18\x01 \x01(\v2\x16.molotalk.v1.ReadStateB\x06\xbaH\x03\xc8\x01\x01R\treadState\"\x9f\x01\n" +
-	"\x19GetMessageReceiptsRequest\x12=\n" +
-	"\achat_id\x18\x01 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\x06chatId\x12C\n" +
+	"read_state\x18\x01 \x01(\v2\x16.molotalk.v1.ReadStateB\x06\xbaH\x03\xc8\x01\x01R\treadState\"i\n" +
+	"\x19GetMessageReceiptsRequest\x12\"\n" +
+	"\achat_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\x06chatId\x12(\n" +
 	"\n" +
-	"message_id\x18\x02 \x01(\tB$\xbaH!r\x1f2\x1d^[0-7][0-9A-HJKMNP-TV-Z]{25}$R\tmessageId\"\x93\x01\n" +
+	"message_id\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x88\xf4\x03\x01R\tmessageId\"\x93\x01\n" +
 	"\x1aGetMessageReceiptsResponse\x12=\n" +
 	"\asummary\x18\x01 \x01(\v2\x1b.molotalk.v1.ReceiptSummaryB\x06\xbaH\x03\xc8\x01\x01R\asummary\x126\n" +
 	"\breceipts\x18\x02 \x03(\v2\x14.molotalk.v1.ReceiptB\x04\xe2A\x01\x02R\breceipts\"M\n" +
@@ -1878,6 +1879,7 @@ func file_molotalk_v1_chat_proto_init() {
 	if File_molotalk_v1_chat_proto != nil {
 		return
 	}
+	file_molotalk_v1_rules_proto_init()
 	file_molotalk_v1_types_proto_init()
 	file_molotalk_v1_chat_proto_msgTypes[0].OneofWrappers = []any{}
 	file_molotalk_v1_chat_proto_msgTypes[1].OneofWrappers = []any{}
