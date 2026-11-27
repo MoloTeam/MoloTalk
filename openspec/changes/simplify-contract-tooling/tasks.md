@@ -2,8 +2,8 @@
 
 ## 0. Подготовка
 
-- [ ] 0.1 Убедиться, что ветка `chore/simplify-contract-tooling` создана от актуального `main` и содержит перенесённый коммит workspaces.
-- [ ] 0.2 Зафиксировать исходные метрики: размер `api/third_party`, `api/materials`, строки `api/scripts/*`, время `npm run check:api`.
+- [x] 0.1 Убедиться, что ветка `chore/simplify-contract-tooling` создана от актуального `main` и содержит перенесённый коммит workspaces.
+- [x] 0.2 Зафиксировать исходные метрики: размер `api/third_party`, `api/materials`, строки `api/scripts/*`, время `npm run check:api`.
 
 ## 1. Удаление снимков материала и обходов окружения
 
@@ -27,7 +27,7 @@
 - [ ] 3.5 Удалить `tool`-директивы плагинов из `backend/go.mod`; проверить, что интеграционные тесты снова собираются (`go test -tags=integration ./...`).
 - [ ] 3.6 Перегенерировать артефакты и проверить diff: ожидаются только баннеры версий и комментарии `validate_pb.ts`.
 
-## 4. Предопределённое правило ULID (условно, по решению владельца)
+## 4. Предопределённое правило ULID (принято)
 
 - [ ] 4.1 Добавить `api/proto/molotalk/v1/rules.proto` с расширением `StringRules` и CEL-правилом ULID.
 - [ ] 4.2 Заменить 75 повторов `pattern` на `(buf.validate.field).string.(molotalk.v1.ulid) = true`.
@@ -35,7 +35,7 @@
 
 ## 5. Документация
 
-- [ ] 5.1 Обновить `api/README.md`: `buf generate`, `buf.lock`, версии плагинов, удаление `third_party`/`materials`.
+- [ ] 5.1 Обновить `api/README.md`: установка `buf` (`go install …@v1.75.0`), `buf generate`, `buf.lock`, версии плагинов, удаление `third_party`/`materials`, потеря `pattern` в OpenAPI.
 - [ ] 5.2 Описать необязательный запасной путь при недоступном реестре.
 - [ ] 5.3 Обновить корневой `README.md` и инструкции CI-проверок.
 
