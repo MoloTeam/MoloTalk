@@ -80,22 +80,18 @@ docker compose --project-directory . --env-file .env.example -f deploy/docker-co
 
 ### Веб-клиент
 
-Веб-клиент живёт в `web/` и собирается на Vite, React и TypeScript. Нужны Node ≥ 24.11 и npm ≥ 11.
+Веб-клиент живёт в `web/` и собирается на Vite, React и TypeScript. Нужны Node ≥ 24.11 и npm ≥ 11. Репозиторий использует npm workspaces `api` и `web`, поэтому установка одна и выполняется из корня.
 
 ```bash
-cd web
-npm ci
-npm --prefix ../api ci --omit=dev   # зависимости сгенерированных контрактов
+npm ci            # зависимости api и web из общего package-lock.json
 npm run dev       # http://127.0.0.1:5173, каркас работает без backend
 npm run lint
 npm run typecheck
 npm run test
-npm run build     # dist/ с готовой раздачей SPA
+npm run build     # web/dist с готовой раздачей SPA
 ```
 
-Файлы `api/src/gen` импортируют `@bufbuild/protobuf`, и TypeScript ищет его в
-`api/node_modules`, поэтому вторая команда обязательна; без неё `typecheck`,
-`test` и `build` завершатся с подсказкой.
+Скрипты можно запускать и из каталога `web`; установка всё равно выполняется из корня.
 
 В dev известные маршруты (`/`, `/login`, `/profile`, `/chats`, `/chats/:chatId`) открываются напрямую благодаря history fallback, неизвестный путь показывает экран «Страница не найдена». Сетевые вызовы в dev не требуются: API и WebSocket подставляются точкой сборки.
 

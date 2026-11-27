@@ -10,64 +10,82 @@ Proto — единственный источник типов и правил. 
 api/
   proto/molotalk/v1/            публичные RPC и Gateway
   proto/molotalk/internal/v1/   внутренние RPC
-  third_party/proto/            закоммиченные внешние proto (buf.validate, google.api)
+  buf.yaml                      модуль и зависимости (deps)
+  buf.lock                      закреплённые коммиты зависимостей
+  buf.gen.go.yaml               Go и Connect
+  buf.gen.ts.yaml               TypeScript публичного пакета
+  buf.gen.openapi.*.yaml        OpenAPI public/internal с base-файлами
   openapi/base.public.yaml      security и исключения без access token
   openapi/base.internal.yaml    служебный Bearer
-  openapi/comparison.md         однократная сверка с материалом HLD
+  openapi/comparison.md         однократная сверка и отклонения
   gen/openapi/public.json       golden публичного OpenAPI
   gen/openapi/internal.json     golden внутреннего OpenAPI
   src/gen/                      TypeScript публичного пакета и зависимостей
 ```
 
-`api/materials/` содержит снимки исходных материалов HLD: `openapi.json`
-(`17eedbb8…`) и `gateway.proto` (`f90e96ae…`).
-
 ## Внешние зависимости
 
-Реестр Buf в окружении недоступен, поэтому внешние proto закоммичены в
-[`third_party/`](third_party/README.md) с закреплённым происхождением, лицензиями
-и SHA-256. `buf.lock` не используется: удалённых зависимостей нет.
+Импортируемые схемы (`buf/validate/validate.proto`,
+`google/api/field_behavior.proto`) берутся из реестра: они перечислены в `deps`
+файла [`buf.yaml`](buf.yaml), а точные коммиты и digest — в [`buf.lock`](buf.lock).
+Каталога `third_party/` нет. Обновление зависимости: `buf dep update` меняет
+только `buf.lock`.
 
 ## Инструменты
 
 | Инструмент | Версия | Лицензия |
 |---|---|---|
-| `github.com/bufbuild/buf/cmd/buf` | v1.75.0 | Apache-2.0 |
-| `google.golang.org/protobuf/cmd/protoc-gen-go` | v1.36.13-0.20261016172727-e9ee2a76ab8e | BSD-3-Clause |
-| `connectrpc.com/connect/v2/cmd/protoc-gen-connect-go` | v2.0.2 | Apache-2.0 |
-| `connectrpc.com/protoc-gen-connect-openapi` | v0.30.0 | MIT |
-| `buf.build/go/protovalidate` | v1.4.1 | Apache-2.0 |
-| `connectrpc.com/connect/v2` | v2.0.2 | Apache-2.0 |
-| `@bufbuild/protoc-gen-es`, `@bufbuild/protobuf` | 2.17.0 | Apache-2.0 |
-| `@bufbuild/protovalidate` | 1.3.0 | Apache-2.0 |
-| `@connectrpc/connect`, `@connectrpc/connect-web` | 2.3.0 | Apache-2.0 |
+| `buf` CLI (устанавливается разработчиком) | v1.75.0 | Apache-2.0 |
+| удалённый `buf.build/protocolbuffers/go` | v1.36.12 | BSD-3-Clause |
+| удалённый `buf.build/connectrpc/go` | v2.0.2 | Apache-2.0 |
+| удалённый `buf.build/bufbuild/es` | 2.17.0 | Apache-2.0 |
+| локальный `go run connectrpc.com/protoc-gen-connect-openapi` | v0.30.0 | MIT |
+| `buf.build/go/protovalidate` (runtime Go) | v1.4.1 | Apache-2.0 |
+| `connectrpc.com/connect/v2` (runtime Go) | v2.0.2 | Apache-2.0 |
+| `@bufbuild/protobuf`, `@connectrpc/connect*` | 2.17.0 / 2.3.0 | Apache-2.0 |
 
-Go-инструменты закреплены директивами `tool` в `backend/go.mod`, JS — точными
-версиями и `package-lock.json`. Глобальная установка плагинов, `protoc` и Docker
-не требуются.
+Плагины Go, Connect и TypeScript — удалённые, их версии закреплены в шаблонах.
+OpenAPI собирается локальным запуском закреплённой версии плагина: удалённый
+плагин не поддерживает `base`. `protoc` и Docker не требуются.
 
 ## Команды
 
-Из корня репозитория:
+`buf` ставится один раз:
 
 ```bash
-npm --prefix api ci
-npm --prefix api run generate
-npm --prefix api run check
+go install github.com/bufbuild/buf/cmd/buf@v1.75.0
 ```
 
-Генерация ограничена каталогами контрактов: Go получает оба пакета, TypeScript —
-только `proto/molotalk/v1` (и импортируемые им внешние схемы), OpenAPI собирается
-отдельно для публичного и внутреннего пакетов.
+Генерация из каталога `api/`:
 
-`generate` собирает `buf` и плагины во временный каталог и прогоняет единую последовательность шаблонов; отдельной команды на каждый шаблон больше нет.
+```bash
+buf generate --template buf.gen.go.yaml
+buf generate --template buf.gen.ts.yaml --path proto/molotalk/v1
+buf generate --template buf.gen.openapi.public.yaml --path proto/molotalk/v1
+buf generate --template buf.gen.openapi.internal.yaml --path proto/molotalk/internal/v1
+```
 
-`check` собирает `buf` и плагины во временный каталог, проверяет
-`buf format/lint/build`, генерирует артефакты в отдельный каталог и сравнивает их
-с отслеживаемыми файлами, затем выполняет `go build/vet/test` и typecheck.
-Отслеживаемые файлы не изменяются: устаревший артефакт даёт ненулевой код.
-До первого слияния контрактов в `main` проверка `buf breaking` явно сообщает об
-отсутствии baseline.
+Первый запуск требует доступа к `buf.build`; дальше работает кеш. Запасной путь
+при недоступном реестре — заранее заполненный кеш `buf` (необязательно).
+
+Проверка после генерации: те же команды плюс `git diff --exit-code` (golden не
+переписывается автоматически), затем `go build/vet/test` в `backend` и
+`npm --workspace api test`.
+
+## Проверка совместимости
+
+`buf breaking` сравнивает модули, поэтому база должна иметь ту же модульную
+структуру, что и рабочая версия. После слияния этого change:
+
+```bash
+buf breaking --against '.git#branch=main,subdir=api'
+```
+
+Во время перехода (в `main` ещё два модуля: `proto` и `third_party/proto`) база
+нормализуется: выгружается `api/proto` из `main`, рядом кладутся текущие
+`buf.yaml` и `buf.lock`, сравнение идёт с этим каталогом. Несовпадение числа
+модулей считается ошибкой конфигурации, а не «нет baseline».
+
 
 ## Примеры использования
 
@@ -124,4 +142,10 @@ const tokens = await auth.login({ identifier: "alice@example.com", password: "se
 Однократная сверка с материалом HLD зафиксирована в
 [`openapi/comparison.md`](openapi/comparison.md). Дальше действует golden:
 изменение proto или base-файла требует обновить generated-файлы в том же PR,
-иначе `check` завершается ошибкой.
+иначе `git diff` после `buf generate` не пуст.
+
+Повторяющийся ULID-шаблон заменён предопределённым правилом
+`(buf.validate.field).string.(molotalk.v1.ulid)`. Protovalidate исполняет его в
+рантайме, но генератор OpenAPI не выводит CEL в схему, поэтому `pattern` для
+ULID-полей в `gen/openapi/*.json` отсутствует. Это документированное отклонение
+(см. `comparison.md`); остальные `pattern` сохранены.

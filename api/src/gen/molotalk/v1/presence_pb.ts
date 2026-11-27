@@ -6,6 +6,7 @@ import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegen
 import { fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
 import { file_buf_validate_validate } from "../../buf/validate/validate_pb.ts";
 import { file_google_api_field_behavior } from "../../google/api/field_behavior_pb.ts";
+import { file_molotalk_v1_rules } from "./rules_pb.ts";
 import type { Presence } from "./types_pb.ts";
 import { file_molotalk_v1_types } from "./types_pb.ts";
 import type { Message } from "@bufbuild/protobuf";
@@ -14,7 +15,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file molotalk/v1/presence.proto.
  */
 export const file_molotalk_v1_presence: GenFile = /*@__PURE__*/
-  fileDesc("Chptb2xvdGFsay92MS9wcmVzZW5jZS5wcm90bxILbW9sb3RhbGsudjEiVgoSR2V0UHJlc2VuY2VSZXF1ZXN0EkAKCHVzZXJfaWRzGAEgAygJQi66SCuSASgIARDIASIhch8yHV5bMC03XVswLTlBLUhKS01OUC1UVi1aXXsyNX0kIkUKE0dldFByZXNlbmNlUmVzcG9uc2USLgoJcHJlc2VuY2VzGAEgAygLMhUubW9sb3RhbGsudjEuUHJlc2VuY2VCBOJBAQIyYwoPUHJlc2VuY2VTZXJ2aWNlElAKC0dldFByZXNlbmNlEh8ubW9sb3RhbGsudjEuR2V0UHJlc2VuY2VSZXF1ZXN0GiAubW9sb3RhbGsudjEuR2V0UHJlc2VuY2VSZXNwb25zZUJBWj9naXRodWIuY29tL01vbG9UZWFtL01vbG9UYWxrL2JhY2tlbmQvZ2VuL21vbG90YWxrL3YxO21vbG90YWxrdjFiBnByb3RvMw", [file_buf_validate_validate, file_google_api_field_behavior, file_molotalk_v1_types]);
+  fileDesc("Chptb2xvdGFsay92MS9wcmVzZW5jZS5wcm90bxILbW9sb3RhbGsudjEiOwoSR2V0UHJlc2VuY2VSZXF1ZXN0EiUKCHVzZXJfaWRzGAEgAygJQhO6SBCSAQ0IARDIASIGcgSI9AMBIkUKE0dldFByZXNlbmNlUmVzcG9uc2USLgoJcHJlc2VuY2VzGAEgAygLMhUubW9sb3RhbGsudjEuUHJlc2VuY2VCBOJBAQIyYwoPUHJlc2VuY2VTZXJ2aWNlElAKC0dldFByZXNlbmNlEh8ubW9sb3RhbGsudjEuR2V0UHJlc2VuY2VSZXF1ZXN0GiAubW9sb3RhbGsudjEuR2V0UHJlc2VuY2VSZXNwb25zZUJBWj9naXRodWIuY29tL01vbG9UZWFtL01vbG9UYWxrL2JhY2tlbmQvZ2VuL21vbG90YWxrL3YxO21vbG90YWxrdjFiBnByb3RvMw", [file_buf_validate_validate, file_google_api_field_behavior, file_molotalk_v1_rules, file_molotalk_v1_types]);
 
 /**
  * @generated from message molotalk.v1.GetPresenceRequest

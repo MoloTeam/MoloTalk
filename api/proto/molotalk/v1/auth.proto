@@ -5,6 +5,7 @@ package molotalk.v1;
 import "buf/validate/validate.proto";
 import "google/api/field_behavior.proto";
 import "google/protobuf/empty.proto";
+import "molotalk/v1/rules.proto";
 import "molotalk/v1/types.proto";
 
 option go_package = "github.com/MoloTeam/MoloTalk/backend/gen/molotalk/v1;molotalkv1";
@@ -80,7 +81,7 @@ message UpdateProfileRequest {
     min_len: 1
     max_len: 64
   }];
-  optional string avatar_attachment_id = 2 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  optional string avatar_attachment_id = 2 [(buf.validate.field).string.(molotalk.v1.ulid) = true];
   optional bool clear_avatar = 3;
 }
 

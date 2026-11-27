@@ -4,6 +4,7 @@ package molotalk.v1;
 
 import "buf/validate/validate.proto";
 import "google/protobuf/timestamp.proto";
+import "molotalk/v1/rules.proto";
 import "molotalk/v1/types.proto";
 
 option go_package = "github.com/MoloTeam/MoloTalk/backend/gen/molotalk/v1;molotalkv1";
@@ -37,8 +38,8 @@ message Identify {
 }
 
 message Ready {
-  string user_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
-  repeated string chat_ids = 2 [(buf.validate.field).repeated.items.string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string user_id = 1 [(buf.validate.field).string.(molotalk.v1.ulid) = true];
+  repeated string chat_ids = 2 [(buf.validate.field).repeated.items.string.(molotalk.v1.ulid) = true];
   repeated ReadState read_states = 3;
 }
 
@@ -61,7 +62,7 @@ message ServerEvent {
     required: true
   };
 
-  string event_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string event_id = 1 [(buf.validate.field).string.(molotalk.v1.ulid) = true];
   google.protobuf.Timestamp occurred_at = 2 [(buf.validate.field).required = true];
 
   oneof event {
@@ -77,8 +78,8 @@ message ServerEvent {
 }
 
 message MessageDeleted {
-  string chat_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
-  string message_id = 2 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string chat_id = 1 [(buf.validate.field).string.(molotalk.v1.ulid) = true];
+  string message_id = 2 [(buf.validate.field).string.(molotalk.v1.ulid) = true];
   int32 revision = 3 [(buf.validate.field).int32.gte = 1];
 }
 
@@ -92,23 +93,23 @@ message ReceiptUpdated {
     required: true
   };
 
-  string chat_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
-  string message_id = 2 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string chat_id = 1 [(buf.validate.field).string.(molotalk.v1.ulid) = true];
+  string message_id = 2 [(buf.validate.field).string.(molotalk.v1.ulid) = true];
   ReceiptSummary receipt_summary = 3;
   Receipt receipt = 4;
 }
 
 message MembershipChanged {
-  string chat_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
-  string user_id = 2 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string chat_id = 1 [(buf.validate.field).string.(molotalk.v1.ulid) = true];
+  string user_id = 2 [(buf.validate.field).string.(molotalk.v1.ulid) = true];
 }
 
 // Публичный профиль события не содержит identifier.
 message PublicProfile {
-  string id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string id = 1 [(buf.validate.field).string.(molotalk.v1.ulid) = true];
   string display_name = 2 [(buf.validate.field).string = {
     min_len: 1
     max_len: 64
   }];
-  optional string avatar_attachment_id = 3 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  optional string avatar_attachment_id = 3 [(buf.validate.field).string.(molotalk.v1.ulid) = true];
 }

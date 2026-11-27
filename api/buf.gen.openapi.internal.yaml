@@ -1,6 +1,6 @@
 version: v2
 plugins:
-  - local: protoc-gen-connect-openapi
+  - local: ["go", "run", "connectrpc.com/protoc-gen-connect-openapi@v0.30.0"]
     out: .
     opt:
       - path=gen/openapi/internal.json

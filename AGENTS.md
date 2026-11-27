@@ -23,9 +23,10 @@ MoloTalk — веб-мессенджер для личной и группово
 | Корень | `docker compose --project-directory . --env-file .env.example -f deploy/docker-compose.yml up --build --wait --wait-timeout 180` | Запуск окружения по [README](README.md#запуск-окружения). |
 | `backend/` | `go build ./...`, `go vet ./...`, `go test -count=1 ./...` | Сборка и обычные проверки Go. Версия Go указана в `go.mod`. |
 | `backend/` | `go test -tags=integration -count=1 ./...` | Интеграционные тесты с Docker. |
-| Корень | `npm --prefix api ci` | Установка зависимостей API. |
-| Корень | `npm --prefix api run generate`, `npm --prefix api run check` | Генерация и проверка контрактов по [api/README.md](api/README.md#команды). |
-| `web/` | `npm ci` | Установка Web-зависимостей. Web также использует установленные зависимости API. |
+| Корень | `npm ci` | Установка зависимостей api и web из общего `package-lock.json` (workspaces). |
+| `api/` | `buf generate --template buf.gen.go.yaml`, `buf.gen.ts.yaml`, `buf.gen.openapi.*.yaml` | Генерация контрактов по [api/README.md](api/README.md#команды). |
+| Корень | `git diff --exit-code` после генерации | Проверка, что golden обновлён вместе с proto. |
+| `web/` | `npm ci` из корня | Зависимости web общие с api; отдельной установки в `web/` нет. |
 | `web/` | `npm run dev`, `npm run build` | Запуск Vite и сборка клиента. |
 | `web/` | `npm run lint`, `npm run typecheck`, `npm run test` | Проверки клиента по [web/README.md](web/README.md#команды). |
 

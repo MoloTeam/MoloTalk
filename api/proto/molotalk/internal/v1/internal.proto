@@ -4,6 +4,7 @@ package molotalk.internal.v1;
 
 import "buf/validate/validate.proto";
 import "google/protobuf/empty.proto";
+import "molotalk/v1/rules.proto";
 import "molotalk/v1/types.proto";
 
 option go_package = "github.com/MoloTeam/MoloTalk/backend/gen/molotalk/internal/v1;molotalkinternalv1";
@@ -25,8 +26,8 @@ service PresenceInternalService {
 }
 
 message IntrospectSessionRequest {
-  string session_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
-  string user_id = 2 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string session_id = 1 [(buf.validate.field).string.(molotalk.v1.ulid) = true];
+  string user_id = 2 [(buf.validate.field).string.(molotalk.v1.ulid) = true];
 }
 
 message IntrospectSessionResponse {
@@ -34,9 +35,9 @@ message IntrospectSessionResponse {
 }
 
 message CheckChatAccessRequest {
-  string user_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
-  string chat_id = 2 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
-  optional string attachment_id = 3 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string user_id = 1 [(buf.validate.field).string.(molotalk.v1.ulid) = true];
+  string chat_id = 2 [(buf.validate.field).string.(molotalk.v1.ulid) = true];
+  optional string attachment_id = 3 [(buf.validate.field).string.(molotalk.v1.ulid) = true];
 }
 
 message CheckChatAccessResponse {
@@ -44,22 +45,22 @@ message CheckChatAccessResponse {
 }
 
 message GetUserChatIdsRequest {
-  string user_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string user_id = 1 [(buf.validate.field).string.(molotalk.v1.ulid) = true];
 }
 
 message GetUserChatIdsResponse {
-  repeated string chat_ids = 1 [(buf.validate.field).repeated.items.string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  repeated string chat_ids = 1 [(buf.validate.field).repeated.items.string.(molotalk.v1.ulid) = true];
   repeated molotalk.v1.ReadState read_states = 2;
 }
 
 message HeartbeatRequest {
-  string user_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
-  string session_id = 2 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
-  string connection_id = 3 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string user_id = 1 [(buf.validate.field).string.(molotalk.v1.ulid) = true];
+  string session_id = 2 [(buf.validate.field).string.(molotalk.v1.ulid) = true];
+  string connection_id = 3 [(buf.validate.field).string.(molotalk.v1.ulid) = true];
 }
 
 message DisconnectRequest {
-  string user_id = 1 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
-  string session_id = 2 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
-  string connection_id = 3 [(buf.validate.field).string.pattern = "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"];
+  string user_id = 1 [(buf.validate.field).string.(molotalk.v1.ulid) = true];
+  string session_id = 2 [(buf.validate.field).string.(molotalk.v1.ulid) = true];
+  string connection_id = 3 [(buf.validate.field).string.(molotalk.v1.ulid) = true];
 }

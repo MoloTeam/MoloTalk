@@ -116,12 +116,12 @@
           "chatId": {
             "type": "string",
             "title": "chat_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "userId": {
             "type": "string",
             "title": "user_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           }
         },
         "title": "AddGroupMemberRequest",
@@ -147,7 +147,7 @@
           "id": {
             "type": "string",
             "title": "id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "purpose": {
             "not": {
@@ -242,7 +242,7 @@
           "id": {
             "type": "string",
             "title": "id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "kind": {
             "not": {
@@ -266,7 +266,7 @@
               "null"
             ],
             "title": "owner_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "members": {
             "type": "array",
@@ -287,7 +287,7 @@
               "null"
             ],
             "title": "last_message_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "lastMessage": {
             "oneOf": [
@@ -333,7 +333,7 @@
           "attachmentId": {
             "type": "string",
             "title": "attachment_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           }
         },
         "title": "CompleteUploadRequest",
@@ -359,13 +359,13 @@
           "chatId": {
             "type": "string",
             "title": "chat_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "messageIds": {
             "type": "array",
             "items": {
               "type": "string",
-              "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+              "description": "molotalk.v1.ulid = true // must be a ULID\n"
             },
             "title": "message_ids",
             "maxItems": 100,
@@ -381,7 +381,7 @@
           "peerUserId": {
             "type": "string",
             "title": "peer_user_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           }
         },
         "title": "CreateDirectChatRequest",
@@ -407,7 +407,7 @@
           "clientRequestId": {
             "type": "string",
             "title": "client_request_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "name": {
             "type": "string",
@@ -419,7 +419,7 @@
             "type": "array",
             "items": {
               "type": "string",
-              "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+              "description": "molotalk.v1.ulid = true // must be a ULID\n"
             },
             "title": "member_ids"
           }
@@ -447,12 +447,12 @@
           "chatId": {
             "type": "string",
             "title": "chat_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "messageId": {
             "type": "string",
             "title": "message_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           }
         },
         "title": "DeleteMessageRequest",
@@ -464,7 +464,7 @@
           "messageId": {
             "type": "string",
             "title": "message_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "revision": {
             "type": "integer",
@@ -482,12 +482,12 @@
           "chatId": {
             "type": "string",
             "title": "chat_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "messageId": {
             "type": "string",
             "title": "message_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "expectedRevision": {
             "type": "integer",
@@ -718,7 +718,7 @@
           "attachmentId": {
             "type": "string",
             "title": "attachment_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           }
         },
         "title": "GetAttachmentRequest",
@@ -744,7 +744,7 @@
           "chatId": {
             "type": "string",
             "title": "chat_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           }
         },
         "title": "GetChatRequest",
@@ -770,7 +770,7 @@
           "attachmentId": {
             "type": "string",
             "title": "attachment_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "thumbnail": {
             "type": [
@@ -822,12 +822,12 @@
           "chatId": {
             "type": "string",
             "title": "chat_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "messageId": {
             "type": "string",
             "title": "message_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           }
         },
         "title": "GetMessageReceiptsRequest",
@@ -861,7 +861,7 @@
           "chatId": {
             "type": "string",
             "title": "chat_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "mode": {
             "oneOf": [
@@ -893,7 +893,7 @@
               "null"
             ],
             "title": "from_message_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "toMessageId": {
             "type": [
@@ -901,7 +901,7 @@
               "null"
             ],
             "title": "to_message_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "limit": {
             "type": [
@@ -953,7 +953,7 @@
             "type": "array",
             "items": {
               "type": "string",
-              "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+              "description": "molotalk.v1.ulid = true // must be a ULID\n"
             },
             "title": "user_ids",
             "maxItems": 200,
@@ -1034,7 +1034,7 @@
           "chatId": {
             "type": "string",
             "title": "chat_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           }
         },
         "title": "LeaveGroupRequest",
@@ -1053,7 +1053,7 @@
               "null"
             ],
             "title": "new_owner_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           }
         },
         "title": "LeaveGroupResponse",
@@ -1162,13 +1162,13 @@
           "chatId": {
             "type": "string",
             "title": "chat_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "messageIds": {
             "type": "array",
             "items": {
               "type": "string",
-              "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+              "description": "molotalk.v1.ulid = true // must be a ULID\n"
             },
             "title": "message_ids",
             "maxItems": 100,
@@ -1236,12 +1236,12 @@
           "chatId": {
             "type": "string",
             "title": "chat_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "userId": {
             "type": "string",
             "title": "user_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           }
         },
         "title": "MembershipChanged",
@@ -1253,22 +1253,22 @@
           "id": {
             "type": "string",
             "title": "id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "chatId": {
             "type": "string",
             "title": "chat_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "authorId": {
             "type": "string",
             "title": "author_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "clientMessageId": {
             "type": "string",
             "title": "client_message_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "text": {
             "type": [
@@ -1351,12 +1351,12 @@
           "chatId": {
             "type": "string",
             "title": "chat_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "messageId": {
             "type": "string",
             "title": "message_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "revision": {
             "type": "integer",
@@ -1421,7 +1421,7 @@
           "attachmentId": {
             "type": "string",
             "title": "attachment_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "uploadUrl": {
             "type": "string",
@@ -1453,7 +1453,7 @@
           "userId": {
             "type": "string",
             "title": "user_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "status": {
             "not": {
@@ -1483,7 +1483,7 @@
           "id": {
             "type": "string",
             "title": "id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "displayName": {
             "type": "string",
@@ -1497,7 +1497,7 @@
               "null"
             ],
             "title": "avatar_attachment_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           }
         },
         "title": "PublicProfile",
@@ -1510,7 +1510,7 @@
           "chatId": {
             "type": "string",
             "title": "chat_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "lastReadMessageId": {
             "type": [
@@ -1518,7 +1518,7 @@
               "null"
             ],
             "title": "last_read_message_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "unreadCount": {
             "type": "integer",
@@ -1536,13 +1536,13 @@
           "userId": {
             "type": "string",
             "title": "user_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "chatIds": {
             "type": "array",
             "items": {
               "type": "string",
-              "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+              "description": "molotalk.v1.ulid = true // must be a ULID\n"
             },
             "title": "chat_ids"
           },
@@ -1563,12 +1563,12 @@
           "messageId": {
             "type": "string",
             "title": "message_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "userId": {
             "type": "string",
             "title": "user_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "deliveredAt": {
             "oneOf": [
@@ -1672,12 +1672,12 @@
           "chatId": {
             "type": "string",
             "title": "chat_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "messageId": {
             "type": "string",
             "title": "message_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "receiptSummary": {
             "title": "receipt_summary",
@@ -1765,12 +1765,12 @@
           "chatId": {
             "type": "string",
             "title": "chat_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "userId": {
             "type": "string",
             "title": "user_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           }
         },
         "title": "RemoveGroupMemberRequest",
@@ -1837,12 +1837,12 @@
           "chatId": {
             "type": "string",
             "title": "chat_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "clientMessageId": {
             "type": "string",
             "title": "client_message_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "text": {
             "type": [
@@ -1856,7 +1856,7 @@
             "type": "array",
             "items": {
               "type": "string",
-              "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+              "description": "molotalk.v1.ulid = true // must be a ULID\n"
             },
             "title": "attachment_ids",
             "maxItems": 5
@@ -2123,7 +2123,7 @@
           "eventId": {
             "type": "string",
             "title": "event_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "occurredAt": {
             "title": "occurred_at",
@@ -2179,7 +2179,7 @@
           "sessionId": {
             "type": "string",
             "title": "session_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "accessToken": {
             "type": "string",
@@ -2214,12 +2214,12 @@
           "chatId": {
             "type": "string",
             "title": "chat_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "userId": {
             "type": "string",
             "title": "user_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "role": {
             "not": {
@@ -2267,7 +2267,7 @@
               "null"
             ],
             "title": "avatar_attachment_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "clearAvatar": {
             "type": [
@@ -2300,7 +2300,7 @@
           "id": {
             "type": "string",
             "title": "id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           },
           "identifier": {
             "type": [
@@ -2324,7 +2324,7 @@
               "null"
             ],
             "title": "avatar_attachment_id",
-            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            "description": "molotalk.v1.ulid = true // must be a ULID\n"
           }
         },
         "title": "User",

@@ -1,7 +1,8 @@
 version: v2
 plugins:
-  - local: protoc-gen-es
+  - remote: buf.build/bufbuild/es:v2.17.0
     out: ./src/gen
     opt:
       - target=ts
       - import_extension=ts
+    include_imports: true

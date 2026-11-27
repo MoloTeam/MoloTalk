@@ -4,6 +4,7 @@ package molotalk.v1;
 
 import "buf/validate/validate.proto";
 import "google/api/field_behavior.proto";
+import "molotalk/v1/rules.proto";
 import "molotalk/v1/types.proto";
 
 option go_package = "github.com/MoloTeam/MoloTalk/backend/gen/molotalk/v1;molotalkv1";
@@ -17,9 +18,7 @@ message GetPresenceRequest {
     min_items: 1
     max_items: 200
     items: {
-      string: {
-        pattern: "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
-      }
+      string: {[molotalk.v1.ulid]: true}
     }
   }];
 }

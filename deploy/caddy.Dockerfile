@@ -1,24 +1,21 @@
 # Сборка веб-клиента и образ Caddy с готовой раздачей SPA.
 #
-# Контекст — корень репозитория: клиенту нужны сгенерированные контракты
-# api/src/gen и их зависимости.
+# Контекст — корень репозитория: общий package-lock.json и workspaces api/web.
+# Клиенту нужны сгенерированные контракты api/src/gen и их зависимости.
 
 FROM node:24-alpine AS web
 
 WORKDIR /src
 
-COPY web/package.json web/package-lock.json ./web/
-RUN npm ci --prefix web
-
-# Сгенерированные дескрипторы импортируют @bufbuild/protobuf и Connect,
-# поэтому зависимости api ставятся рядом с исходниками.
-COPY api/package.json api/package-lock.json ./api/
-RUN npm ci --prefix api --omit=dev
+COPY package.json package-lock.json ./
+COPY api/package.json ./api/package.json
+COPY web/package.json ./web/package.json
+RUN npm ci
 
 COPY api/src/gen ./api/src/gen
 COPY web ./web
 
-RUN npm --prefix web run build
+RUN npm run build --workspace web
 
 
 FROM caddy:2.10-alpine
