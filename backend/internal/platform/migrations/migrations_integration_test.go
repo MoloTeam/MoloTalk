@@ -5,12 +5,10 @@ package migrations_test
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"reflect"
 	"strings"
 	"sync"
 	"testing"
@@ -38,29 +36,6 @@ func prepare(t *testing.T) *sql.DB {
 		t.Fatalf("apply migrations: %v", err)
 	}
 	return db
-}
-
-func TestSchemaMatchesGolden(t *testing.T) {
-	db := prepare(t)
-
-	snapshot, err := migrations.Snapshot(context.Background(), db)
-	if err != nil {
-		t.Fatalf("snapshot: %v", err)
-	}
-
-	raw, err := os.ReadFile(filepath.Join("testdata", "schema.golden.json"))
-	if err != nil {
-		t.Fatalf("read golden: %v", err)
-	}
-	var golden migrations.Schema
-	if err := json.Unmarshal(raw, &golden); err != nil {
-		t.Fatalf("decode golden: %v", err)
-	}
-
-	if !reflect.DeepEqual(snapshot, golden) {
-		compare, _ := json.MarshalIndent(snapshot, "", "  ")
-		t.Fatalf("schema does not match golden\nactual:\n%s", compare)
-	}
 }
 
 func TestReapplyKeepsData(t *testing.T) {

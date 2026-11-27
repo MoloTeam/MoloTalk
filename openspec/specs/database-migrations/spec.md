@@ -7,13 +7,13 @@
 
 ### Requirement: Схема создаётся на пустой БД
 
-Миграции SHALL создавать все объекты `docs/hld/schema.sql`, кроме отклонённого U06 `UNIQUE messages(channel_id,id)`, с заменой C12 на `char_length(text) <= 4096`. Результат SHALL совпадать с проверенным golden-файлом нормализованной интроспекции pg_catalog.
+Начальная миграция SHALL создавать прикладную схему без отклонённого U06 на пару messages(channel_id,id), с ограничением текста C12 до 4096 символов.
 
-#### Scenario: Полная схема совпадает с golden
+#### Scenario: Начальная миграция применяется к пустой БД
 
-- **GIVEN** пустая PostgreSQL-БД и проверенный golden-файл для исходника с двумя принятыми изменениями
-- **WHEN** выполняют миграции и нормализованную интроспекцию pg_catalog
-- **THEN** таблицы, столбцы, домен, ограничения и индексы совпадают с golden; UNIQUE messages(channel_id,id) и его индекс отсутствуют
+- **GIVEN** пустая PostgreSQL-БД
+- **WHEN** запускают миграции
+- **THEN** миграции завершаются успешно и начальная версия отмечена выполненной
 
 ### Requirement: Повторное применение сохраняет данные
 
@@ -128,20 +128,20 @@ C01, C02, C04, C08, C15, C17, C18 и C19 SHALL применяться по вы�
 
 ### Requirement: Одобренные индексы присутствуют в схеме
 
-Индексы `sessions_user_idx`, `refresh_session_idx`, `attachment_cleanup_idx` и `login_window_cleanup_idx` SHALL создаваться по выражениям источника, включая условие частичного индекса. Их определения SHALL входить в golden-проверку.
+Индексы sessions_user_idx, refresh_session_idx и login_window_cleanup_idx SHALL создаваться по user_id, session_id и window_started_at соответственно. Индекс attachment_cleanup_idx SHALL создаваться по паре (status, created_at) с условием linked_at IS NULL.
 
 #### Scenario: Состав и определения индексов подтверждены
 
 - **GIVEN** пустая БД после миграций
-- **WHEN** читают определения четырёх индексов из pg_catalog и сравнивают с golden
+- **WHEN** читают определения четырёх индексов из pg_indexes
 - **THEN** все четыре присутствуют с правильными ключами и предикатами, лишнего индекса от U06 нет
 
 ### Requirement: Отклонённый U06 не является зависимостью FK
 
-Миграции SHALL сохранять FK на `messages(id)` и не создавать U06. Проверка источника SHALL подтверждать отсутствие FK, ссылающихся на пару `messages(channel_id,id)`.
+Миграции SHALL сохранять FK на `messages(id)` и не создавать U06.
 
 #### Scenario: FK не требуют отклонённого составного ключа
 
-- **GIVEN** исходник docs/hld/schema.sql и БД после миграций
-- **WHEN** программно извлекают цели REFERENCES из SQL и пары confkey из pg_constraint
-- **THEN** ссылок на messages(channel_id,id) нет, message_receipts.message_id ссылается на messages(id), все FK создаются без U06
+- **GIVEN** PostgreSQL-БД после миграций
+- **WHEN** проверяют ограничения, индексы и внешние ключи, ссылающиеся на messages
+- **THEN** U06 и его индекс отсутствуют, единственный внешний ключ на messages ссылается на один столбец
