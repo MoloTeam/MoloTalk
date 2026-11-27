@@ -174,13 +174,14 @@ protovalidate поддерживает предопределённые прав
   заменяются `buf generate`; проверка в CI — `buf generate` + `git diff
   --exit-code` (или `check` как тонкая обёртка над `buf`).
 - `tool`-директивы плагинов в `backend/go.mod` (5 строк) — удаляются; это же
-  убирает источник `go-connections v0.8.2`, ломавший интеграционные тесты
-  (проверяется в реализации).
+  убирает источник `go-connections v0.8.2`, ломавший интеграционные тесты.
+- `testcontainers` возвращается на `v0.45.0` (как было до #17). С этой версией
+  `go-connections v0.8.2` совместима, поэтому отдельный пин не нужен:
+  `go build -tags=integration ./...` проходит.
 - Подмены `TMP`/`GOTMPDIR`/`PATH`/`LOCALAPPDATA` в скриптах и документации.
 - **Решение владельца: `buf` устанавливают сами разработчики.** В README
   документируется `go install github.com/bufbuild/buf/cmd/buf@v1.75.0`; в
-  `backend/go.mod` `buf` не остаётся, поэтому Go-граф чист и интеграционные
-  тесты не тянут конфликтующую версию `go-connections`.
+  `backend/go.mod` `buf` не остаётся, поэтому Go-граф чист.
 
 [ФАКТ] `buf breaking --against` выгрузки `main` падает на несовпадении числа
 модулей (`input contained 1 images, whereas against contained 2 images`).
