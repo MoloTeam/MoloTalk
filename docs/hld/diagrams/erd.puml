@@ -1,0 +1,127 @@
+@startuml erd-unified
+hide circle
+hide methods
+skinparam linetype ortho
+skinparam dpi 180
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classFontSize 14
+skinparam classBackgroundColor #FFFFFF
+skinparam classBorderColor #666666
+skinparam classAttributeIconSize 0
+skinparam ArrowColor #777777
+skinparam nodesep 48
+skinparam ranksep 28
+entity "users" as users {
+  {field} * id : ulid <<PK>>
+  {field} * identifier : text <<UQ>>
+  {field} * display_name : text
+  {field} avatar_attachment_id : ulid <<FK,UQ>>
+  {field} * created_at : timestamptz
+}
+entity "user_auth" as user_auth {
+  {field} * user_id : ulid <<PK,FK>>
+  {field} * password_hash : text
+  {field} * password_changed_at : timestamptz
+}
+entity "sessions" as sessions {
+  {field} * id : ulid <<PK>>
+  {field} * user_id : ulid <<FK>>
+  {field} * created_at : timestamptz
+  {field} * expires_at : timestamptz
+  {field} revoked_at : timestamptz
+}
+entity "refresh_tokens" as refresh_tokens {
+  {field} * token_hash : text <<PK>>
+  {field} * session_id : ulid <<FK>>
+  {field} * expires_at : timestamptz
+  {field} consumed_at : timestamptz
+}
+entity "login_attempt_windows" as login_attempt_windows {
+  {field} * identifier_hash : char(64) <<PK>>
+  {field} * failed_count : smallint
+  {field} * window_started_at : timestamptz
+}
+entity "channels" as channels {
+  {field} * id : ulid <<PK>>
+  {field} * created_by_id : ulid <<FK>>
+  {field} client_request_id : ulid
+  {field} create_request_hash : text
+  {field} * kind : text
+  {field} name : text
+  {field} owner_id : ulid <<FK>>
+  {field} direct_pair_key : text <<UQ>>
+  {field} * created_at : timestamptz
+  {field} closed_at : timestamptz
+}
+entity "channel_members" as channel_members {
+  {field} * channel_id : ulid <<PK,FK>>
+  {field} * user_id : ulid <<PK,FK>>
+  {field} * role : text
+  {field} * joined_at : timestamptz
+}
+entity "messages" as messages {
+  {field} * id : ulid <<PK>>
+  {field} * channel_id : ulid <<FK>>
+  {field} * author_id : ulid <<FK>>
+  {field} * client_message_id : ulid <<UQ*>>
+  {field} * text : text
+  {field} * attachment_ids : varchar(26)[]
+  {field} * revision : integer
+  {field} * created_at : timestamptz
+  {field} edited_at : timestamptz
+  {field} deleted_at : timestamptz
+  {field} * request_hash : text
+}
+entity "message_receipts" as message_receipts {
+  {field} * message_id : ulid <<PK,FK>>
+  {field} * user_id : ulid <<PK,FK>>
+  {field} delivered_at : timestamptz
+  {field} read_at : timestamptz
+}
+entity "attachments" as attachments {
+  {field} * id : ulid <<PK>>
+  {field} * uploader_id : ulid <<FK>>
+  {field} * purpose : text
+  {field} * status : text
+  {field} * object_key : text <<UQ>>
+  {field} temp_object_key : text <<UQ>>
+  {field} thumbnail_key : text
+  {field} * filename : text
+  {field} * content_type : text
+  {field} * size_bytes : bigint
+  {field} channel_id : ulid <<FK>>
+  {field} linked_at : timestamptz
+  {field} * created_at : timestamptz
+  {field} * upload_expires_at : timestamptz
+  {field} completed_at : timestamptz
+}
+users ||-[norank]-|| user_auth
+users ||-[norank]-o{ sessions
+sessions ||-[norank]-o{ refresh_tokens
+users ||-[norank]-o{ channels
+channels ||-[norank]-o{ channel_members
+users ||-[norank]-o{ channel_members
+channels ||-[norank]-o{ messages
+users ||-[norank]-o{ messages
+messages ||-[norank]-o{ message_receipts
+users ||-[norank]-o{ message_receipts
+users ||-[norank]-o{ attachments
+channels |o-[norank]-o{ attachments
+attachments |o-[norank]-o| users
+messages |o-[dashed,norank]-o{ attachments
+user_auth -[hidden]right- login_attempt_windows
+user_auth -[hidden]down- sessions
+sessions -[hidden]right- users
+sessions -[hidden]down- refresh_tokens
+refresh_tokens -[hidden]right- channel_members
+refresh_tokens -[hidden]down- channels
+channels -[hidden]right- messages
+channels -[hidden]down- attachments
+attachments -[hidden]right- message_receipts
+login_attempt_windows -[hidden]down- users
+users -[hidden]down- channel_members
+channel_members -[hidden]down- messages
+messages -[hidden]down- message_receipts
+@enduml

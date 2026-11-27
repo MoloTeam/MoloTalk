@@ -8,7 +8,7 @@ body:
       value: |
         Карточка должна быть **обозримой** (ориентир — до 2–3 дней работы одного человека)
         и **проверяемой**: готовность определяется по требованиям FS.
-        Плохо: «Сделать чат». Хорошо: «Отправка текстового сообщения согласно F_Msg_1–F_Msg_3 и разделу 5.4 HLD».
+        «Сделать чат» — слишком широкая задача. Подходящий пример — «Отправка текстового сообщения по F_Msg_1–F_Msg_3 и HLD §4.4».
   - type: dropdown
     id: module
     attributes:
@@ -29,14 +29,14 @@ body:
     attributes:
       label: Требования FS
       description: Идентификаторы через запятую. Для служебных задач (CI, каркас) укажите «—» и пояснение ниже.
-      placeholder: "F_Msg_1, F_Msg_2, F_Msg_3, NF_Perf_1"
+      placeholder: "F_Msg_1, F_Msg_2, F_Msg_3, NF_Perf_2"
     validations:
       required: true
   - type: input
     id: hld
     attributes:
       label: Разделы HLD
-      placeholder: "3.4 Сервис чатов; 5.4 Диалоги, сообщения и подтверждения"
+      placeholder: "§2.5 Внутреннее устройство сервиса чатов · §4.4 Диалоги, сообщения и подтверждения"
     validations:
       required: true
   - type: textarea
@@ -56,13 +56,6 @@ body:
         - [ ] F_XXX_2: ...
     validations:
       required: true
-  - type: textarea
-    id: deps
-    attributes:
-      label: Зависимости
-      description: От каких карточек/PR зависит эта задача (#номер).
-    validations:
-      required: false
   - type: checkboxes
     id: dod
     attributes:

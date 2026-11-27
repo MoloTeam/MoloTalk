@@ -1,5 +1,4 @@
-// Package migrations применяет версионированные миграции схемы к PostgreSQL и
-// снимает нормализованный снимок pg_catalog для сверки с golden-файлом.
+// Package migrations применяет версионированные миграции схемы к PostgreSQL.
 package migrations
 
 import (

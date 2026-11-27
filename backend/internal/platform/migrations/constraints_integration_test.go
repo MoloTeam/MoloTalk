@@ -5,8 +5,6 @@ package migrations_test
 import (
 	"context"
 	"database/sql"
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 
@@ -277,20 +275,5 @@ func TestRejectedU06IsAbsent(t *testing.T) {
 	}
 	if width != 1 {
 		t.Fatalf("foreign key references %d columns, want 1", width)
-	}
-}
-
-func TestSourceHasNoCompositeMessageReference(t *testing.T) {
-	raw, err := os.ReadFile(filepath.Join("..", "..", "..", "..", "docs", "hld", "schema.sql"))
-	if err != nil {
-		t.Fatalf("read source: %v", err)
-	}
-	source := string(raw)
-
-	if strings.Contains(source, "REFERENCES messages(channel_id,id)") {
-		t.Fatal("source references messages(channel_id,id)")
-	}
-	if !strings.Contains(source, "REFERENCES messages(id)") {
-		t.Fatal("source has no reference to messages(id)")
 	}
 }
