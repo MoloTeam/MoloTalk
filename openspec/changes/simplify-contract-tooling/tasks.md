@@ -42,7 +42,7 @@
 ## 6. Приёмка
 
 - [x] 6.1 `go build ./...`, `go vet ./...`, `go test ./...` — успешно.
-- [ ] 6.2 `go test -tags=integration ./...` — собирается и проходит (нужен Docker).
+- [x] 6.2 `go test -tags=integration ./...` — собирается и проходит (проверено в контейнере `golang:1.27-alpine` с проброшенным `/var/run/docker.sock`).
 - [x] 6.3 TypeScript typecheck для `api` и `web`, контрактные тесты Go и TS — успешно.
 - [x] 6.4 `buf breaking` против нормализованной базы `main` — успешно.
 - [x] 6.5 Повторная генерация в двух каталогах совпадает; `git diff --exit-code` после `buf generate` пуст.
