@@ -2259,7 +2259,7 @@
             "title": "display_name",
             "maxLength": 64,
             "minLength": 1,
-            "description": "Отсутствие поля сохраняет текущее значение; явное false в clear_avatar\r\n означает удаление аватара и отличается от отсутствия поля."
+            "description": "Отсутствие поля сохраняет текущее значение; явное false в clear_avatar\n означает удаление аватара и отличается от отсутствия поля."
           },
           "avatarAttachmentId": {
             "type": [
