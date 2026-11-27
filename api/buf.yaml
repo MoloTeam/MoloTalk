@@ -1,7 +1,9 @@
 version: v2
 modules:
   - path: proto
-  - path: third_party/proto
+deps:
+  - buf.build/bufbuild/protovalidate
+  - buf.build/googleapis/googleapis
 lint:
   use:
     - STANDARD
@@ -9,8 +11,6 @@ lint:
     - RPC_REQUEST_STANDARD_NAME
     - RPC_RESPONSE_STANDARD_NAME
     - RPC_REQUEST_RESPONSE_UNIQUE
-  ignore:
-    - third_party/proto
 breaking:
   use:
     - FILE

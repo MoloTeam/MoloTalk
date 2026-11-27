@@ -19,7 +19,7 @@ export const steps = [
   {
     name: "ts",
     template: "buf.gen.ts.yaml",
-    paths: ["proto/molotalk/v1", "third_party/proto/buf/validate", "third_party/proto/google/api"],
+    paths: ["proto/molotalk/v1"],
   },
   {
     name: "openapi-public",
