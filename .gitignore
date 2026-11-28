@@ -45,6 +45,7 @@ playwright-report/
 playwright/.cache/
 junit*.xml
 reports/
+.gobco-src/
 
 # Docker / local data
 deploy/data/
