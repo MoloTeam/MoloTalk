@@ -11,43 +11,108 @@ import (
 	"github.com/MoloTeam/MoloTalk/backend/internal/platform/idgen"
 )
 
-type accounts struct{ err error }
-
-func (f accounts) FindByIdentifier(context.Context, string) (auth.Account, error) {
-	return auth.Account{}, f.err
+type accounts struct {
+	created []auth.Registration
+	profile auth.Profile
+	err     error
 }
 
-func (f accounts) Create(context.Context, auth.Account) error { return f.err }
-
-func (f accounts) Update(context.Context, auth.Account) error { return f.err }
-
-type sessions struct{ err error }
-
-func (f sessions) ConsumeRefresh(context.Context, string) (auth.Session, error) {
-	return auth.Session{}, f.err
+func (f *accounts) CreateWithSession(_ context.Context, registration auth.Registration) error {
+	f.created = append(f.created, registration)
+	return f.err
 }
 
-func (f sessions) Revoke(context.Context, string) error { return f.err }
+func (f *accounts) Profile(context.Context, string) (auth.Profile, error) {
+	return f.profile, f.err
+}
 
-type hasher struct{ err error }
+type sessions struct {
+	rotation auth.Rotation
+	result   auth.RotationResult
+	revoked  auth.RevokeRequest
+	err      error
+}
 
-func (f hasher) Hash(context.Context, string) (string, error) { return "", f.err }
+func (f *sessions) RotateRefresh(ctx context.Context, rotation auth.Rotation, issue auth.IssueAccess) (auth.RotationResult, error) {
+	f.rotation = rotation
+	result := f.result
+	if f.err != nil || result.Status != auth.RotationSucceeded {
+		return result, f.err
+	}
+	var err error
+	result.Access, err = issue(ctx, auth.Claims{AccountID: result.Profile.ID, SessionID: result.SessionID})
+	return result, err
+}
 
-func (f hasher) Verify(context.Context, string, string) (bool, error) { return false, f.err }
+func (f *sessions) RevokeSessions(_ context.Context, request auth.RevokeRequest) error {
+	f.revoked = request
+	return f.err
+}
 
-type tokens struct{ err error }
+type hasher struct {
+	hash       string
+	verified   bool
+	hashErr    error
+	verifyErr  error
+	lastHash   string
+	lastVerify string
+}
 
-func (f tokens) Issue(context.Context, auth.Claims) (string, error) { return "", f.err }
+func (f *hasher) Hash(context.Context, string) (string, error) {
+	if f.hash == "" {
+		f.hash = "encoded-hash"
+	}
+	return f.hash, f.hashErr
+}
 
-func (f tokens) Validate(context.Context, string) (auth.Claims, error) {
-	return auth.Claims{}, f.err
+func (f *hasher) Verify(_ context.Context, password, hash string) (bool, error) {
+	f.lastVerify = password + "|" + hash
+	return f.verified, f.verifyErr
+}
+
+type tokens struct {
+	issued      auth.Claims
+	validated   auth.Claims
+	issueErr    error
+	validateErr error
+	expires     time.Time
+}
+
+func (f *tokens) Issue(_ context.Context, claims auth.Claims) (auth.AccessToken, error) {
+	f.issued = claims
+	expires := f.expires
+	if expires.IsZero() {
+		expires = time.Unix(1000, 0).UTC()
+	}
+	return auth.AccessToken{Value: "signed-token", ExpiresAt: expires}, f.issueErr
+}
+
+func (f *tokens) Validate(context.Context, string) (auth.Claims, error) {
+	return f.validated, f.validateErr
+}
+
+type refreshTokens struct {
+	token string
+	hash  string
+	err   error
+}
+
+func (f *refreshTokens) New() (string, string, error) {
+	if f.token == "" {
+		f.token = "refresh-token"
+	}
+	if f.hash == "" {
+		f.hash = auth.HashRefreshToken(f.token)
+	}
+	return f.token, f.hash, f.err
 }
 
 var (
-	_ auth.AccountRepository = accounts{}
-	_ auth.SessionRepository = sessions{}
-	_ auth.PasswordHasher    = hasher{}
-	_ auth.TokenCodec        = tokens{}
+	_ auth.AccountRepository = (*accounts)(nil)
+	_ auth.SessionRepository = (*sessions)(nil)
+	_ auth.PasswordHasher    = (*hasher)(nil)
+	_ auth.TokenCodec        = (*tokens)(nil)
+	_ auth.RefreshTokens     = (*refreshTokens)(nil)
 )
 
 func TestAuthPortsExposeTheContract(t *testing.T) {
@@ -55,12 +120,13 @@ func TestAuthPortsExposeTheContract(t *testing.T) {
 
 	sentinel := errors.New("storage unavailable")
 	module := auth.New(auth.Deps{
-		Accounts: accounts{err: sentinel},
-		Sessions: sessions{err: sentinel},
-		Hasher:   hasher{err: sentinel},
-		Tokens:   tokens{err: sentinel},
-		Clock:    clock.NewManual(time.Unix(0, 0)),
-		IDs:      idgen.NewSequence(),
+		Accounts:      &accounts{err: sentinel},
+		Sessions:      &sessions{err: sentinel},
+		Hasher:        &hasher{hashErr: sentinel},
+		Tokens:        &tokens{validateErr: sentinel},
+		RefreshTokens: &refreshTokens{err: sentinel},
+		Clock:         clock.NewManual(time.Unix(0, 0)),
+		IDs:           idgen.NewSequence(),
 	})
 
 	if module == nil {
@@ -73,14 +139,7 @@ func TestAuthPortsExposeTheContract(t *testing.T) {
 		t.Errorf("readiness checks = %d, want the empty framework set", len(checks))
 	}
 
-	ctx := context.Background()
-	var repository auth.AccountRepository = accounts{err: sentinel}
-	if _, err := repository.FindByIdentifier(ctx, "user@example.com"); !errors.Is(err, sentinel) {
-		t.Errorf("FindByIdentifier error = %v, want the port failure", err)
-	}
-
-	var codec auth.TokenCodec = tokens{err: sentinel}
-	if _, err := codec.Issue(ctx, auth.Claims{AccountID: "account"}); !errors.Is(err, sentinel) {
-		t.Errorf("Issue error = %v, want the port failure", err)
+	if _, err := module.Authenticate(context.Background(), "broken"); !errors.Is(err, auth.ErrUnauthenticated) {
+		t.Errorf("Authenticate error = %v, want unauthenticated", err)
 	}
 }

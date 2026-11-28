@@ -92,6 +92,24 @@ func (p *Postgres) DSN() string {
 func (p *Postgres) NewDatabase(t *testing.T) *sql.DB {
 	t.Helper()
 
+	scenarioDSN := p.NewDatabaseDSN(t)
+	db, err := sql.Open("pgx", scenarioDSN)
+	if err != nil {
+		t.Fatalf("open scenario connection: %v", err)
+	}
+	if err := db.Ping(); err != nil {
+		t.Fatalf("ping scenario database: %v", err)
+	}
+	t.Cleanup(func() { db.Close() })
+
+	return db
+}
+
+// NewDatabaseDSN создаёт отдельную БД сценария и возвращает её DSN.
+// Удаление регистрируется в t.Cleanup.
+func (p *Postgres) NewDatabaseDSN(t *testing.T) string {
+	t.Helper()
+
 	p.mu.Lock()
 	p.sequence++
 	name := fmt.Sprintf("scenario_%d_%d", time.Now().UnixNano()%1_000_000, p.sequence)
@@ -108,23 +126,15 @@ func (p *Postgres) NewDatabase(t *testing.T) *sql.DB {
 
 	scenarioDSN, err := databaseDSN(p.dsn, name)
 	if err != nil {
+		admin.Close()
 		t.Fatalf("build scenario dsn: %v", err)
-	}
-	db, err := sql.Open("pgx", scenarioDSN)
-	if err != nil {
-		t.Fatalf("open scenario connection: %v", err)
-	}
-	if err := db.Ping(); err != nil {
-		t.Fatalf("ping scenario database: %v", err)
 	}
 
 	t.Cleanup(func() {
-		db.Close()
 		_, _ = admin.Exec("DROP DATABASE IF EXISTS " + name + " WITH (FORCE)")
 		admin.Close()
 	})
-
-	return db
+	return scenarioDSN
 }
 
 func databaseDSN(dsn, name string) (string, error) {
