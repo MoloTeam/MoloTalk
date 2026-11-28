@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Сравнивает модуль api с отдельной базой: SHA PR, SHA до push в main или
-# merge-base с origin/main для проверочной ветки.
+# Сравнивает модуль api с переданным коммитом или общим предком HEAD и origin/main.
 set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
