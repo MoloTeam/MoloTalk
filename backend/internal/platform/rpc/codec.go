@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"io"
-	"net/http"
 
 	"connectrpc.com/connect/v2"
 	"connectrpc.com/connect/v2/connecthttp"
@@ -16,7 +15,7 @@ import (
 // Mount регистрирует процедуры на mux с JSON-кодеком, который выдаёт
 // обязательные false, 0 и пустые массивы, не превращая отсутствующие
 // presence-поля в null.
-func Mount(mux *http.ServeMux, server *connect.Server) {
+func Mount(mux connecthttp.ServeMux, server *connect.Server) {
 	connecthttp.Mount(mux, server, connecthttp.WithCodecs(connectproto.NewBinaryCodec(), defaultValuesCodec{}))
 }
 

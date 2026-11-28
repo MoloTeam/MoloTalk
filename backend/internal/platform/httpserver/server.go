@@ -3,7 +3,9 @@
 package httpserver
 
 import (
+	"bufio"
 	"context"
+	"net"
 	"net/http"
 	"time"
 
@@ -51,12 +53,27 @@ func New(options Options) *Server {
 	}
 }
 
-// Handler возвращает маршруты с обработкой идентификатора операции.
+// Handler возвращает служебные маршруты с общим middleware.
 func (s *Server) Handler() http.Handler {
+	handler, _ := s.HandlerWithRoutes(nil)
+	return handler
+}
+
+// HandlerWithRoutes добавляет прикладные маршруты к служебным до запуска HTTP.
+func (s *Server) HandlerWithRoutes(register func(*Routes) error) (http.Handler, error) {
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /healthz", s.health)
-	mux.HandleFunc("GET /readyz", s.ready)
-	return s.withRequestID(s.withLogging(mux))
+	mux.HandleFunc("GET "+healthPath, s.health)
+	mux.HandleFunc("GET "+readyPath, s.ready)
+	if register != nil {
+		routes := &Routes{mux: mux}
+		if err := register(routes); err != nil {
+			return nil, err
+		}
+		if routes.err != nil {
+			return nil, routes.err
+		}
+	}
+	return s.withRequestID(s.withLogging(mux)), nil
 }
 
 func (s *Server) health(w http.ResponseWriter, _ *http.Request) {
@@ -114,15 +131,44 @@ type statusWriter struct {
 }
 
 func (w *statusWriter) WriteHeader(status int) {
-	w.status = status
+	if w.status == 0 && (status >= 200 || status == http.StatusSwitchingProtocols) {
+		w.status = status
+	}
 	w.ResponseWriter.WriteHeader(status)
+}
+
+func (w *statusWriter) Write(data []byte) (int, error) {
+	if w.status == 0 {
+		w.status = http.StatusOK
+	}
+	return w.ResponseWriter.Write(data)
+}
+
+func (w *statusWriter) Unwrap() http.ResponseWriter {
+	return w.ResponseWriter
+}
+
+func (w *statusWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	return http.NewResponseController(w.ResponseWriter).Hijack()
+}
+
+func (w *statusWriter) Flush() {
+	_ = w.FlushError()
+}
+
+func (w *statusWriter) FlushError() error {
+	err := http.NewResponseController(w.ResponseWriter).Flush()
+	if err == nil && w.status == 0 {
+		w.status = http.StatusOK
+	}
+	return err
 }
 
 // withLogging записывает результат операции после обработки запроса.
 func (s *Server) withLogging(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		started := time.Now()
-		tracked := &statusWriter{ResponseWriter: w, status: http.StatusOK}
+		tracked := &statusWriter{ResponseWriter: w}
 		next.ServeHTTP(tracked, r)
 
 		id, _ := requestid.FromContext(r.Context())
@@ -142,9 +188,9 @@ func (s *Server) withLogging(next http.Handler) http.Handler {
 
 func operationName(path string) string {
 	switch path {
-	case "/healthz":
+	case healthPath:
 		return "health"
-	case "/readyz":
+	case readyPath:
 		return "readiness"
 	default:
 		return "http"
