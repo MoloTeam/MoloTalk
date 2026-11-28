@@ -98,6 +98,10 @@ services:
       HTTP_HOST: 0.0.0.0
       AUTH_HTTP_PORT: ${AUTH_HTTP_PORT:-8081}
       READINESS_TIMEOUT: ${READINESS_TIMEOUT:-1s}
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
+      AUTH_JWT_SIGNING_KEY_FILE: /run/secrets/auth_jwt_signing_key
+    secrets:
+      - auth_jwt_signing_key
     depends_on:
       postgres:
         condition: service_healthy
@@ -266,3 +270,7 @@ volumes:
   minio-data:
   caddy-data:
   caddy-config:
+
+secrets:
+  auth_jwt_signing_key:
+    file: ${AUTH_JWT_SIGNING_KEY_PATH:-./deploy/data/auth-jwt-signing-key.pem}
