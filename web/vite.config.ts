@@ -22,5 +22,20 @@ export default defineConfig({
     environment: "jsdom",
     include: ["src/**/*.test.{ts,tsx}"],
     restoreMocks: true,
+    // Покрытие измеряется по рукописным TS/TSX в src, включая файлы без тестов.
+    // Тесты, fixtures и декларации исключены; generated-файлов в web/src нет.
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "json-summary", "lcov"],
+      reportsDirectory: "coverage",
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: [
+        "src/**/*.test.{ts,tsx}",
+        "src/**/test/**",
+        "src/**/__fixtures__/**",
+        "src/**/*.d.ts",
+      ],
+      all: true,
+    },
   },
 });
